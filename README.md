@@ -1,4 +1,4 @@
 BMR
 ===
 
-Bayesian Macroeconomics in R
+Bayesian Macroeconometrics in R
