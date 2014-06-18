@@ -173,7 +173,9 @@ SEXP cvarforecast( SEXP mY0, SEXP mM, SEXP mp, SEXP mK, SEXP mkcons, SEXP mperio
     fYL(arma::span(j-1,j-1),arma::span()) = kY*Beta - ci*trans(sqrt(SEY));
     fYU(arma::span(j-1,j-1),arma::span()) = kY*Beta + ci*trans(sqrt(SEY));
     //
-    kY(0,arma::span(M+kcons,K-1)) = kY(0,arma::span(kcons,K-M-1)); 
+    if (K > M+kcons){
+      kY(0,arma::span(M+kcons,K-1)) = kY(0,arma::span(kcons,K-M-1));
+    }
     kY(0,arma::span(kcons,M-1+kcons)) = fY(arma::span(j-1,j-1),arma::span());
     //
   }

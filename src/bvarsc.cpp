@@ -288,7 +288,9 @@ SEXP bvarsforecast( SEXP mY0, SEXP mdX, SEXP mM, SEXP mp, SEXP mK, SEXP mruns, S
         jshock = trans(Shock*Krand);
         //
         fY(arma::span(j-1,j-1),arma::span()) = kY*BT + PT - dX*(arma::kron(arma::eye(p,p),PT))*BT + jshock;
-        kY(0,arma::span(M,K-1)) = kY(0,arma::span(0,K-M-1)); 
+        if (K > M){
+          kY(0,arma::span(M,K-1)) = kY(0,arma::span(0,K-M-1));
+        }
         kY(0,arma::span(0,M-1)) = fY(arma::span(j-1,j-1),arma::span());
       }
       Forecasts(arma::span(),arma::span(),arma::span(i-1,i-1)) = fY;
@@ -303,7 +305,9 @@ SEXP bvarsforecast( SEXP mY0, SEXP mdX, SEXP mM, SEXP mp, SEXP mK, SEXP mruns, S
       kY = Y0;
       for (j=1;j<=periods;j++) {
         fY(arma::span(j-1,j-1),arma::span()) = kY*BT + PT - dX*(arma::kron(arma::eye(p,p),PT))*BT;
-        kY(0,arma::span(M,K-1)) = kY(0,arma::span(0,K-M-1)); 
+        if (K > M){
+          kY(0,arma::span(M,K-1)) = kY(0,arma::span(0,K-M-1));
+        }
         kY(0,arma::span(0,M-1)) = fY(arma::span(j-1,j-1),arma::span());
       }
       Forecasts(arma::span(),arma::span(),arma::span(i-1,i-1)) = fY;
