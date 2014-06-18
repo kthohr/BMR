@@ -75,6 +75,73 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
   return Rcpp::List::create(Rcpp::Named("SigmaX") = SigmaX,Rcpp::Named("SigmaSS") = SigmaSS);
 }
 
+SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , SEXP mGammaXX , 
+                        SEXP mGammaBarYY , SEXP mGammaBarXY, SEXP mGammaBarXX , 
+                        SEXP mlambda , SEXP mTp , SEXP mM , SEXP mp )
+{
+  //
+  float logGPR = as<double>(mlogGPR);
+  float lambda = as<double>(mlambda);
+  float Tp = as<int>(mTp);
+  float M = as<int>(mM);
+  float p = as<int>(mp);
+  //
+  arma::mat XX = as<arma::mat>(mXX);
+  //
+  arma::mat GammaYY = as<arma::mat>(mGammaYY);
+  arma::mat GammaXY = as<arma::mat>(mGammaXY);
+  arma::mat GammaXX = as<arma::mat>(mGammaXX);
+  //
+  arma::mat GammaBarYY = as<arma::mat>(mGammaBarYY);
+  arma::mat GammaBarXY = as<arma::mat>(mGammaBarXY);
+  arma::mat GammaBarXX = as<arma::mat>(mGammaBarXX);
+  //
+  float lambdaT = Tp*lambda;
+  float invlambda = 1/lambda;
+  float M2 = M/2;
+  //
+  arma::mat invGammaXX = arma::inv_sympd(GammaXX);
+  arma::mat invGammaBarXX = arma::inv_sympd(GammaBarXX);
+  arma::mat SigmaEpsilon = GammaYY - GammaXY*invGammaXX*trans(GammaXY);
+  arma::mat SigmaHatEpsilon = GammaBarYY - trans(GammaBarXY)*invGammaBarXX*GammaBarXY;
+  #
+  arma::mat invlambdaXX = invlambda*XX;
+  double Term1 = -M2*log(arma::det(GammaXX + invlambdaXX)) + M2*log(arma::det(GammaXX));
+  arma::mat invlambdaSigma = (1 + invlambda)*SigmaHatEpsilon;
+  double Term2 = -((Tp + lambdaT - M*p)/2)*log(arma::det( invlambdaSigma ));
+  double Term3 = ((lambdaT - M*p)/2)*log(arma::det(SigmaEpsilon));
+  double logLikelihood = Term1 + Term2 + Term3 + logGPR - (((M*Tp)/2)*log(lambdaT*arma::datum::pi));
+  //
+  return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);
+}
+
+SEXP DSGEVARLikelihoodInf( SEXP mYY , SEXP mXY , SEXP mXX , 
+                           SEXP mGammaYY , SEXP mGammaXY , SEXP mGammaXX , 
+                           SEXP mTp , SEXP mM , SEXP mp )
+{
+  //
+  float Tp = as<int>(mTp);
+  float M = as<int>(mM);
+  float p = as<int>(mp);
+  //
+  arma::mat YY = as<arma::mat>(mYY);
+  arma::mat XY = as<arma::mat>(mXY);
+  arma::mat XX = as<arma::mat>(mXX);
+  //
+  arma::mat GammaYY = as<arma::mat>(mGammaYY);
+  arma::mat GammaXY = as<arma::mat>(mGammaXY);
+  arma::mat GammaXX = as<arma::mat>(mGammaXX);
+  //
+  arma::mat invGammaXX = arma::inv_sympd(GammaXX);
+  arma::mat SigmaEpsilon = GammaYY - GammaXY*invGammaXX*trans(GammaXY);
+  arma::mat Beta = invGammaXX*trans(GammaXY);
+  arma::mat SigmaBarEpsilon = YY + trans(Beta)*XX*Beta - trans(Beta)*XY - trans(XY)*Beta;
+  #
+  double logLikelihood = - (((M*Tp)/2)*log(2*arma::datum::pi)) - ((Tp/2)*log(arma::det(SigmaEpsilon))) - ((Tp/2)*arma::trace(arma::inv_sympd(SigmaEpsilon)*SigmaBarEpsilon));
+  //
+  return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);
+}
+
 SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP mGXX , 
                   SEXP mGHXX , SEXP mlambda , SEXP mkreps , SEXP mTp , SEXP mM , SEXP mp )
 {

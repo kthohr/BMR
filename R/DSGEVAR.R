@@ -235,19 +235,11 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   GammaBarXY <- (tau*t(GammaXY))+((1-tau)*XY)
   GammaBarXX <- (tau*GammaXX)+((1-tau)*XX)
   #
-  SigmaEpsilon <- GammaYY-(GammaXY)%*%solve(GammaXX)%*%t(GammaXY)
-  SigmaHatEpsilon <- GammaBarYY-(t(GammaBarXY)%*%solve(GammaBarXX)%*%GammaBarXY)
+  logLikelihood <- -.Call("DSGEVARLikelihood", logGPR,XX,GammaYY,GammaXY,GammaXX,GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
   #
-  lambdaT <- nrow(Y)*lambda
-  FirstTerm <- -((ncol(Y)/2)*log(det(GammaXX+((1/lambda)*XX)))) + ((ncol(Y)/2)*log(det(GammaXX)))
-  SecondTerm <- -((nrow(Y)+lambdaT-ncol(Y)*p)/2)*log(det((1+(1/lambda))*SigmaHatEpsilon))
-  ThirdTerm <- ((lambdaT-ncol(Y)*p)/2)*log(det(SigmaEpsilon))
-  logLikeValue <- FirstTerm + SecondTerm + ThirdTerm + logGPR - (((ncol(Y)*nrow(Y))/2)*log(lambdaT*pi))
-  logLikeValue <- -logLikeValue
+  logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
   #
-  posterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikeValue)
-  #
-  return(posterior)
+  return(logPosterior)
 }
 
 .DSGEVARLogPosteriorInf <- function(dsgeparTrans,kdata,lambda,p,YY,XY,XX,ObserveMat,partomats,priorform,priorpars,parbounds){
@@ -258,18 +250,11 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   dsgeprior <- .DSGEVARPrior(dsgepar,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
   GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
+  logLikelihood <- -.Call("DSGEVARLikelihoodInf", YY,XY,XX,GammaYY,GammaXY,GammaXX,nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
   #
-  SigmaEpsilon <- GammaYY-(GammaXY)%*%solve(GammaXX)%*%t(GammaXY)
-  Phi <- solve(GammaXX)%*%t(GammaXY);
+  logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
   #
-  SigmaBarEpsilon <- YY + (t(Phi)%*%XX%*%Phi) - (t(Phi)%*%XY) - (t(XY)%*%Phi)
-  #
-  logLikeValue <- -(((ncol(Y)*nrow(Y))/2)*log(2*pi)) - ((nrow(Y)/2)*log(det(SigmaEpsilon))) - ((nrow(Y)/2)*sum(diag(solve(SigmaEpsilon)%*%SigmaBarEpsilon)))
-  logLikeValue <- -logLikeValue
-  #
-  posterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikeValue)
-  #
-  return(posterior)
+  return(logPosterior)
 }
 
 .LGPR <- function(n,a,b){
