@@ -228,7 +228,9 @@ SEXP SBVARIRFs( SEXP mM, SEXP mK, SEXP mkreps, SEXP mirfperiods, SEXP mBDs, SEXP
     for (i=2;i<=irfperiods;i++){
       Pow = BetaT*ShockB;
       ImpStore(arma::span(),arma::span(),arma::span((j-1)*irfperiods + (i-1),(j-1)*irfperiods + (i-1))) = Pow;
-      ShockB(arma::span(M,K-1),arma::span()) = ShockB(arma::span(0,K-M-1),arma::span());
+      if (K > M){
+        ShockB(arma::span(M,K-1),arma::span()) = ShockB(arma::span(0,K-M-1),arma::span());
+      }
       ShockB(arma::span(0,M-1),arma::span()) = Pow;
     }
   }
