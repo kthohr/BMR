@@ -2,9 +2,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
                             priorform,priorpars,parbounds,parnames=NULL,
                             optimMethod="Nelder-Mead",optimLower=NULL,optimUpper=NULL,optimControl=list(),
                             IRFs=TRUE,irf.periods=20,scalepar=1,keep=50000,burnin=10000){
-  #keep=10000; burnin=5000
-  #lambda = 1; p = 2; irf.periods=20; scalepar=0.5
-  #optimControl=list(maxit=20000,reltol=(10^(-12)))
+  #
   cat('Trying to solve the model with your initial values... ')
   dsgemats1t <- partomats(initialvals)
   dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
@@ -96,10 +94,6 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   cat('Parameter Estimates and Standard Errors (SE) at the Posterior Mode: \n', sep="")
   cat(' \n', sep="")
   print(ModeTable)
-  #
-  #for(i in 1:length(dsgemode$par)){
-  #  cat("$\\",rownames(ModeTable)[i],"$"," & ",ModeTable[i,1]," & ","(",ModeTable[i,2],")"," & ",ModeTable[i,3]," & ","(",ModeTable[i,4],")", " \\\\ ", "\n", sep="")
-  #}
   #
   rownames(parametersMode) <- "Parameter:"
   rownames(ParActualSEs) <- "Parameter:"
@@ -250,6 +244,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   dsgeprior <- .DSGEVARPrior(dsgepar,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
   GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
+  #
   logLikelihood <- -.Call("DSGEVARLikelihoodInf", YY,XY,XX,GammaYY,GammaXY,GammaXX,nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
   #
   logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
@@ -273,7 +268,6 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
   #
   SigmaX <- .Call("DSGEVARPriorC", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,p,500, PACKAGE = "BMR", DUP = FALSE)$SigmaX
-  #SigmaX <- DSGEVARPriorC(dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,p,500)$SigmaX
   #
   GammaYY <- SigmaX[,,1]
   #
@@ -440,7 +434,6 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   }
   #
   RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
-  #RepsRun <- DSGEVARReps(GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p)
   #
   return(list(Phi=RepsRun$Beta,Sigma=RepsRun$Sigma))
 }
@@ -468,7 +461,6 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   }
   #
   RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
-  #RepsRun <- DSGEVARRepsInf(GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p)
   #
   return(list(Phi=RepsRun$Beta,Sigma=RepsRun$Sigma))
 }
