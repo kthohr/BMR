@@ -485,7 +485,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     #
     Shocks <- StateMats$G%*%Shocks
     #
-    GMatShocks <- Shocks[,(nrow(dsgemats$shocks)+1):nrow(StateMats$G)]
+    GMatShocks <- Shocks[,(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G)]
     #
     SigmaChol <- t(chol(SigmaEpsilon))
     #
