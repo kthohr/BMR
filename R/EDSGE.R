@@ -2,7 +2,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
                           priorform,priorpars,parbounds,parnames=NULL,
                           optimMethod="Nelder-Mead",optimLower=NULL,optimUpper=NULL,optimControl=list(),
                           DSGEIRFs=TRUE,irf.periods=20,scalepar=1,keep=50000,burnin=10000){
-  #optimControl=list(maxit=20000,reltol=(10^(-12)))
+  #
   cat('Trying to solve the model with your initial values... ')
   dsgemats1t <- partomats(initialvals)
   dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
@@ -74,10 +74,6 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   cat('Parameter Estimates and Standard Errors (SE) at the Posterior Mode: \n', sep="")
   cat(' \n', sep="")
   print(ModeTable)
-  #
-  #for(i in 1:length(dsgemode$par)){
-  #  cat("$\\",rownames(ModeTable)[i],"$"," & ",ModeTable[i,1]," & ","(",ModeTable[i,2],")"," & ",ModeTable[i,3]," & ","(",ModeTable[i,4],")", " \\\\ ", "\n", sep="")
-  #}
   #
   rownames(parametersMode) <- "Parameter:"
   rownames(ParActualSEs) <- "Parameter:"
@@ -281,8 +277,6 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
       PrevLP <- PropLP
     }else{
       Draws[i+1,] <- Draws[i,]
-      PickMeInstead <- PickMeInstead
-      PrevLP <- PrevLP
     }
   }
   #
