@@ -61,7 +61,9 @@ SEXP CVARReps( SEXP mBeta, SEXP mSigma, SEXP mX, SEXP mY, SEXP mTp, SEXP mM,
     for (j=1;j<=Tp;j++) {
       XT(arma::span(j-1,j-1),arma::span()) = XTM;
       YT(arma::span(j-1,j-1),arma::span()) = XTM*Beta + RT(arma::span(j-1,j-1),arma::span());
-      XTM(0,arma::span(M+kcons,K-1)) = XTM(0,arma::span(kcons,K-M-1));
+      if (K > M+kcons){
+        XTM(0,arma::span(M+kcons,K-1)) = XTM(0,arma::span(kcons,K-M-1));
+      }
       XTM(0,arma::span(kcons,M-1+kcons)) = YT(arma::span(j-1,j-1),arma::span());
     }
     BetaS = arma::solve(XT,YT);
@@ -164,7 +166,9 @@ SEXP cvarforecast( SEXP mY0, SEXP mM, SEXP mp, SEXP mK, SEXP mkcons, SEXP mperio
   SEForecast.zeros();
   for (j=1;j<=periods;j++) {
     SEForecast = Sigma + trans(BetaNC)*Shocks*BetaNC;
-    Shocks(arma::span(M,(M*p)-1),arma::span(M,(M*p)-1)) = Shocks(arma::span(0,(M*(p-1))-1),arma::span(0,(M*(p-1))-1));
+    if (K > M+kcons){
+      Shocks(arma::span(M,(M*p)-1),arma::span(M,(M*p)-1)) = Shocks(arma::span(0,(M*(p-1))-1),arma::span(0,(M*(p-1))-1));
+    }
     Shocks(arma::span(0,M-1),arma::span(0,M-1)) = Sigma;
     //
     SEY = SEForecast.diag();
