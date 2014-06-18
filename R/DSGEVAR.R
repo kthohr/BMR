@@ -170,7 +170,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     IRFDVs <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods*keep))
     #
     A0Mats <- .DSGEVARIRFMatrices(DSGEMCMCRes$parameters,VARMCMCRes$Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p,0,keep,irf.periods,VARMCMCRes$Phi,A0Mats,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
+    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p,0,keep,irf.periods,VARMCMCRes$Beta,A0Mats,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
     IRFDVs <- IRFDVs$ImpStore
     IRFStore <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods,keep))
     for(i in 1:keep){
@@ -185,7 +185,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     cat('DSGEVAR IRFs finished, ', date(),'. \n', sep="")
   }
   #
-  dsgevarret <- list(Parameters=DSGEMCMCRes$parameters,Beta=VARMCMCRes$Phi,Sigma=VARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,ModeParamTrans=dsgemode$par,ModeHessian=dsgemode$hessian,scalepar=scalepar,AcceptanceRate=DSGEMCMCRes$acceptRate,ObserveMat=ObserveMat,data=dsgedataret,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds)
+  dsgevarret <- list(Parameters=DSGEMCMCRes$parameters,Beta=VARMCMCRes$Beta,Sigma=VARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,ModeParamTrans=dsgemode$par,ModeHessian=dsgemode$hessian,scalepar=scalepar,AcceptanceRate=DSGEMCMCRes$acceptRate,ObserveMat=ObserveMat,data=dsgedataret,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds)
   class(dsgevarret) <- "DSGEVAR"
   #
   return(dsgevarret)
@@ -435,7 +435,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
   #
-  return(list(Phi=RepsRun$Beta,Sigma=RepsRun$Sigma))
+  return(list(Beta=RepsRun$Beta,Sigma=RepsRun$Sigma))
 }
 
 .DSGEVARMCMCInf <- function(dsgemcmc,dsgemode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds){
@@ -462,7 +462,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
   #
-  return(list(Phi=RepsRun$Beta,Sigma=RepsRun$Sigma))
+  return(list(Beta=RepsRun$Beta,Sigma=RepsRun$Sigma))
 }
 
 .DSGEVARIRFMatrices <- function(dsgepars,Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds){
@@ -481,7 +481,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
     #
     Shocks <- matrix(0,nrow(StateMats$G),nrow(StateMats$G))
-    Shocks[(nrow(dsgemats$shocks)+1):nrow(StateMats$G),(nrow(dsgemats$shocks)+1):nrow(StateMats$G)] <- sqrt(dsgemats$shocks)
+    Shocks[(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G),(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G)] <- sqrt(dsgemats$shocks)
     #
     Shocks <- StateMats$G%*%Shocks
     #
