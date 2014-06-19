@@ -72,6 +72,11 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   parametersMode <- .DSGEParTransform(NULL,dsgemode$par,priorform,parbounds)
   #
+  logMargLikelihood <- .LaplaceMargLikelihood(dsgemode)
+  #
+  cat(' \n', sep="")
+  cat('Log Marginal Likelihood: ',logMargLikelihood,'. \n', sep="")
+  #
   parametersModeHessian <- solve(dsgemode$hessian)
   parametersModeHessian <- diag(parametersModeHessian)
   parametersModeHessian <- sqrt(parametersModeHessian)

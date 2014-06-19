@@ -52,6 +52,11 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   #
   parametersMode <- .DSGEParTransform(NULL,dsgemode$par,priorform,parbounds)
   #
+  logMargLikelihood <- .LaplaceMargLikelihood(dsgemode)
+  #
+  cat(' \n', sep="")
+  cat('Log Marginal Likelihood: ',logMargLikelihood,'. \n', sep="")
+  #
   parametersModeHessian <- solve(dsgemode$hessian)
   parametersModeHessian <- diag(parametersModeHessian)
   parametersModeHessian <- sqrt(parametersModeHessian)
@@ -238,6 +243,12 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   dsgelike <- .Call("DSGEKalman", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,R,200, PACKAGE = "BMR", DUP = FALSE)
   dsgeposterior <- .DSGEPriors(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike$dsgelike)
   return(dsgeposterior)
+}
+
+.LaplaceMargLikelihood <- function(obj){
+  PosteriorVal <- -obj$value
+  MargLike <- PosteriorVal + (length(obj$par)*log(2*pi) + log(1/det(obj$hessian)))/2
+  return(MargLike)
 }
 
 .DSGEMCMC <- function(dsgeopt,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
