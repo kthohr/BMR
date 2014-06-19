@@ -14,6 +14,10 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   dsgedataret <- dsgedata
   kdata <- .dsgevardata(dsgedata,p,FALSE)
   dsgedata <- kdata$Y
+  # Set a lower bound on lambda:
+  if(lambda < ncol(dsgedata)*(p+1)/nrow(dsgedata)){
+    lambda <- ncol(dsgedata)*(p+1)/nrow(dsgedata)
+  }
   #
   dsgemode <- NULL
   cat(' \n', sep="")
