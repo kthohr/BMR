@@ -21,9 +21,9 @@ DSGEVAR(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,partomats,priorform,
 
 \arguments{
   \item{dsgedata}{
-	A matrix or data frame of size T x j containing the relevant series.} 
+	A matrix or data frame of size T x j containing the relevant series. Note that, in order to identify the structural shocks, there must be the same number of observable series as shocks in the DSGE model.} 
   \item{lambda}{
-  The proportion of DSGE dummy data to actual data. See the vignette for details.} 
+  The proportion of DSGE dummy data to actual data. Acceptable values lie in the interval j x (p+1)/T to +infinity. See the vignette for details.} 
   \item{p}{
   The number of lags to include of each variable. The default value is 2.}
 	\item{ObserveMat}{
@@ -69,8 +69,14 @@ The function returns an object of class DSGEVAR, which contains:
 
   \item{Parameters}{
 	A matrix with `keep' number of rows that contain the estimated, post sample burn-in parameter draws.}
-	\item{IRFs}{
-	The IRFs (if any), based on the posterior parameter draws.}
+	\item{Beta}{
+  An array of size (j x p) x m x keep which contains the post-burn-in draws of beta.}
+	\item{Sigma}{
+	An array of size j x j x keep$ which contains the post-burn-in draws of Sigma.}
+	\item{DSGEIRFs}{
+	A four-dimensional object of size irf.periods x (m + n + k) x n x keep containing the impulse response function values for the DSGE model. The first m refers to the responses to the last m shock.}
+	\item{DSGEVARIRFs}{
+	A four-dimensional object of size irf.periods x j x n x keep containing the impulse response function values for the VAR. The last m refers to the structural shock.}
 	\item{ModeParamTrans}{
 	The values of the transformed parameters at the posterior mode.}
 	\item{ModeHessian}{
@@ -92,11 +98,12 @@ The function returns an object of class DSGEVAR, which contains:
 \examples{
 \dontrun{
 #
-NKMVAR <- DSGEVAR(dsgedata,1,2,ObserveMat,initialvals,partomats,
+NKMVAR <- DSGEVAR(dsgedata,lambda=1,p=4,ObserveMat,initialvals,partomats,
                   priorform,priorpars,parbounds,parnames,
-                  optimMethod="CG",optimLower=NULL,optimControl=list(maxit=20000,reltol=(10^(-12))),
+                  optimMethod="CG",optimLower=NULL,
+                  optimControl=list(maxit=20000,reltol=(10^(-12))),
                   optimUpper=NULL,IRFs=TRUE,irf.periods=5,
-                  scalepar=0.4,keep=10000,burnin=10000)
+                  scalepar=0.4,keep=50000,burnin=75000)
 }
 }
 
