@@ -72,7 +72,7 @@ The function returns an object of class DSGEVAR, which contains:
 	\item{Beta}{
   An array of size (j x p) x m x keep which contains the post-burn-in draws of beta.}
 	\item{Sigma}{
-	An array of size j x j x keep$ which contains the post-burn-in draws of Sigma.}
+	An array of size j x j x keep which contains the post-burn-in draws of Sigma.}
 	\item{DSGEIRFs}{
 	A four-dimensional object of size irf.periods x (m + n + k) x n x keep containing the impulse response function values for the DSGE model. The first m refers to the responses to the last m shock.}
 	\item{DSGEVARIRFs}{
