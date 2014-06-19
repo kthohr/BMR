@@ -25,7 +25,7 @@ EDSGE(dsgedata,chains=1,cores=1,ObserveMat,initialvals,partomats,priorform,
   \item{chains}{
   A positive integer value indicating the number of MCMC chains to run.}
   \item{cores}{
-  An positive integer value indicating the number of CPU cores that should be used in estimation. This number should be less than or equal to the number of chains.}
+  An positive integer value indicating the number of CPU cores that should be used in estimation. This number should be less than or equal to the number of chains. DO NOT ENTER MORE CORES THAN YOUR COMPUTER CAN HANDLE! If in doubt, set cores = 1, which is the default.}
 	\item{ObserveMat}{
 	The (m+n+k) x j observable matrix H that maps the state variables to the to observed series in the measurement equation.}
 	\item{initialvals}{

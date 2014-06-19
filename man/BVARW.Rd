@@ -20,7 +20,7 @@ BVARW(mydata,cores,coefprior=NULL,p=4,constant=TRUE,
   \item{mydata}{
   A matrix or data frame containing the series to be used in estimation, and should be of size T x m.}
   \item{cores}{
-  An positive integer value indicating the number of CPU cores that should be used in estimation.}
+  An positive integer value indicating the number of CPU cores that should be used in estimation. DO NOT ENTER MORE CORES THAN YOUR COMPUTER CAN HANDLE! If in doubt, set cores = 1, which is the default.}
 	\item{coefprior}{
 	A numeric vector of length m, matrix of size (m p + 1_c) x m, or a logical value of `NULL', that contains the prior mean of each coefficient. Only providing a numeric vector of length m will make BMR set a zero prior on all coefficients except the own first-lags, which are set according to the elements in `coefprior'. Setting this to `NULL' will mean a random walk in levels prior.}
 	\item{p}{
@@ -77,7 +77,7 @@ The function returns an object of class BVARW, which contains:
 \examples{
 \dontrun{
 data(BMRVARData)
-testbvarw <- BVARW(USMacroData[,2:4],1,c(0.9,0.95,0.95),p=4,constant=T,
+testbvarw <- BVARW(USMacroData[,2:4],cores=1,c(0.9,0.95,0.95),p=4,constant=T,
                     irf.periods=20,keep=10000,burnin=5000,
                     XiBeta=4,XiSigma=1,gamma=4)
 }
