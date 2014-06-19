@@ -205,6 +205,8 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   LogLikelihood.zeros();
   //
   int T = dsgedata.n_rows;
+  double ndata = dsgedata.n_cols;
+  double nlog2pi = ndata*log(2*arma::datum::pi);
   //
   int i;
   //
@@ -247,7 +249,7 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   arma::mat KalmanResid = trans(dsgedata(arma::span(0,0),arma::span())) - trans(ObserveMat)*StatePredicted;
   arma::mat StateFiltered = StatePredicted + KalmanGain*KalmanResid;
   arma::mat StateCovFiltered = StateCovPredicted - KalmanGain*trans(ObserveMat)*StateCovPredicted;
-  LogLikelihood += log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
+  LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
   #
   for(i=2; i<=T; i++){
     StatePredicted = F*StateFiltered;
@@ -260,9 +262,9 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
     KalmanResid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - trans(ObserveMat)*StatePredicted;
     StateFiltered = StatePredicted + KalmanGain*KalmanResid;
     StateCovFiltered = StateCovPredicted - KalmanGain*trans(ObserveMat)*StateCovPredicted;
-    LogLikelihood += log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
+    LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
   }
-  //
+  // Returns the negative of the loglikelihood
   LogLikelihood = 0.5*arma::as_scalar(LogLikelihood);
   //
   return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
