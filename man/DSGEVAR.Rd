@@ -14,7 +14,7 @@ DSGEVAR(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,partomats,priorform,
         priorpars,parbounds,parnames=NULL,
         optimMethod="Nelder-Mead",optimLower=NULL,optimUpper=NULL,
         optimControl=list(),
-        DSGEIRFs=TRUE,irf.periods=20,
+        IRFs=TRUE,irf.periods=20,
         scalepar=1,keep=50000,burnin=10000)
 \method{plot}{DSGEVAR}(obj,BinDenom=40,save=FALSE,height=13,width=13)
 }

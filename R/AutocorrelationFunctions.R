@@ -7,8 +7,6 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
 }
 
 .ggplotacf<-function(y,lags=10,ci=.95,plot=T,barcolor="purple",names=FALSE,save=FALSE,height=12,width=12){
-  require(ggplot2)
-  require(grid)
   #
   M <- as.numeric(ncol(y))
   #
@@ -79,8 +77,6 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
 }
 
 .ggplotpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALSE,height=12,width=12){
-  require(ggplot2)
-  require(grid)
   #
   M <- as.numeric(ncol(y))
   #

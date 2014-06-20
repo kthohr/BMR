@@ -107,9 +107,6 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
 
 .dsgevarmodecheck <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
   #
-  require(ggplot2)
-  require(grid)
-  #
   dsgedata <- obj$data
   ObserveMat <- obj$ObserveMat
   partomats <- obj$partomats
