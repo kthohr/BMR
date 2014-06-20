@@ -317,9 +317,6 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
 
 .irfsdsge <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
   #
-  require(ggplot2)
-  require(grid)
-  #
   StateMats <- .DSGEstatespace(obj$N,obj$P,obj$Q,obj$R,obj$S)
   F <- StateMats$F; G <- StateMats$G
   nShocks <- as.numeric(ncol(obj$N))

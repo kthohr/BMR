@@ -206,8 +206,6 @@ BVARW.default <- function(mydata,cores,coefprior=NULL,p=4,constant=TRUE,irf.peri
 
 .bvarwreplicationsP <- function(Y,X,Z,aPr,alpha,BVPr,vPr,SPr,Sigma,K,M,p,constant,Tp,keep,burnin,irf.periods,NCore){
   #
-  require(doSNOW)
-  #
   ImpStore <- 0
   #
   cat('Starting Gibbs C++, ', date(),'. \n', sep="")
