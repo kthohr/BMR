@@ -210,6 +210,9 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   //
   int i;
   //
+  arma::mat tObserveMat = trans(ObserveMat);
+  arma::mat tF = trans(F);
+  //
   arma::mat Q(G.n_rows,G.n_rows);
   Q.zeros();
   arma::mat QShocks(1,1);
@@ -232,7 +235,7 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   arma::mat IMat = F;
   //
   for(i=1;i<=MaxIter;i++){
-    SSCovNew = SSCovOld + (IMat*SSCovOld*trans(IMat));
+    SSCovNew = SSCovOld + IMat*SSCovOld*trans(IMat);
     IMat *= IMat;
     //
     SSCovOld = SSCovNew;
@@ -240,28 +243,26 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   InitialCov = SSCovNew;
   //
   arma::mat StatePredicted = F*InitialState;
-  arma::mat StateCovPredicted = F*InitialCov*trans(F) + GQG;
-  arma::mat Sigma = trans(ObserveMat)*StateCovPredicted*ObserveMat + R;
-  Sigma = 0.5*(trans(Sigma) + Sigma);
+  arma::mat StateCovPredicted = F*InitialCov*tF + GQG;
+  arma::mat Sigma = tObserveMat*StateCovPredicted*ObserveMat + R;
   arma::mat invSigma = inv_sympd(Sigma);
   //
   arma::mat KalmanGain = StateCovPredicted*ObserveMat*invSigma;
-  arma::mat KalmanResid = trans(dsgedata(arma::span(0,0),arma::span())) - trans(ObserveMat)*StatePredicted;
+  arma::mat KalmanResid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StatePredicted;
   arma::mat StateFiltered = StatePredicted + KalmanGain*KalmanResid;
-  arma::mat StateCovFiltered = StateCovPredicted - KalmanGain*trans(ObserveMat)*StateCovPredicted;
+  arma::mat StateCovFiltered = StateCovPredicted - KalmanGain*tObserveMat*StateCovPredicted;
   LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
   #
   for(i=2; i<=T; i++){
     StatePredicted = F*StateFiltered;
-    StateCovPredicted = F*StateCovFiltered*trans(F) + GQG;
-    Sigma = trans(ObserveMat)*StateCovPredicted*ObserveMat + R;
-    Sigma = 0.5*(trans(Sigma) + Sigma);
+    StateCovPredicted = F*StateCovFiltered*tF + GQG;
+    Sigma = tObserveMat*StateCovPredicted*ObserveMat + R;
     invSigma = inv_sympd(Sigma);
     //
     KalmanGain = StateCovPredicted*ObserveMat*invSigma;
-    KalmanResid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - trans(ObserveMat)*StatePredicted;
+    KalmanResid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StatePredicted;
     StateFiltered = StatePredicted + KalmanGain*KalmanResid;
-    StateCovFiltered = StateCovPredicted - KalmanGain*trans(ObserveMat)*StateCovPredicted;
+    StateCovFiltered = StateCovPredicted - KalmanGain*tObserveMat*StateCovPredicted;
     LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
   }
   // Returns the negative of the loglikelihood
