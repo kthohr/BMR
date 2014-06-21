@@ -54,7 +54,7 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
   arma::mat IMat = F;
   //
   for(j=1;j<=MaxIter;j++){
-    SigmaSSNew = SigmaSSOld + (IMat*SigmaSSOld*trans(IMat));
+    SigmaSSNew = SigmaSSOld + IMat*SigmaSSOld*trans(IMat);;
     IMat *= IMat;
     //
     SigmaSSOld = SigmaSSNew;
