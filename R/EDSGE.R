@@ -9,12 +9,195 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
   cat('Done. \n')
   #
-  parametersTrans <- .DSGEParTransform(initialvals,NULL,priorform,parbounds)
+  priorformRet <- priorform
+  priorform <- .edsgePrelimWork(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)$priorform
+  #
+  #
+  #
+  Mode <- .DSGEModeEstimate(dsgedata,ObserveMat,initialvals,partomats,priorform,priorpars,parbounds,parnames,optimMethod,optimLower,optimUpper,optimControl)
+  #
+  dsgemode <- Mode$dsgemode; parMode <- Mode$parMode; parModeSEs <- Mode$parModeSEs
+  #
+  dsgeret <- 0
+  if(keep==0){
+    parRet <- matrix(0,nrow=0,ncol=length(parMode))
+    if(class(parnames)=="character"){
+      colnames(parRet) <- parnames
+    }
+    dsgeret <- list(Parameters=parRet,parMode=parMode,IRFs=NULL,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=NULL,RootRConvStats=NULL,ObserveMat=ObserveMat,data=dsgedata,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
+    class(dsgeret) <- "EDSGE"
+    #
+    return(dsgeret)
+  }
+  #
+  #
+  #
+  cat(' \n', sep="")
+  cat('Beginning MCMC run, ', date(),'. \n', sep="")
+  MCMCRes <- 0
+  if(chains==1){
+    MCMCRes <- .DSGEMCMC(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
+  }else if(chains > 1){
+    MCMCRes <- .DSGEMCMCMulti(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores)
+  }
+  cat('MCMC run finished, ', date(),'. \n', sep="")
+  #
+  if(class(parnames)=="character"){
+    colnames(MCMCRes$parameters) <- parnames
+  }
+  #
+  PostMCMCInfo <- .DSGEMCMCPrint(MCMCRes,chains,parMode,parModeSEs,parnames)
+  #
+  #
+  #
+  IRFs <- NULL
+  if(DSGEIRFs == TRUE){
+    cat(' \n')
+    cat('Computing IRFs now... ')
+    IRFs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
+    for(i in 1:keep){
+      dsgemats <- partomats(MCMCRes$parameters[i,])
+      dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+      iIRF <- IRF(dsgesolved,sqrt(diag(dsgemats$shocks)),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
+      IRFs[,,,i] <- iIRF$IRFs
+    }
+    cat('Done. \n')
+  }
+  #
+  dsgeret <- list(Parameters=MCMCRes$parameters,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,IRFs=IRFs,scalepar=scalepar,AcceptanceRate=MCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,ObserveMat=ObserveMat,data=dsgedata,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
+  class(dsgeret) <- "EDSGE"
+  #
+  return(dsgeret)
+}
+
+.edsgePrelimWork <- function(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds){
+  #
+  # Change from character to numeric
+  priorformNum <- numeric(length(priorform))
+  # Normal = 1, Gamma = 2, IGamma = 3, Beta = 4
+  for(i in 1:length(priorform)){
+    if(priorform[i]=="Normal"){
+      priorformNum[i] <- 1
+    }else if(priorform[i]=="Gamma"){
+      priorformNum[i] <- 2
+    }else if(priorform[i]=="IGamma"){
+      priorformNum[i] <- 3
+    }else if(priorform[i]=="Beta"){
+      priorformNum[i] <- 4
+    }
+  }
+  #
+  return=list(priorform=priorformNum)
+}
+
+.DSGEParTransform <- function(parameters,priorform,parbounds,trans=1){
+  #
+  #trans = 1, then transform from regular
+  #trans = 2, then transform back to regular
+  #
+  if(trans == 1){
+    nparam <- as.numeric(length(parameters))
+    parametersTrans <- numeric(nparam)
+    #
+    for(i in 1:nparam){
+      if(priorform[i] == 2 || priorform[i] == 3){
+        if(class(parbounds[i,1]) != "numeric"){
+          parametersTrans[i] <- log(parameters[i] - parbounds[i,1])
+        }else{
+          parametersTrans[i] <- log(parameters[i])
+        }
+      }else if(priorform[i] == 4){
+        parametersTrans[i] <- log((parameters[i] - parbounds[i,1])/(parbounds[i,2] - parameters[i]))
+      }else{#Normal
+        parametersTrans[i] <- parameters[i]
+      }
+    }
+    #
+    return(parametersTrans)
+  }else{
+    nparam <- as.numeric(length(parameters))
+    TransBack <- numeric(nparam)
+    #
+    for(i in 1:nparam){
+      if(priorform[i] == 2 || priorform[i] == 3){
+        if(class(parbounds[i,1]) != "numeric"){
+          TransBack[i] <- exp(parameters[i]) + parbounds[i,1]
+        }else{
+          TransBack[i] <- exp(parameters[i])
+        }
+      }else if(priorform[i] == 4){
+        TransBack[i] <- (parbounds[i,1] + parbounds[i,2]*exp(parameters[i]))/(1 + exp(parameters[i]))
+      }else{#Normal
+        TransBack[i] <- parameters[i]
+      }
+    }
+    #
+    return(TransBack)
+  }
+}
+
+.DSGEPriors <- function(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike){
+  #
+  nparam <- as.numeric(length(parameters))
+  dsgeposterior <- - dsgelike
+  #
+  for(i in 1:nparam){
+    if(priorform[i] == 1){
+      dsgeposterior <- dsgeposterior + dnorm(parameters[i],mean = priorpars[i,1],sd = sqrt(priorpars[i,2]), log = TRUE)
+    }else if(priorform[i] == 2){
+      dsgeposterior <- dsgeposterior + dgamma(parameters[i],shape=priorpars[i,1],scale=priorpars[i,2],log=TRUE) + parametersTrans[i]
+    }else if(priorform[i] == 3){
+      dsgeposterior <- dsgeposterior + log( ( (priorpars[i,2]^priorpars[i,1])/gamma(priorpars[i,1]) )*( (parameters[i])^(-priorpars[i,1]-1) )*( exp(-priorpars[i,2]/parameters[i]) ) ) + parametersTrans[i]
+    }else if(priorform[i] == 4){
+      if(is.na(parbounds[i,1]) || is.na(parbounds[i,2])){
+        z = (parameters[i]-parbounds[i,1])/(parbounds[i,2]-parbounds[i,1])
+        dsgeposterior <- dsgeposterior - log(parbounds[i,2] - parbounds[i,1]) - lbeta(priorpars[i,1],priorpars[i,2]) + ((priorpars[i,1]-1)*log(z)) + ((priorpars[i,2]-1)*log(1-z))
+        dsgeposterior <- dsgeposterior + parametersTrans[i] - 2*log(1+exp(parametersTrans[i]))
+      }else{
+        z = (parameters[i]-parbounds[i,1])/(parbounds[i,2]-parbounds[i,1])
+        dsgeposterior <- dsgeposterior - log(parbounds[i,2] - parbounds[i,1]) - lbeta(priorpars[i,1],priorpars[i,2]) + ((priorpars[i,1]-1)*log(z)) + ((priorpars[i,2]-1)*log(1-z))
+        dsgeposterior <- dsgeposterior + log(parbounds[i,2] - parbounds[i,1]) + parametersTrans[i] - 2*log(1+exp(parametersTrans[i]))
+      }
+    }else{
+      stop("Parameter ", i ," is not of a valid prior form.\n",call.=FALSE)
+    }
+  }
+  # Return negative of the posterior:
+  dsgeposterior <- - dsgeposterior
+  #
+  return(as.numeric(dsgeposterior))
+}
+
+.dsgeposteriorfn <- function(parametersTrans,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds){
+  parameters <- .DSGEParTransform(parametersTrans,priorform,parbounds,2)
+  dsgemats <- partomats(parameters)
+  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+  #
+  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  #
+  R <- matrix(0,nrow=ncol(ObserveMat),ncol=ncol(ObserveMat))
+  #dsgelike <- .Call("DSGEKalman", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,R,200, PACKAGE = "BMR", DUP = FALSE)
+  dsgelike <- .Call("DSGECR", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,R,200, PACKAGE = "BMR", DUP = FALSE)
+  dsgeposterior <- .DSGEPriors(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike$dsgelike)
+  return(dsgeposterior)
+}
+
+.LaplaceMargLikelihood <- function(obj){
+  PosteriorVal <- -obj$value
+  MargLike <- PosteriorVal + (length(obj$par)*log(2*pi) + log(1/det(obj$hessian)))/2
+  return(MargLike)
+}
+
+.DSGEModeEstimate <- function(dsgedata,ObserveMat,initialvals,partomats,
+                             priorform,priorpars,parbounds,parnames,
+                             optimMethod,optimLower,optimUpper,optimControl){
+  #
+  parametersTrans <- .DSGEParTransform(initialvals,priorform,parbounds,1)
   #
   dsgemode <- NULL
   cat(' \n', sep="")
   cat('Beginning optimization, ', date(),'. \n', sep="")
-  cat('Using Optimisation Method: ',optimMethod,'. \n', sep="")
+  cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
   if(optimMethod=="Nelder-Mead"){
     dsgemode <- optim(parametersTrans,fn=.dsgeposteriorfn,method="Nelder-Mead",control=optimControl,dsgedata=dsgedata,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
   }else if(optimMethod=="BFGS"){
@@ -50,26 +233,26 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   cat('Optimizer Iterations: \n', sep="")
   print(dsgemode$counts)
   #
-  parametersMode <- .DSGEParTransform(NULL,dsgemode$par,priorform,parbounds)
+  parMode <- .DSGEParTransform(dsgemode$par,priorform,parbounds,2)
   #
   logMargLikelihood <- .LaplaceMargLikelihood(dsgemode)
   #
   cat(' \n', sep="")
   cat('Log Marginal Likelihood: ',logMargLikelihood,'. \n', sep="")
   #
-  parametersModeHessian <- solve(dsgemode$hessian)
-  parametersModeHessian <- diag(parametersModeHessian)
-  parametersModeHessian <- sqrt(parametersModeHessian)
+  parModeHessian <- solve(dsgemode$hessian)
+  parModeHessian <- diag(parModeHessian)
+  parModeHessian <- sqrt(parModeHessian)
   #
-  ParActualSEs <- .DSGEParTransform(NULL,dsgemode$par,priorform,parbounds) - .DSGEParTransform(NULL,dsgemode$par - parametersModeHessian,priorform,parbounds)
+  parModeSEs <- .DSGEParTransform(dsgemode$par,priorform,parbounds,2) - .DSGEParTransform(dsgemode$par - parModeHessian,priorform,parbounds,2)
   #
-  parametersMode <- matrix(parametersMode,nrow=1)
-  ParActualSEs <- matrix(ParActualSEs,nrow=1)
-  parametersModeHessian <- matrix(parametersModeHessian,nrow=1)
+  parMode <- matrix(parMode,nrow=1)
+  parModeSEs <- matrix(parModeSEs,nrow=1)
+  parModeHessian <- matrix(parModeHessian,nrow=1)
   #
   ModeTable <- matrix(NA,nrow=length(dsgemode$par),ncol=2)
-  ModeTable[,1] <- parametersMode
-  ModeTable[,2] <- ParActualSEs
+  ModeTable[,1] <- parMode
+  ModeTable[,2] <- parModeSEs
   #
   colnames(ModeTable) <- c("Estimate","SE")
   if(class(parnames)=="character"){
@@ -80,200 +263,61 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   cat(' \n', sep="")
   print(ModeTable)
   #
-  rownames(parametersMode) <- "Parameter:"
-  rownames(ParActualSEs) <- "Parameter:"
-  rownames(parametersModeHessian) <- "Parameter:"
+  rownames(parMode) <- "Parameter:"
+  rownames(parModeSEs) <- "Parameter:"
+  rownames(parModeHessian) <- "Parameter:"
   if(class(parnames)=="character"){
-    colnames(parametersMode) <- parnames
-    colnames(parametersModeHessian) <- parnames
-    colnames(ParActualSEs) <- parnames
+    colnames(parMode) <- parnames
+    colnames(parModeHessian) <- parnames
+    colnames(parModeSEs) <- parnames
   }
   #
-  cat(' \n', sep="")
-  cat('Beginning MCMC run, ', date(),'. \n', sep="")
-  MCMCRes <- 0
-  if(chains==1){
-    MCMCRes <- .DSGEMCMC(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
-  }else if(chains > 1){
-    MCMCRes <- .DSGEMCMCMulti(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores)
-  }
-  cat('MCMC run finished, ', date(),'. \n', sep="")
-  if(chains==1){
-    cat('Acceptance Rate: ', MCMCRes$acceptRate,'. \n', sep="")
-  }else{
-    cat('Acceptance Rate: ', sep="")
-    for(kk in 1:(chains-1)){
-      cat('Chain ',kk,': ', MCMCRes$acceptRate[kk],'; ', sep="")
-    }
-    cat('Chain ',chains,': ', MCMCRes$acceptRate[chains],'. \n', sep="")
-    #
-    # Chain convergence statistics:
-    #
-    Diagnostics <- matrix(.MCMCDiagnostics(MCMCRes$parameters,chains),nrow=1)
-    #
-    rownames(Diagnostics) <- "Stat:"
-    if(class(parnames)=="character"){
-      colnames(Diagnostics) <- parnames
-    }
-    #
-    cat(' \n', sep="")
-    cat('Root-R Chain-Convergence Statistics: \n', sep="")
-    print(Diagnostics)
-    cat(' \n', sep="")
-  }
   #
-  if(class(parnames)=="character"){
-    colnames(MCMCRes$parameters) <- parnames
-  }
-  #
-  PostTable <- matrix(NA,nrow=length(dsgemode$par),ncol=4)
-  PostTable[,1] <- parametersMode
-  PostTable[,2] <- ParActualSEs
-  PostTable[,3] <- apply(MCMCRes$parameters,2,mean)
-  PostTable[,4] <- apply(MCMCRes$parameters,2,sd)
-  #
-  colnames(PostTable) <- c("Posterior.Mode","SE.Mode","Posterior.Mean","SE.Posterior")
-  if(class(parnames)=="character"){
-    rownames(PostTable) <- parnames
-  }
-  cat(' \n', sep="")
-  cat('Parameter Estimates and Standard Errors: \n', sep="")
-  cat(' \n', sep="")
-  print(PostTable)
-  #
-  IRFs <- NULL
-  if(DSGEIRFs == TRUE){
-    cat(' \n')
-    cat('Computing IRFs now... ')
-    IRFs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
-    for(i in 1:keep){
-      dsgemats <- partomats(MCMCRes$parameters[i,])
-      dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-      iIRF <- IRF(dsgesolved,sqrt(MCMCRes$parameters[i,(ncol(MCMCRes$parameters)-nrow(dsgemats1t$N)+1):ncol(MCMCRes$parameters)]),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
-      IRFs[,,,i] <- iIRF$IRFs
-    }
-    cat('Done. \n')
-  }
-  #
-  dsgeret <- list(Parameters=MCMCRes$parameters,IRFs=IRFs,ModeParamTrans=dsgemode$par,ModeHessian=dsgemode$hessian,scalepar=scalepar,AcceptanceRate=MCMCRes$acceptRate,ObserveMat=ObserveMat,data=dsgedata,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds)
-  class(dsgeret) <- "EDSGE"
-  #
-  return(dsgeret)
-}
-
-.DSGEParTransform <- function(parameters=NULL,parametersTrans=NULL,priorform,parbounds){
-  if(class(parameters) == "numeric"){
-    nparam <- as.numeric(length(parameters))
-    parametersTrans <- numeric(nparam)
-    #
-    for(i in 1:nparam){
-      if(priorform[i] == "Gamma" || priorform[i] == "IGamma"){
-        if(class(parbounds[i,1]) != "numeric"){
-          parametersTrans[i] <- log(parameters[i] - parbounds[i,1])
-        }else{
-          parametersTrans[i] <- log(parameters[i])
-        }
-      }else if(priorform[i] == "Beta"){
-        parametersTrans[i] <- log((parameters[i] - parbounds[i,1])/(parbounds[i,2] - parameters[i]))
-      }else{
-        parametersTrans[i] <- parameters[i]
-      }
-    }
-    #
-    return(parametersTrans)
-  }else{
-    nparam <- as.numeric(length(parametersTrans))
-    parameters <- numeric(nparam)
-    #
-    for(i in 1:nparam){
-      if(priorform[i] == "Gamma" || priorform[i] == "IGamma"){
-        if(class(parbounds[i,1]) != "numeric"){
-          parameters[i] <- exp(parametersTrans[i]) + parbounds[i,1]
-        }else{
-          parameters[i] <- exp(parametersTrans[i])
-        }
-      }else if(priorform[i] == "Beta"){
-        parameters[i] <- (parbounds[i,1] + parbounds[i,2]*exp(parametersTrans[i]))/(1 + exp(parametersTrans[i]))
-      }else{
-        parameters[i] <- parametersTrans[i]
-      }
-    }
-    #
-    return(parameters)
-  }
-}
-
-.DSGEPriors <- function(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike){
-  nparam <- as.numeric(length(parameters))
-  dsgeposterior <- - dsgelike
-  #
-  for(i in 1:nparam){
-    if(priorform[i] == "Normal"){
-      dsgeposterior <- dsgeposterior + dnorm(parameters[i],mean = priorpars[i,1],sd = sqrt(priorpars[i,2]), log = TRUE)
-    }else if(priorform[i] == "Gamma"){
-      dsgeposterior <- dsgeposterior + dgamma(parameters[i],shape=priorpars[i,1],scale=priorpars[i,2],log=TRUE) + parametersTrans[i]
-    }else if(priorform[i] == "IGamma"){
-      dsgeposterior <- dsgeposterior + log( ( (priorpars[i,2]^priorpars[i,1])/gamma(priorpars[i,1]) )*( (parameters[i])^(-priorpars[i,1]-1) )*( exp(-priorpars[i,2]/parameters[i]) ) ) + parametersTrans[i]
-    }else if(priorform[i] == "Beta"){
-      if(is.na(parbounds[i,1]) || is.na(parbounds[i,2])){
-        z = (parameters[i]-parbounds[i,1])/(parbounds[i,2]-parbounds[i,1])
-        dsgeposterior <- dsgeposterior - log(parbounds[i,2] - parbounds[i,1]) - lbeta(priorpars[i,1],priorpars[i,2]) + ((priorpars[i,1]-1)*log(z)) + ((priorpars[i,2]-1)*log(1-z))
-        dsgeposterior <- dsgeposterior + parametersTrans[i] - 2*log(1+exp(parametersTrans[i]))
-      }else{
-        z = (parameters[i]-parbounds[i,1])/(parbounds[i,2]-parbounds[i,1])
-        dsgeposterior <- dsgeposterior - log(parbounds[i,2] - parbounds[i,1]) - lbeta(priorpars[i,1],priorpars[i,2]) + ((priorpars[i,1]-1)*log(z)) + ((priorpars[i,2]-1)*log(1-z))
-        dsgeposterior <- dsgeposterior + log(parbounds[i,2] - parbounds[i,1]) + parametersTrans[i] - 2*log(1+exp(parametersTrans[i]))
-      }
-    }
-  }
-  #
-  dsgeposterior <- - dsgeposterior
-  #
-  return(as.numeric(dsgeposterior))
-}
-
-.dsgeposteriorfn <- function(parametersTrans,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds){
-  parameters <- .DSGEParTransform(NULL,parametersTrans,priorform,parbounds)
-  dsgemats <- partomats(parameters)
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-  #
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
-  #
-  R <- matrix(0,nrow=ncol(ObserveMat),ncol=ncol(ObserveMat))
-  dsgelike <- .Call("DSGEKalman", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,R,200, PACKAGE = "BMR", DUP = FALSE)
-  dsgeposterior <- .DSGEPriors(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike$dsgelike)
-  return(dsgeposterior)
-}
-
-.LaplaceMargLikelihood <- function(obj){
-  PosteriorVal <- -obj$value
-  MargLike <- PosteriorVal + (length(obj$par)*log(2*pi) + log(1/det(obj$hessian)))/2
-  return(MargLike)
+  return=list(dsgemode=dsgemode,parMode=parMode,parModeSEs=parModeSEs,logMargLikelihood=logMargLikelihood)
 }
 
 .DSGEMCMC <- function(dsgeopt,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
   #
-  Draws <- matrix(NA,nrow=(keep+burnin+1),ncol=length(dsgeopt$par))
+  Draws <- matrix(NA,nrow=(keep+1),ncol=length(dsgeopt$par))
   #
-  Draws[1,] <- dsgeopt$par
+  InitialDraw <- dsgeopt$par
   if(parallel==TRUE){
-    Draws[1,] <- dsgeopt$par + runif(1,-1,1)*c(sqrt(diag(solve(dsgeopt$hessian))))
+    InitialDraw <- dsgeopt$par + runif(1,-1,1)*c(sqrt(diag(solve(dsgeopt$hessian))))
   }
   #
   PrevLP <- (-1)*dsgeopt$value
   if(parallel==TRUE){
-    PrevLP <- (-1)*.dsgeposteriorfn(c(Draws[1,]),dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
+    PrevLP <- (-1)*.dsgeposteriorfn(c(InitialDraw),dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
   }
   #
-  PickMeInstead <- matrix(c(Draws[1,]))
+  PickMeInstead <- matrix(c(InitialDraw))
   #
   CovM <- scalepar*(solve(dsgeopt$hessian))
   CovMChol <- t(chol(CovM))
   #
   Acceptances <- 0
   #
-  for (i in 1:(keep+burnin)){
+  for (i in 1:burnin){
+    #
     proposal <- PickMeInstead + CovMChol%*%matrix(rnorm(length(dsgeopt$par)))
+    #
+    PropLP <- (-1)*.dsgeposteriorfn(c(proposal),dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
+    if(is.nan(PropLP)){
+      PropLP <- -1000000
+    }
+    #
+    if(runif(1) < exp(PropLP-PrevLP)){
+      PickMeInstead <- proposal
+      PrevLP <- PropLP
+    }
+  }
+  #
+  Draws[1,] <- t(PickMeInstead)
+  #
+  for (i in 1:keep){
+    #
+    proposal <- PickMeInstead + CovMChol%*%matrix(rnorm(length(dsgeopt$par)))
+    #
     PropLP <- (-1)*.dsgeposteriorfn(c(proposal),dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
     if(is.nan(PropLP)){
       PropLP <- -1000000
@@ -281,9 +325,8 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
     #
     if(runif(1) < exp(PropLP-PrevLP)){
       Draws[i+1,] <- t(proposal)
-      if(i > burnin){
-        Acceptances <- Acceptances + 1
-      }
+      Acceptances <- Acceptances + 1
+      #
       PickMeInstead <- proposal
       PrevLP <- PropLP
     }else{
@@ -291,11 +334,11 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
     }
   }
   #
-  Draws <- Draws[(burnin+2):nrow(Draws),]
+  Draws <- Draws[-1,]
   accept <- Acceptances/keep
   #
   for(i in 1:keep){
-    Draws[i,] <- .DSGEParTransform(NULL,Draws[i,],priorform,parbounds)
+    Draws[i,] <- .DSGEParTransform(Draws[i,],priorform,parbounds,2)
   }
   #
   if(parallel==FALSE){
@@ -366,4 +409,49 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,parto
   rootR <- sqrt( ( ((dim(parArray)[1]-1)/dim(parArray)[1])*W + (1/dim(parArray)[1])*B ) / W)
   #
   return(rootR)
+}
+
+.DSGEMCMCPrint <- function(MCMCRes,chains,parMode,parModeSEs,parnames){
+  #
+  Diagnostics <- NULL
+  if(chains==1){
+    cat('Acceptance Rate: ', MCMCRes$acceptRate,'. \n', sep="")
+  }else{
+    cat('Acceptance Rate: ', sep="")
+    for(kk in 1:(chains-1)){
+      cat('Chain ',kk,': ', MCMCRes$acceptRate[kk],'; ', sep="")
+    }
+    cat('Chain ',chains,': ', MCMCRes$acceptRate[chains],'. \n', sep="")
+    #
+    # Chain convergence statistics:
+    #
+    Diagnostics <- matrix(.MCMCDiagnostics(MCMCRes$parameters,chains),nrow=1)
+    #
+    rownames(Diagnostics) <- "Stat:"
+    if(class(parnames)=="character"){
+      colnames(Diagnostics) <- parnames
+    }
+    #
+    cat(' \n', sep="")
+    cat('Root-R Chain-Convergence Statistics: \n', sep="")
+    print(Diagnostics)
+    cat(' \n', sep="")
+  }
+  #
+  PostTable <- matrix(NA,nrow=length(parMode),ncol=4)
+  PostTable[,1] <- parMode
+  PostTable[,2] <- parModeSEs
+  PostTable[,3] <- apply(MCMCRes$parameters,2,mean)
+  PostTable[,4] <- apply(MCMCRes$parameters,2,sd)
+  #
+  colnames(PostTable) <- c("Posterior.Mode","SE.Mode","Posterior.Mean","SE.Posterior")
+  if(class(parnames)=="character"){
+    rownames(PostTable) <- parnames
+  }
+  cat(' \n', sep="")
+  cat('Parameter Estimates and Standard Errors: \n', sep="")
+  cat(' \n', sep="")
+  print(PostTable)
+  #
+  return=list(Diagnostics=Diagnostics)
 }
