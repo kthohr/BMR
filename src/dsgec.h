@@ -25,4 +25,6 @@ RcppExport SEXP UhligCpp( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP ,
                           SEXP , SEXP , SEXP , SEXP , SEXP );
 RcppExport SEXP DSGEKalman( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP, SEXP, 
                             SEXP );
+RcppExport SEXP DSGECR( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP, SEXP, 
+                        SEXP );
 #endif

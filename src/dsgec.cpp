@@ -270,3 +270,112 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   //
   return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
 }
+
+SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
+             SEXP mR, SEXP mMaxIter )
+{
+  arma::mat dsgedata = as<arma::mat>(mdsgedata);
+  arma::mat ObserveMat = as<arma::mat>(mObserveMat);
+  arma::mat F = as<arma::mat>(mF);
+  arma::mat G = as<arma::mat>(mG);
+  arma::mat N = as<arma::mat>(mN);
+  arma::mat shocks = as<arma::mat>(mshocks);
+  arma::mat R = as<arma::mat>(mR);
+  //
+  double MaxIter = as<int>(mMaxIter);
+  //
+  arma::mat LogLikelihood(1,1);
+  LogLikelihood.zeros();
+  //
+  int T = dsgedata.n_rows;
+  double ndata = dsgedata.n_cols;
+  double nlog2pi = ndata*log(2*arma::datum::pi);
+  //
+  int i;
+  //
+  arma::mat tObserveMat = trans(ObserveMat);
+  arma::mat tF = trans(F);
+  //
+  arma::mat Q(G.n_rows,G.n_rows);
+  Q.zeros();
+  arma::mat QShocks(1,1);
+  QShocks.zeros();
+  for(i = (G.n_rows-N.n_rows + 1); i <= G.n_rows;i++) {
+    QShocks = shocks(arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)),arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)));
+    Q(arma::span(i-1,i-1),arma::span(i-1,i-1)) = QShocks;
+  }
+  arma::mat GQG = G*Q*trans(G);
+  //
+  //
+  //
+  arma::mat InitialState(F.n_cols,1);
+  InitialState.zeros();
+  //
+  arma::mat InitialCov = arma::eye(F.n_cols,F.n_cols);
+  //
+  arma::mat SSCovOld = GQG;
+  arma::mat SSCovNew = GQG;
+  arma::mat IMat = F;
+  //
+  for(i=1;i<=MaxIter;i++){
+    SSCovNew = SSCovOld + IMat*SSCovOld*trans(IMat);
+    IMat *= IMat;
+    //
+    SSCovOld = SSCovNew;
+  }
+  InitialCov = SSCovNew;
+  //
+  arma::mat StateFiltered = InitialState;
+  arma::mat StateCovPredicted = F*InitialCov*tF + GQG;
+  arma::mat Sigma = tObserveMat*StateCovPredicted*ObserveMat + R;
+  arma::mat iSigma = inv_sympd(Sigma);
+  //
+  arma::mat St = F*StateCovPredicted*ObserveMat;
+  arma::mat Mt = -iSigma;    
+  arma::mat Kt = St*iSigma;
+  //
+  arma::mat Resid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StateFiltered;
+  //
+  LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(Resid)*iSigma*Resid;
+  //
+  StateFiltered = F*StateFiltered + Kt*Resid;
+  //
+  arma::mat tObserveMatSt = tObserveMat*St;
+  arma::mat MSpZp = Mt*trans(tObserveMatSt);
+  arma::mat FSt = F*St;
+  //
+  arma::mat Sigma1  = Sigma + tObserveMatSt*MSpZp;     
+  arma::mat iSigma1 = arma::inv_sympd(Sigma1);
+  //
+  Kt = (Kt*Sigma + FSt*MSpZp)*iSigma1;
+  St = FSt - Kt*tObserveMatSt;
+  Mt += MSpZp*iSigma*trans(MSpZp);
+  Sigma = Sigma1;
+  iSigma = iSigma1;
+  //
+  for(i=2; i<=T; i++){
+    //
+    Resid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StateFiltered;
+    //
+    LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(Resid)*iSigma*Resid;
+    //
+    StateFiltered = F*StateFiltered + Kt*Resid;
+    //
+    tObserveMatSt = tObserveMat*St;
+    MSpZp = Mt*trans(tObserveMatSt);
+    FSt = F*St;
+    //
+    Sigma1 += tObserveMatSt*MSpZp;       
+    iSigma1 = inv_sympd(Sigma1);
+    //
+    Kt = (Kt*Sigma + FSt*MSpZp)*iSigma1;
+    St = FSt - Kt*tObserveMatSt;
+    Mt += MSpZp*iSigma*trans(MSpZp);
+    Sigma = Sigma1;
+    iSigma = iSigma1;
+  }
+  // Returns the negative of the loglikelihood
+  LogLikelihood = 0.5*arma::as_scalar(LogLikelihood);
+  //
+  return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
+}

@@ -430,6 +430,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
 
 .irfedsge <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
   #
+  if(nrow(obj$Parameters)==0){
+    stop("no MCMC draws detected.\n",call.=FALSE)
+  }
+  #
   IRFs <- round(obj$IRFs,10)
   irf.periods <- as.numeric(dim(IRFs)[1])
   nResp <- as.numeric(dim(IRFs)[2])
@@ -556,6 +560,9 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
 
 .irfdsgevar <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
   #
+  if(nrow(obj$Parameters)==0){
+    stop("no MCMC draws detected.\n",call.=FALSE)
+  }
   #
   ObservableIRFs <- TRUE
   #

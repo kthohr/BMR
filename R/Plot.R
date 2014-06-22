@@ -563,11 +563,13 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
 }
 
 .plotedsge <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+  #
   Parameters <- obj$Parameters
   nParam <- as.numeric(ncol(Parameters))
   #
-  library(ggplot2)
-  library(grid)
+  if(nrow(Parameters)==0){
+    stop("no MCMC draws detected.\n",call.=FALSE)
+  }
   #
   if(class(dev.list()) != "NULL"){dev.off()}
   #
@@ -675,11 +677,13 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
 }
 
 .plotdsgevar <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+  #
   Parameters <- obj$Parameters
   nParam <- as.numeric(ncol(Parameters))
   #
-  library(ggplot2)
-  library(grid)
+  if(nrow(Parameters)==0){
+    stop("no MCMC draws detected.\n",call.=FALSE)
+  }
   #
   if(class(dev.list()) != "NULL"){dev.off()}
   #

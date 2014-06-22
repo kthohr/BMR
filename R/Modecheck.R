@@ -19,7 +19,9 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   ParNames <- colnames(Parameters)
   nParam <- as.numeric(ncol(Parameters))
   #
-  parametersMode <- obj$ModeParamTrans
+  priorform <- .edsgePrelimWork(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)$priorform
+  #
+  parametersMode <- .DSGEParTransform(obj$parMode,priorform,parbounds,1)
   parametersModeHessian <- obj$ModeHessian
   parametersModeHessian <- solve(parametersModeHessian)
   parametersModeHessian <- diag(parametersModeHessian)
@@ -40,7 +42,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
     for(i in 1:length(ParamGrid)){
       ParamTemp[j] <- ParamGrid[i]
       if(plottransform==FALSE){
-        ParModeCheck[i,1,j] <- .DSGEParTransform(NULL,ParamTemp,priorform,parbounds)[j]
+        ParModeCheck[i,1,j] <- .DSGEParTransform(ParamTemp,priorform,parbounds,2)[j]
       }else{
         ParModeCheck[i,1,j] <- ParamGrid[i]
       }
@@ -55,7 +57,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   MR <- 0; MC <- 0
   if(plot==TRUE){
     if(plottransform==FALSE){
-      parametersMode <- .DSGEParTransform(NULL,parametersMode,priorform,parbounds)
+      parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
     }
     #
     if(nParam < 4){
@@ -118,17 +120,18 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   ParNames <- colnames(Parameters)
   nParam <- as.numeric(ncol(Parameters))
   #
-  parametersMode <- obj$ModeParamTrans
+  lambda <- obj$lambda
+  p <- obj$p
+  #
+  prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+  kdata <- prelimwork$kdata; priorform <- prelimwork$priorform;
+  dsgedata <- kdata$Y
+  #
+  parametersMode <- .DSGEParTransform(obj$parMode,priorform,parbounds,1)
   parametersModeHessian <- obj$ModeHessian
   parametersModeHessian <- solve(parametersModeHessian)
   parametersModeHessian <- diag(parametersModeHessian)
   parametersModeHessian <- sqrt(parametersModeHessian)
-  #
-  lambda <- obj$lambda
-  p <- (dim(obj$Beta)[1]/dim(obj$Beta)[2])
-  #
-  kdata <- .dsgevardata(dsgedata,p,FALSE)
-  dsgedata <- kdata$Y
   #
   if(class(scalepar)=="NULL"){
     scalepar <- obj$scalepar
@@ -147,7 +150,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
       for(i in 1:length(ParamGrid)){
         ParamTemp[j] <- ParamGrid[i]
         if(plottransform==FALSE){
-          ParModeCheck[i,1,j] <- .DSGEParTransform(NULL,ParamTemp,priorform,parbounds)[j]
+          ParModeCheck[i,1,j] <- .DSGEParTransform(ParamTemp,priorform,parbounds,2)[j]
         }else{
           ParModeCheck[i,1,j] <- ParamGrid[i]
         }
@@ -162,7 +165,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
       for(i in 1:length(ParamGrid)){
         ParamTemp[j] <- ParamGrid[i]
         if(plottransform==FALSE){
-          ParModeCheck[i,1,j] <- .DSGEParTransform(NULL,ParamTemp,priorform,parbounds)[j]
+          ParModeCheck[i,1,j] <- .DSGEParTransform(ParamTemp,priorform,parbounds,2)[j]
         }else{
           ParModeCheck[i,1,j] <- ParamGrid[i]
         }
@@ -178,7 +181,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   MR <- 0; MC <- 0
   if(plot==TRUE){
     if(plottransform==FALSE){
-      parametersMode <- .DSGEParTransform(NULL,parametersMode,priorform,parbounds)
+      parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
     }
     #
     if(nParam < 4){

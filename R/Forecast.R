@@ -380,6 +380,10 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   Betas <- obj$Beta
   Sigmas <- obj$Sigma
   #
+  if(class(Betas)=="NULL"){
+    stop("no MCMC draws detected.\n",call.=FALSE)
+  }
+  #
   Y <- obj$data
   Y <- as.matrix(Y,ncol=(ncol(Y)))
   M <- as.numeric(ncol(Y))
@@ -397,7 +401,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   kY0 <- embed(Y,p)
   kY0 <- kY0[nrow(kY0),]; kY0 <- as.matrix(kY0,ncol=1)
   if(constant==T){kY0 <- rbind(1,kY0)}
-  kY0<-t(kY0)
+  kY0 <- t(kY0)
   #
   Forecasts <- .Call("dsgevarforecast", kY0,M,p,K,kcons,runs,periods,inclshocks,Betas,Sigmas, PACKAGE = "BMR", DUP = FALSE)
   Forecasts <- Forecasts$Forecasts
@@ -448,7 +452,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
         #
         print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
         #
-        Sys.sleep(1)
+        Sys.sleep(0.6)
       }
     }else{
       for(i in 1:M){
@@ -459,7 +463,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
         #
         print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
         #
-        Sys.sleep(1)
+        Sys.sleep(0.6)
       }
     }
     if(save==TRUE){dev.off()}

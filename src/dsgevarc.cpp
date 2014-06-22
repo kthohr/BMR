@@ -43,18 +43,16 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
     Q(arma::span(i-1,i-1),arma::span(i-1,i-1)) = QShocks;
   }
   //
-  Q = arma::sqrt(Q);
-  //
-  Q = G*Q*trans(G);
+  arma::mat GQG = G*Q*trans(G);
   //
   arma::mat SigmaSS = arma::eye(F.n_cols,F.n_cols);
   //
-  arma::mat SigmaSSOld = Q;
-  arma::mat SigmaSSNew = Q;
+  arma::mat SigmaSSOld = GQG;
+  arma::mat SigmaSSNew = GQG;
   arma::mat IMat = F;
   //
   for(j=1;j<=MaxIter;j++){
-    SigmaSSNew = SigmaSSOld + IMat*SigmaSSOld*trans(IMat);;
+    SigmaSSNew = SigmaSSOld + IMat*SigmaSSOld*trans(IMat);
     IMat *= IMat;
     //
     SigmaSSOld = SigmaSSNew;
