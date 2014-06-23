@@ -10,7 +10,7 @@
 }
 
 \usage{
-BVARW(mydata,cores,coefprior=NULL,p=4,constant=TRUE,
+BVARW(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,
       irf.periods=20,keep=10000,burnin=1000,
       XiBeta=1,XiSigma=1,gamma=NULL)
 \method{plot}{BVARW}(obj,save=TRUE,height=13,width=13)
@@ -20,7 +20,7 @@ BVARW(mydata,cores,coefprior=NULL,p=4,constant=TRUE,
   \item{mydata}{
   A matrix or data frame containing the series to be used in estimation, and should be of size T x m.}
   \item{cores}{
-  An positive integer value indicating the number of CPU cores that should be used in estimation. DO NOT ENTER MORE CORES THAN YOUR COMPUTER CAN HANDLE! If in doubt, set cores = 1, which is the default.}
+  A positive integer value indicating the number of CPU cores that should be used in estimation. DO NOT ENTER MORE CORES THAN YOUR COMPUTER CAN HANDLE! If in doubt, set cores = 1, which is the default.}
 	\item{coefprior}{
 	A numeric vector of length m, matrix of size (m p + 1_c) x m, or a logical value of `NULL', that contains the prior mean of each coefficient. Only providing a numeric vector of length m will make BMR set a zero prior on all coefficients except the own first-lags, which are set according to the elements in `coefprior'. Setting this to `NULL' will mean a random walk in levels prior.}
 	\item{p}{

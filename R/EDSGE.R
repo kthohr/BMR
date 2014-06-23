@@ -1,7 +1,11 @@
-EDSGE.default <- function(dsgedata,chains=1,cores=1,ObserveMat,initialvals,partomats,
+EDSGE.default <- function(dsgedata,chains=1,cores=1,
+                          ObserveMat,initialvals,partomats,
                           priorform,priorpars,parbounds,parnames=NULL,
-                          optimMethod="Nelder-Mead",optimLower=NULL,optimUpper=NULL,optimControl=list(),
-                          DSGEIRFs=TRUE,irf.periods=20,scalepar=1,keep=50000,burnin=10000){
+                          optimMethod="Nelder-Mead",
+                          optimLower=NULL,optimUpper=NULL,
+                          optimControl=list(),
+                          DSGEIRFs=TRUE,irf.periods=20,
+                          scalepar=1,keep=50000,burnin=10000){
   #
   cat('Trying to solve the model with your initial values... ')
   dsgemats1t <- partomats(initialvals)

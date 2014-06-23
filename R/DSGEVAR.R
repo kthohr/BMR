@@ -1,7 +1,11 @@
-DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,partomats,
+DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
+                            ObserveMat,initialvals,partomats,
                             priorform,priorpars,parbounds,parnames=NULL,
-                            optimMethod="Nelder-Mead",optimLower=NULL,optimUpper=NULL,optimControl=list(),
-                            IRFs=TRUE,irf.periods=20,scalepar=1,keep=50000,burnin=10000){
+                            optimMethod="Nelder-Mead",
+                            optimLower=NULL,optimUpper=NULL,
+                            optimControl=list(),
+                            IRFs=TRUE,irf.periods=20,scalepar=1,
+                            keep=50000,burnin=10000){
   #
   cat('Trying to solve the model with your initial values... ')
   dsgemats1t <- partomats(initialvals)
@@ -29,7 +33,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
       colnames(parRet) <- parnames
     }
     #
-    dsgevarret <- list(Parameters=parRet,Beta=NULL,Sigma=NULL,DSGEIRFs=NULL,DSGEVARIRFs=NULL,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=NULL,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
+    dsgevarret <- list(Parameters=parRet,Beta=NULL,Sigma=NULL,DSGEIRFs=NULL,DSGEVARIRFs=NULL,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=NULL,RootRConvStats=NULL,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
     class(dsgevarret) <- "DSGEVAR"
     #
     return(dsgevarret)
@@ -46,21 +50,23 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   cat(' \n', sep="")
   cat('Beginning DSGE-VAR MCMC run, ', date(),'. \n', sep="")
-  DSGEMCMCRes <- 0; VARMCMCRes <- 0
-  if(is.finite(lambda)==TRUE){
-    DSGEMCMCRes <- .DSGEMCMCDraw(dsgemode,scalepar,keep,burnin,kdata,lambda,p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE)
-    VARMCMCRes <- .DSGEVARMCMC(DSGEMCMCRes$parameters,c(parMode),kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+  DSGEVARMCMCRes <- 0; DSGEVARMCMCRes <- 0
+  if(chains==1){
+    if(is.finite(lambda)==TRUE){
+      DSGEVARMCMCRes <- .DSGEVARMCMC(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE)
+    }else{
+      DSGEVARMCMCRes <- .DSGEVARMCMCInf(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE)
+    }
   }else{
-    DSGEMCMCRes <- .DSGEMCMCDrawInf(dsgemode,scalepar,keep,burnin,kdata,lambda,p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE)
-    VARMCMCRes <- .DSGEVARMCMCInf(DSGEMCMCRes$parameters,c(parMode),kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+    DSGEVARMCMCRes <- .DSGEVARMCMCMulti(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores)
   }
   cat('MCMC run finished, ', date(),'. \n', sep="")
   #
   if(class(parnames)=="character"){
-    colnames(DSGEMCMCRes$parameters) <- parnames
+    colnames(DSGEVARMCMCRes$parameters) <- parnames
   }
   #
-  PostMCMCInfo <- .DSGEVARMCMCPrint(DSGEMCMCRes,parMode,parModeSEs,parnames)
+  PostMCMCInfo <- .DSGEVARMCMCPrint(DSGEVARMCMCRes,chains,parMode,parModeSEs,parnames)
   #
   #
   #
@@ -75,7 +81,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
     IRFDs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
     for(i in 1:keep){
-      dsgemats <- partomats(DSGEMCMCRes$parameters[i,])
+      dsgemats <- partomats(DSGEVARMCMCRes$parameters[i,])
       dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
       iIRF <- IRF(dsgesolved,sqrt(diag(dsgemats$shocks)),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
       IRFDs[,,,i] <- iIRF$IRFs
@@ -87,8 +93,8 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     #
     IRFDVs <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods*keep))
     #
-    DSGEVARImpact <- .DSGEVARIRFMatrices(DSGEMCMCRes$parameters,VARMCMCRes$Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p,0,keep,irf.periods,VARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
+    DSGEVARImpact <- .DSGEVARIRFMatrices(DSGEVARMCMCRes$parameters,DSGEVARMCMCRes$Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p,0,keep,irf.periods,DSGEVARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
     IRFDVs <- IRFDVs$ImpStore
     IRFStore <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods,keep))
     for(i in 1:keep){
@@ -103,7 +109,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     cat('DSGEVAR IRFs finished, ', date(),'. \n', sep="")
   }
   #
-  dsgevarret <- list(Parameters=DSGEMCMCRes$parameters,Beta=VARMCMCRes$Beta,Sigma=VARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=DSGEMCMCRes$acceptRate,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
+  dsgevarret <- list(Parameters=DSGEVARMCMCRes$parameters,Beta=DSGEVARMCMCRes$Beta,Sigma=DSGEVARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=DSGEVARMCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
   class(dsgevarret) <- "DSGEVAR"
   #
   return(dsgevarret)
@@ -367,9 +373,11 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   return=list(dsgemode=dsgemode,parMode=parMode,parModeSEs=parModeSEs,logMargLikelihood=logMargLikelihood)
 }
 
-.DSGEMCMCDraw <- function(dsgeopt,scalepar,keep,burnin,kdata,lambda,p,YY,XY,XX,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
+.DSGEVARMCMC <- function(dsgeopt,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
   #
-  Draws <- matrix(NA,nrow=(keep+1),ncol=length(dsgeopt$par))
+  Y <- kdata$Y; X <- kdata$X; YY <- kdata$YY; XY <- kdata$XY; XX <- kdata$XX;
+  #
+  DSGEDraws <- matrix(NA,nrow=(keep+1),ncol=length(dsgeopt$par))
   #
   InitialDraw <- dsgeopt$par
   if(parallel==TRUE){
@@ -403,7 +411,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     }
   }
   #
-  Draws[1,] <- t(PickMeInstead)
+  DSGEDraws[1,] <- t(PickMeInstead)
   #
   for (i in 1:keep){
     #
@@ -415,33 +423,68 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     }
     #
     if(runif(1) < exp(PropLP-PrevLP)){
-      Draws[i+1,] <- t(proposal)
+      DSGEDraws[i+1,] <- t(proposal)
       Acceptances <- Acceptances + 1
       #
       PickMeInstead <- proposal
       PrevLP <- PropLP
     }else{
-      Draws[i+1,] <- Draws[i,]
+      DSGEDraws[i+1,] <- DSGEDraws[i,]
     }
   }
   #
-  Draws <- Draws[-1,]
+  DSGEDraws <- DSGEDraws[-1,]
   accept <- Acceptances/keep
   #
   for(i in 1:keep){
-    Draws[i,] <- .DSGEParTransform(Draws[i,],priorform,parbounds,2)
+    DSGEDraws[i,] <- .DSGEParTransform(DSGEDraws[i,],priorform,parbounds,2)
   }
   #
+  #
+  # VAR Sampling
+  #
+  #
+  dsgeprior <- .DSGEVARPrior(parMode,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+  GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
+  #
+  tau <- lambda/(1+lambda)
+  GammaBarYY <- tau*GammaYY + (1-tau)*YY
+  GammaBarXY <- tau*t(GammaXY) + (1-tau)*XY
+  GammaBarXX <- tau*GammaXX + (1-tau)*XX
+  #
+  GammaBarYY <- array(0,dim=c(c(dim(YY)),nrow(DSGEDraws)))
+  GammaBarXY <- array(0,dim=c(c(dim(XY)),nrow(DSGEDraws)))
+  GammaBarXX <- array(0,dim=c(c(dim(XX)),nrow(DSGEDraws)))
+  GXX <- array(0,dim=c(c(dim(XX)),nrow(DSGEDraws)))
+  #
+  for(t in 1:nrow(DSGEDraws)){
+    dsgeparameters <- DSGEDraws[t,]
+    dsgeprior <- .DSGEVARPrior(dsgeparameters,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+    GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
+    #
+    GammaBarYY[,,t] <- tau*GammaYY + (1-tau)*YY
+    GammaBarXY[,,t] <- tau*t(GammaXY) + (1-tau)*XY
+    GammaBarXX[,,t] <- tau*GammaXX + (1-tau)*XX
+    #
+    GXX[,,t] <- GammaXX
+    #
+  }
+  #
+  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
+  #
+  #
   if(parallel==FALSE){
-    return=list(parameters=Draws,acceptRate=accept)
+    return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)
   }else{
-    return(list(Draws,accept))
+    return(list(DSGEDraws,accept,RepsRun$Beta,RepsRun$Sigma))
   }
 }
 
-.DSGEMCMCDrawInf <- function(dsgeopt,scalepar,keep,burnin,kdata,lambda,p,YY,XY,XX,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
+.DSGEVARMCMCInf <- function(dsgeopt,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=FALSE){
   #
-  Draws <- matrix(NA,nrow=(keep+1),ncol=length(dsgeopt$par))
+  Y <- kdata$Y; X <- kdata$X; YY <- kdata$YY; XY <- kdata$XY; XX <- kdata$XX;
+  #
+  DSGEDraws <- matrix(NA,nrow=(keep+1),ncol=length(dsgeopt$par))
   #
   InitialDraw <- dsgeopt$par
   if(parallel==TRUE){
@@ -475,7 +518,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     }
   }
   #
-  Draws[1,] <- t(PickMeInstead)
+  DSGEDraws[1,] <- t(PickMeInstead)
   #
   for (i in 1:keep){
     #
@@ -487,78 +530,36 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     }
     #
     if(runif(1) < exp(PropLP-PrevLP)){
-      Draws[i+1,] <- t(proposal)
+      DSGEDraws[i+1,] <- t(proposal)
       Acceptances <- Acceptances + 1
       #
       PickMeInstead <- proposal
       PrevLP <- PropLP
     }else{
-      Draws[i+1,] <- Draws[i,]
+      DSGEDraws[i+1,] <- DSGEDraws[i,]
     }
   }
   #
-  Draws <- Draws[-1,]
+  DSGEDraws <- DSGEDraws[-1,]
   accept <- Acceptances/keep
   #
   for(i in 1:keep){
-    Draws[i,] <- .DSGEParTransform(Draws[i,],priorform,parbounds,2)
+    DSGEDraws[i,] <- .DSGEParTransform(DSGEDraws[i,],priorform,parbounds,2)
   }
   #
-  if(parallel==FALSE){
-    return=list(parameters=Draws,acceptRate=accept)
-  }else{
-    return(list(Draws,accept))
-  }
-}
-
-.DSGEVARMCMC <- function(dsgemcmc,dsgemode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds){
   #
-  Y <- kdata$Y; X <- kdata$X; YY <- kdata$YY; XY <- kdata$XY; XX <- kdata$XX;
+  # VAR Sampling
   #
-  dsgeprior <- .DSGEVARPrior(dsgemode,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+  #
+  dsgeprior <- .DSGEVARPrior(parMode,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
   GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
   #
-  tau <- lambda/(1+lambda)
-  GammaBarYY <- (tau*GammaYY)+((1-tau)*YY)
-  GammaBarXY <- (tau*t(GammaXY))+((1-tau)*XY)
-  GammaBarXX <- (tau*GammaXX)+((1-tau)*XX)
+  GammaBarYY <- array(0,dim=c(c(dim(GammaYY)),nrow(DSGEDraws)))
+  GammaBarXY <- array(0,dim=c(c(dim(t(GammaXY))),nrow(DSGEDraws)))
+  GammaBarXX <- array(0,dim=c(c(dim(GammaXX)),nrow(DSGEDraws)))
   #
-  GammaBarYY <- array(0,dim=c(c(dim(YY)),nrow(dsgemcmc)))
-  GammaBarXY <- array(0,dim=c(c(dim(XY)),nrow(dsgemcmc)))
-  GammaBarXX <- array(0,dim=c(c(dim(XX)),nrow(dsgemcmc)))
-  GXX <- array(0,dim=c(c(dim(XX)),nrow(dsgemcmc)))
-  #
-  for(t in 1:nrow(dsgemcmc)){
-    dsgeparameters <- dsgemcmc[t,]
-    dsgeprior <- .DSGEVARPrior(dsgeparameters,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-    GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
-    #
-    GammaBarYY[,,t] <- (tau*GammaYY)+((1-tau)*YY)
-    GammaBarXY[,,t] <- (tau*t(GammaXY))+((1-tau)*XY)
-    GammaBarXX[,,t] <- (tau*GammaXX)+((1-tau)*XX)
-    #
-    GXX[,,t] <- GammaXX
-    #
-  }
-  #
-  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
-  #
-  return(list(Beta=RepsRun$Beta,Sigma=RepsRun$Sigma))
-}
-
-.DSGEVARMCMCInf <- function(dsgemcmc,dsgemode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds){
-  #
-  Y <- kdata$Y; X <- kdata$X
-  #
-  dsgeprior <- .DSGEVARPrior(dsgemode,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-  GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
-  #
-  GammaBarYY <- array(0,dim=c(c(dim(GammaYY)),nrow(dsgemcmc)))
-  GammaBarXY <- array(0,dim=c(c(dim(t(GammaXY))),nrow(dsgemcmc)))
-  GammaBarXX <- array(0,dim=c(c(dim(GammaXX)),nrow(dsgemcmc)))
-  #
-  for(t in 1:nrow(dsgemcmc)){
-    dsgeparameters <- dsgemcmc[t,]
+  for(t in 1:nrow(DSGEDraws)){
+    dsgeparameters <- DSGEDraws[t,]
     dsgeprior <- .DSGEVARPrior(dsgeparameters,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
     GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
     #
@@ -568,20 +569,80 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
     #
   }
   #
-  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(dsgemcmc),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
   #
-  return(list(Beta=RepsRun$Beta,Sigma=RepsRun$Sigma))
+  if(parallel==FALSE){
+    return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)
+  }else{
+    return(list(DSGEDraws,accept,RepsRun$Beta,RepsRun$Sigma))
+  }
 }
 
-.DSGEVARMCMCPrint <- function(DSGEMCMCRes,parMode,parModeSEs,parnames){
+.DSGEVARMCMCMulti <- function(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores){
   #
-  cat('Acceptance Rate: ', DSGEMCMCRes$acceptRate,'. \n', sep="")
+  cl <- makeCluster(cores)
+  registerDoSNOW(cl)
+  #
+  parallelsol <- 0
+  if(is.finite(lambda)==TRUE){
+    parallelsol <- foreach(jj=1:chains, .packages=c("BMR")) %dopar% {
+      .DSGEVARMCMC(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=TRUE)
+    }
+  }else{
+    parallelsol <- foreach(jj=1:chains, .packages=c("BMR")) %dopar% {
+      .DSGEVARMCMCInf(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,parallel=TRUE)
+    }
+  }
+  #
+  stopCluster(cl)
+  #
+  DSGEDraws <- matrix(NA,nrow=keep*chains,ncol=length(dsgemode$par))
+  accept <- numeric(chains)
+  Beta <- array(NA,dim=c(nrow(kdata$XY),ncol(kdata$XY),keep*chains))
+  Sigma <- array(NA,dim=c(ncol(kdata$XY),ncol(kdata$XY),keep*chains))
+  #
+  for(j in 1:chains){
+    DSGEDraws[((j-1)*keep+1):(j*keep),] <- parallelsol[[j]][[1]]
+    accept[j] <- parallelsol[[j]][[2]]
+    Beta[,,((j-1)*keep+1):(j*keep)] <- parallelsol[[j]][[3]]
+    Sigma[,,((j-1)*keep+1):(j*keep)] <- parallelsol[[j]][[4]]
+  }
+  #
+  return=list(parameters=DSGEDraws,acceptRate=accept,Beta=Beta,Sigma=Sigma)
+}
+
+.DSGEVARMCMCPrint <- function(DSGEVARMCMCRes,chains,parMode,parModeSEs,parnames){
+  #
+  Diagnostics <- NULL
+  if(chains==1){
+    cat('Acceptance Rate: ', DSGEVARMCMCRes$acceptRate,'. \n', sep="")
+  }else{
+    cat('Acceptance Rate: ', sep="")
+    for(kk in 1:(chains-1)){
+      cat('Chain ',kk,': ', DSGEVARMCMCRes$acceptRate[kk],'; ', sep="")
+    }
+    cat('Chain ',chains,': ', DSGEVARMCMCRes$acceptRate[chains],'. \n', sep="")
+    #
+    # Chain convergence statistics:
+    #
+    Diagnostics <- matrix(.MCMCDiagnostics(DSGEVARMCMCRes$parameters,chains),nrow=1)
+    #
+    rownames(Diagnostics) <- "Stat:"
+    if(class(parnames)=="character"){
+      colnames(Diagnostics) <- parnames
+    }
+    #
+    cat(' \n', sep="")
+    cat('Root-R Chain-Convergence Statistics: \n', sep="")
+    print(Diagnostics)
+    cat(' \n', sep="")
+  }
   #
   PostTable <- matrix(NA,nrow=length(parMode),ncol=4)
   PostTable[,1] <- parMode
   PostTable[,2] <- parModeSEs
-  PostTable[,3] <- apply(DSGEMCMCRes$parameters,2,mean)
-  PostTable[,4] <- apply(DSGEMCMCRes$parameters,2,sd)
+  PostTable[,3] <- apply(DSGEVARMCMCRes$parameters,2,mean)
+  PostTable[,4] <- apply(DSGEVARMCMCRes$parameters,2,sd)
   #
   colnames(PostTable) <- c("Posterior.Mode","SE.Mode","Posterior.Mean","SE.Posterior")
   if(class(parnames)=="character"){
@@ -592,8 +653,7 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   cat(' \n', sep="")
   print(PostTable)
   #
-  #return=list(Diagnostics=Diagnostics)
-  return=list()
+  return=list(Diagnostics=Diagnostics)
 }
 
 .DSGEVARIRFMatrices <- function(dsgepars,Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds){
