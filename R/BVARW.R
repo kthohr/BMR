@@ -1,5 +1,5 @@
 # 12/06/2014
-BVARW.default <- function(mydata,cores,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL){
+BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL){
   #
   kerr <- .bvarwerrors(mydata,cores,p,coefprior,constant,XiBeta,XiSigma,gamma)
   #
