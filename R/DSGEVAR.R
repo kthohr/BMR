@@ -246,37 +246,56 @@ DSGEVAR.default <- function(dsgedata,lambda=Inf,p=2,ObserveMat,initialvals,parto
   #
   parametersTrans <- .DSGEParTransform(initialvals,priorform,parbounds,1)
   #
+  OptimMethods <- optimMethod
+  #
   dsgemode <- NULL
   cat(' \n', sep="")
   cat('Beginning optimization, ', date(),'. \n', sep="")
-  cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
   if(is.finite(lambda)==TRUE){
-    if(optimMethod=="Nelder-Mead"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="BFGS"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="BFGS",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="CG"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="CG",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="L-BFGS-B"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="L-BFGS-B",lower=optimLower,upper=optimUpper,control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="SANN"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="SANN",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else{
-      stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
+    for(jj in 1:length(OptimMethods)){
+      #
+      optimMethod <- OptimMethods[jj]
+      #
+      cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      #
+      if(optimMethod=="Nelder-Mead"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="BFGS"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="BFGS",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="CG"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="CG",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="L-BFGS-B"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="L-BFGS-B",lower=optimLower,upper=optimUpper,control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="SANN"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="SANN",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else{
+        stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
+      }
+      #
+      parametersTrans <- dsgemode$par
     }
   }else{
-    if(optimMethod=="Nelder-Mead"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="BFGS"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="BFGS",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="CG"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="CG",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="L-BFGS-B"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="L-BFGS-B",lower=optimLower,upper=optimUpper,control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else if(optimMethod=="SANN"){
-      dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="SANN",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
-    }else{
-      stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
+    for(jj in 1:length(OptimMethods)){
+      #
+      optimMethod <- OptimMethods[jj]
+      #
+      cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      #
+      if(optimMethod=="Nelder-Mead"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="BFGS"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="BFGS",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="CG"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="CG",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="L-BFGS-B"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="L-BFGS-B",lower=optimLower,upper=optimUpper,control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else if(optimMethod=="SANN"){
+        dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="SANN",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
+      }else{
+        stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
+      }
+      #
+      parametersTrans <- dsgemode$par
     }
   }
   #
