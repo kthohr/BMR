@@ -33,7 +33,7 @@ EDSGE(dsgedata,chains=1,cores=1,
 	\item{initialvals}{
 	The initial values to begin the optimisation routine.}
 	\item{partomats}{
-	This is perhaps the most important input to the function. It should be a function that maps the deep parameters to the matrices of Uhlig's solution, A through N, and an additional matrix labelled `shocks', which should be of size k x k and contain the variances of the structural shocks.}
+  This is perhaps the most important input to the function. It should be a function that maps the deep parameters to the matrices of Uhlig's solution, A through N; a matrix labelled `shocks' containing the variances of the structural shocks, which should be of size k x k; a matrix labelled `MeasCons' containing any constant terms in the measurement equation, which should be of size j x 1; and a matrix labelled `MeasErrs' containing the variances of the measurement errors, which should be of size j x j.}
 	\item{priorform}{
 	The prior distribution of each parameter.}
 	\item{priorpars}{
@@ -100,20 +100,14 @@ The function returns an object of class EDSGE, which contains:
 
 \examples{
 \dontrun{
-ObserveMat<-rbind(0,0,1,0,0,0,0)
-#
-initialvals <- c(0.28,0.015,1,0.90,1)
-parnames <- c("Alpha","Delta","Eta","Rho","SigmaA")
-priorform <- c("Normal","Normal","Normal","Beta","IGamma")
-priorpars <- t(rbind(c(0.30, 0.015,   1,   4,  2),
-                     c(0.05^2, 0.002^2, 0.2^2, 1.5,  1)))
-parbounds <- t(rbind(c(NA, NA, NA,   0.5,   0),
-                     c(NA, NA, NA, 0.999,  NA)))
-#
-RBCest <- EDSGE(dsgedata,1,1,ObserveMat,initialvals,partomats,
-           priorform,priorpars,parbounds,parnames,
-           optimMethod="BFGS",optimLower=NULL,optimUpper=NULL,
-           DSGEIRFs=TRUE,irf.periods=30,scalepar=0.75,keep=50000,burnin=20000)
+NKMest <- EDSGE(dsgedata,chains=1,cores=1,
+                ObserveMat,initialvals,partomats,
+                priorform,priorpars,parbounds,parnames,
+                optimMethod=c("Nelder-Mead","CG"),
+                optimLower=NULL,optimUpper=NULL,
+                optimControl=list(maxit=10000),
+                DSGEIRFs=TRUE,irf.periods=40,
+                scalepar=0.27,keep=50000,burnin=75000)
 }
 }
 

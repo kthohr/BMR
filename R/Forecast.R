@@ -377,6 +377,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
 }
 
 .forecastdsgevar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  #
   Betas <- obj$Beta
   Sigmas <- obj$Sigma
   #
@@ -387,11 +388,11 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   Y <- obj$data
   Y <- as.matrix(Y,ncol=(ncol(Y)))
   M <- as.numeric(ncol(Y))
-  p <- floor(dim(Betas)[1]/dim(Betas)[2])
+  p <- obj$p
   K <- as.numeric(dim(Betas)[1])
   runs <- as.numeric(dim(Betas)[3])
   #
-  constant <- FALSE
+  constant <- obj$constant
   kcons <- 0
   if(constant==T){kcons <- 1}
   #

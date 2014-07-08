@@ -355,27 +355,28 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
   #
   # Plot
   #
+  nRespPlot <- nResp - nShocks + 1
   MR <- 0; MC <- 0
   if(plot==TRUE){
-    if(nResp < 4){
-      MR <- nResp; MC <- 1
-    }else if(nResp == 4){
+    if(nRespPlot < 4){
+      MR <- nRespPlot; MC <- 1
+    }else if(nRespPlot == 4){
       MR <- 2; MC <-2
-    }else if(nResp > 4 && nResp < 7){
+    }else if(nRespPlot > 4 && nRespPlot < 7){
       MR <- 3; MC <- 2
-    }else if(nResp > 6 && nResp < 10){
+    }else if(nRespPlot > 6 && nRespPlot < 10){
       MR <- 3; MC <- 3
-    }else if(nResp > 9 && nResp < 13){
+    }else if(nRespPlot > 9 && nRespPlot < 13){
       MR <- 4; MC <- 3
-    }else if(nResp > 12 && nResp < 17){
+    }else if(nRespPlot > 12 && nRespPlot < 17){
       MR <- 4; MC <- 4
-    }else if(nResp > 17 && nResp < 21){
+    }else if(nRespPlot > 17 && nRespPlot < 21){
       MR <- 5; MC <- 4
-    }else if(nResp > 20 && nResp < 26){
+    }else if(nRespPlot > 20 && nRespPlot < 26){
       MR <- 5; MC <- 5
-    }else if(nResp > 25 && nResp < 31){
+    }else if(nRespPlot > 25 && nRespPlot < 31){
       MR <- 5; MC <- 6
-    }else if(nResp > 30 && nResp < 37){
+    }else if(nRespPlot > 30 && nRespPlot < 37){
       MR <- 6; MC <- 6
     }else{
       stop("You have too many IRFs to plot!")
@@ -495,19 +496,30 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
     }
   }
   #
+  nRespPlot <- nResp - nShocks + 1
   MR <- 0; MC <- 0
-  if(nResp < 4){
-    MR <- nResp; MC <- 1
-  }else if(nResp == 4){
+  if(nRespPlot < 4){
+    MR <- nRespPlot; MC <- 1
+  }else if(nRespPlot == 4){
     MR <- 2; MC <-2
-  }else if(nResp > 4 && nResp < 7){
+  }else if(nRespPlot > 4 && nRespPlot < 7){
     MR <- 3; MC <- 2
-  }else if(nResp > 6 && nResp < 10){
+  }else if(nRespPlot > 6 && nRespPlot < 10){
     MR <- 3; MC <- 3
-  }else if(nResp > 9 && nResp < 13){
+  }else if(nRespPlot > 9 && nRespPlot < 13){
     MR <- 4; MC <- 3
-  }else if(nResp > 12 && nResp < 17){
+  }else if(nRespPlot > 12 && nRespPlot < 17){
     MR <- 4; MC <- 4
+  }else if(nRespPlot > 17 && nRespPlot < 21){
+    MR <- 5; MC <- 4
+  }else if(nRespPlot > 20 && nRespPlot < 26){
+    MR <- 5; MC <- 5
+  }else if(nRespPlot > 25 && nRespPlot < 31){
+    MR <- 5; MC <- 6
+  }else if(nRespPlot > 30 && nRespPlot < 37){
+    MR <- 6; MC <- 6
+  }else{
+    stop("You have too many IRFs to plot!")
   }
   #
   if(class(dev.list()) != "NULL"){dev.off()}

@@ -11,7 +11,7 @@
 
 \usage{
 DSGEVAR(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
-        ObserveMat,initialvals,partomats,
+        constant=FALSE,ObserveMat,initialvals,partomats,
         priorform,priorpars,parbounds,parnames=NULL,
         optimMethod="Nelder-Mead",
         optimLower=NULL,optimUpper=NULL,
@@ -32,12 +32,14 @@ DSGEVAR(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   The proportion of DSGE dummy data to actual data. Acceptable values lie in the interval j x (p+1)/T to +infinity. See the vignette for details.} 
   \item{p}{
   The number of lags to include of each variable. The default value is 2.}
+  \item{constant}{
+  A logical statement on whether to include a constant vector in the model. The default is `FALSE', and the alternative is `TRUE'.}
 	\item{ObserveMat}{
 	The (m+n+k) x j observable matrix H that maps the state variables to the to observed series in the measurement equation.}
 	\item{initialvals}{
 	The initial values to begin the optimisation routine.}
 	\item{partomats}{
-	This is possibly the most important component the user supplies to the function. It should be a function that maps the deep parameters to the matrices of Uhlig's solution, A through N, and an additional matrix labelled `shocks', which should be of size k x k.}
+	This is perhaps the most important input to the function. It should be a function that maps the deep parameters to the matrices of Uhlig's solution, A through N; a matrix labelled `shocks' containing the variances of the structural shocks, which should be of size k x k; a matrix labelled `MeasCons' containing any constant terms in the measurement equation, which should be of size j x 1; and a matrix labelled `MeasErrs' containing the variances of the measurement errors, which should be of size j x j.}
 	\item{priorform}{
 	The prior distribution of each parameter.}
 	\item{priorpars}{
@@ -112,13 +114,14 @@ The function returns an object of class DSGEVAR, which contains:
 
 \examples{
 \dontrun{
-#
-NKMVAR <- DSGEVAR(dsgedata,lambda=1,p=4,ObserveMat,initialvals,partomats,
+NKMVAR <- DSGEVAR(dsgedata,chains=1,cores=1,lambda=1,p=4,
+                  FALSE,ObserveMat,initialvals,partomats,
                   priorform,priorpars,parbounds,parnames,
-                  optimMethod="CG",optimLower=NULL,
+                  optimMethod=c("Nelder-Mead","CG"),
+                  optimLower=NULL,optimUpper=NULL,
                   optimControl=list(maxit=20000,reltol=(10^(-12))),
-                  optimUpper=NULL,IRFs=TRUE,irf.periods=5,
-                  scalepar=0.4,keep=50000,burnin=75000)
+                  IRFs=TRUE,irf.periods=5,
+                  scalepar=0.28,keep=25000,burnin=25000)
 }
 }
 
