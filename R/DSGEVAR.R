@@ -1,5 +1,5 @@
 DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
-                            ObserveMat,initialvals,partomats,
+                            constant=FALSE,ObserveMat,initialvals,partomats,
                             priorform,priorpars,parbounds,parnames=NULL,
                             optimMethod="Nelder-Mead",
                             optimLower=NULL,optimUpper=NULL,
@@ -13,12 +13,12 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
   cat('Done. \n')
   #
-  dsgedataRet <- dsgedata
-  priorformRet <- priorform
+  dsgedataRet <- dsgedata; priorformRet <- priorform
   #
-  prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-  kdata <- prelimwork$kdata; lambda <- prelimwork$lambda; priorform <- prelimwork$priorform;
-  dsgedata <- kdata$Y
+  prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,constant,dsgemats1t$shocks,IRFs,ObserveMat,partomats,priorform,priorpars,parbounds)
+  kdata <- prelimwork$kdata; dsgedata <- kdata$Y; 
+  lambda <- prelimwork$lambda; IRFs <- prelimwork$IRFs
+  priorform <- prelimwork$priorform; parbounds <- prelimwork$parbounds
   #
   #
   #
@@ -70,6 +70,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   #
   #
   #
+  kcons <- constant*constant
   IRFDVs <- NULL; DSGEVARImpact <- NULL; 
   IRFDs <- NULL
   dsgemats1t <- NULL; dsgesolved1t <- NULL; StateMats1t <- NULL
@@ -94,7 +95,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     IRFDVs <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods*keep))
     #
     DSGEVARImpact <- .DSGEVARIRFMatrices(DSGEVARMCMCRes$parameters,DSGEVARMCMCRes$Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p,0,keep,irf.periods,DSGEVARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
+    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p+kcons,kcons,keep,irf.periods,DSGEVARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
     IRFDVs <- IRFDVs$ImpStore
     IRFStore <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods,keep))
     for(i in 1:keep){
@@ -102,14 +103,14 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     }
     #
     IRFDVs <- 0
-    IRFDVs<-apply(IRFStore,c(3,1,2),sort)
+    IRFDVs <- apply(IRFStore,c(3,1,2),sort)
     #
-    IRFDVs<-aperm(IRFDVs,c(2,3,1,4)); IRFDVs<-aperm(IRFDVs,c(1,2,4,3))
+    IRFDVs <- aperm(IRFDVs,c(2,3,1,4)); IRFDVs <- aperm(IRFDVs,c(1,2,4,3))
     #
     cat('DSGEVAR IRFs finished, ', date(),'. \n', sep="")
   }
   #
-  dsgevarret <- list(Parameters=DSGEVARMCMCRes$parameters,Beta=DSGEVARMCMCRes$Beta,Sigma=DSGEVARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=DSGEVARMCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
+  dsgevarret <- list(Parameters=DSGEVARMCMCRes$parameters,Beta=DSGEVARMCMCRes$Beta,Sigma=DSGEVARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=DSGEVARMCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,constant=constant,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
   class(dsgevarret) <- "DSGEVAR"
   #
   return(dsgevarret)
@@ -137,18 +138,28 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   return=list(Y=Y,X=X,M=M,K=K,Yraw=Yraw,Tp=Tp,YY=YY,XY=XY,XX=XX)
 }
 
-.dsgevarPrelimWork <- function(dsgedata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds){
+.dsgevarPrelimWork <- function(dsgedata,lambda,p,constant,shocks,IRFs,ObserveMat,partomats,priorform,priorpars,parbounds){
   #
-  kdata <- .dsgevardata(dsgedata,p,FALSE)
+  kcons <- constant*constant
+  #
+  kdata <- .dsgevardata(dsgedata,p,constant)
   #
   # Set a lower bound on lambda:
-  if(lambda < ncol(dsgedata)*(p+1)/nrow(dsgedata)){
-    lambda <- ncol(dsgedata)*(p+1)/nrow(dsgedata)
+  if(lambda < (ncol(dsgedata)*(p+1) + kcons)/nrow(dsgedata)){
+    lambda <- (ncol(dsgedata)*(p+1) + kcons)/nrow(dsgedata)
+  }
+  #
+  # Check if there are as many structural shocks as observables
+  if(IRFs==TRUE){
+    if(ncol(dsgedata)!=ncol(shocks)){
+      warning('The number of observable series and structural shocks do not coincide. IRFs will not be computed.', call.=FALSE)
+      IRFs <- FALSE
+    }
   }
   #
   # Change from character to numeric
   priorformNum <- numeric(length(priorform))
-  # Normal = 1, Gamma = 2, IGamma = 3, Beta = 4
+  # Normal = 1, Gamma = 2, IGamma = 3, Beta = 4, Uniform = 5
   for(i in 1:length(priorform)){
     if(priorform[i]=="Normal"){
       priorformNum[i] <- 1
@@ -158,29 +169,41 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
       priorformNum[i] <- 3
     }else if(priorform[i]=="Beta"){
       priorformNum[i] <- 4
+    }else if(priorform[i]=="Uniform"){
+      priorformNum[i] <- 5
+    }else{
+      stop("Parameter ", i ," does not have a valid prior form.\n",call.=FALSE)
     }
   }
   #
-  return=list(kdata=kdata,lambda=lambda,priorform=priorformNum)
+  # Check if parbounds is set correctly for uniform priors
+  for(i in 1:length(priorform)){
+    if(priorform[i]=="Uniform"){
+      parbounds[i,] <- priorpars[i,]
+    }
+  }
+  #
+  return=list(kdata=kdata,lambda=lambda,IRFs=IRFs,priorform=priorformNum,parbounds=parbounds)
 }
 
 .DSGEVARLogPosterior <- function(dsgeparTrans,kdata,lambda,p,YY,XY,XX,ObserveMat,partomats,priorform,priorpars,parbounds){
   #
   Y <- kdata$Y; X <- kdata$X
+  kcons <- (ncol(X)%%p!=0)*(ncol(X)%%p!=0)
   #
   dsgepar <- .DSGEParTransform(dsgeparTrans,priorform,parbounds,2)
   #
-  logGPR <- .LGPR(ncol(Y),((1+lambda)*nrow(Y))-ncol(Y)*p,(lambda*nrow(Y))-ncol(Y)*p);
+  logGPR <- .LGPR(ncol(Y),((1+lambda)*nrow(Y))-ncol(Y)*p-kcons,(lambda*nrow(Y))-ncol(Y)*p-kcons)
   #
   dsgeprior <- .DSGEVARPrior(dsgepar,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
   GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
   #
   tau <- lambda/(1+lambda);
-  GammaBarYY <- (tau*GammaYY)+((1-tau)*YY)
-  GammaBarXY <- (tau*t(GammaXY))+((1-tau)*XY)
-  GammaBarXX <- (tau*GammaXX)+((1-tau)*XX)
+  GammaBarYY <- tau*GammaYY + (1-tau)*YY
+  GammaBarXY <- tau*t(GammaXY) + (1-tau)*XY
+  GammaBarXX <- tau*GammaXX + (1-tau)*XX
   #
-  logLikelihood <- -.Call("DSGEVARLikelihood", logGPR,XX,GammaYY,GammaXY,GammaXX,GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
+  logLikelihood <- -.Call("DSGEVARLikelihood", logGPR,XX,GammaYY,GammaXY,GammaXX,GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
   #
   logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
   #
@@ -218,7 +241,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   #
   StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
   #
-  SigmaX <- .Call("DSGEVARPriorC", dsgedata,ObserveMat,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,p,500, PACKAGE = "BMR", DUP = FALSE)$SigmaX
+  SigmaX <- .Call("DSGEVARPriorC", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,p,500, PACKAGE = "BMR", DUP = FALSE)$SigmaX
   #
   GammaYY <- SigmaX[,,1]
   #
@@ -226,35 +249,42 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   #
   GammaXX <- matrix(0,ncol(dsgedata)*p,ncol(dsgedata)*p)
   GammaXY <- matrix(0,ncol(dsgedata),ncol(dsgedata)*p)
+  GammaCY <- matrix(0,1,ncol(dsgedata)*p)
   #
   for(i in 1:p){
-    RowInd <- (1:ncol(dsgedata))+((i-1)*ncol(dsgedata))
+    NR <- (1:ncol(dsgedata))+((i-1)*ncol(dsgedata))
     for(j in 1:p){
-      ColInd <- (1:ncol(dsgedata))+((j-1)*ncol(dsgedata))
+      NC <- (1:ncol(dsgedata))+((j-1)*ncol(dsgedata))
       if(i==j){
-        SelectMat <- SigmaX[,,1]
+        GammaXX[NR,NC] <- SigmaX[,,1]
       }else if(i<j){
-        SelectMat <- SigmaX[,,1+j-i]
+        GammaXX[NR,NC] <- SigmaX[,,1+j-i]
       }else{
-        SelectMat <- t(SigmaX[,,1+i-j])
+        GammaXX[NR,NC] <- SigmaX[,,1+i-j]
       }
-      GammaXX[RowInd,ColInd] = SelectMat
     }
-    GammaXY[,RowInd] = SigmaX[,,1+i]
+    GammaCY[,NR] <- t(dsgemats$ObsCons)
+    GammaXY[,NR] <- SigmaX[,,1+i]
+  }
+  #
+  if(ncol(X)%%p != 0){
+    GammaXY = cbind(dsgemats$ObsCons, GammaXY);
+    GammaXX = rbind(cbind(1,GammaCY), cbind(t(GammaCY), GammaXX))
   }
   #
   return(list(GammaYY=GammaYY,GammaXX=GammaXX,GammaXY=GammaXY))
 }
 
 .DSGEVARModeEstimate <- function(kdata,lambda,p,ObserveMat,initialvals,partomats,
-                                priorform,priorpars,parbounds,parnames,
-                                optimMethod,optimLower,optimUpper,optimControl){
+                                 priorform,priorpars,parbounds,parnames,
+                                 optimMethod,optimLower,optimUpper,optimControl){
   #
   parametersTrans <- .DSGEParTransform(initialvals,priorform,parbounds,1)
   #
   OptimMethods <- optimMethod
   #
   dsgemode <- NULL
+  prevlogpost <- 0
   cat(' \n', sep="")
   cat('Beginning optimization, ', date(),'. \n', sep="")
   if(is.finite(lambda)==TRUE){
@@ -262,7 +292,11 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
       #
       optimMethod <- OptimMethods[jj]
       #
-      cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      if(jj==1){
+        cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      }else{
+        cat('Using Optimization Method: ',optimMethod,'. ', sep="")
+      }
       #
       if(optimMethod=="Nelder-Mead"){
         dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosterior,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
@@ -278,14 +312,23 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
         stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
       }
       #
+      if(jj>1){
+        cat('Change in the log posterior: ',-dsgemode$value - prevlogpost,'. \n', sep="")
+      }
+      #
       parametersTrans <- dsgemode$par
+      prevlogpost <- -dsgemode$value
     }
   }else{
     for(jj in 1:length(OptimMethods)){
       #
       optimMethod <- OptimMethods[jj]
       #
-      cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      if(jj==1){
+        cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      }else{
+        cat('Using Optimization Method: ',optimMethod,'. ', sep="")
+      }
       #
       if(optimMethod=="Nelder-Mead"){
         dsgemode <- optim(par=parametersTrans,fn=.DSGEVARLogPosteriorInf,method="Nelder-Mead",control=optimControl,kdata=kdata,lambda=lambda,p=p,YY=kdata$YY,XY=kdata$XY,XX=kdata$XX,ObserveMat=ObserveMat,partomats=partomats,priorform=priorform,priorpars=priorpars,parbounds=parbounds,hessian=TRUE)
@@ -301,7 +344,12 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
         stop("You have entered an unrecognized optimization method.\n",call.=FALSE)
       }
       #
+      if(jj>1){
+        cat('Change in the log posterior: ',-dsgemode$value - prevlogpost,'. \n', sep="")
+      }
+      #
       parametersTrans <- dsgemode$par
+      prevlogpost <- -dsgemode$value
     }
   }
   #
@@ -317,7 +365,9 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     ConvReport <- "warning from L-BFGS-B"
   }else if(ConvCode==52){
     ConvReport <- "error from L-BFGS-B"
-  }else{}
+  }else{
+    ConvReport <- "unknown"
+  }
   #
   cat('Optimization over, ', date(),'. \n', sep="")
   cat(' \n', sep="")
@@ -355,10 +405,6 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   cat('Parameter Estimates and Standard Errors (SE) at the Posterior Mode: \n', sep="")
   cat(' \n', sep="")
   print(ModeTable)
-  #
-  #for(i in 1:length(dsgemode$par)){
-  #  cat("$\\",rownames(ModeTable)[i],"$"," & ",ModeTable[i,1]," & ","(",ModeTable[i,2],")"," & ",ModeTable[i,3]," & ","(",ModeTable[i,4],")", " \\\\ ", "\n", sep="")
-  #}
   #
   rownames(parMode) <- "Parameter:"
   rownames(parModeSEs) <- "Parameter:"
@@ -470,8 +516,8 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     #
   }
   #
-  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
-  #
+  kcons <- (ncol(X)%%p!=0)*(ncol(X)%%p!=0)
+  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)
   #
   if(parallel==FALSE){
     return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)
@@ -569,7 +615,8 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     #
   }
   #
-  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)
+  kcons <- (ncol(X)%%p!=0)*(ncol(X)%%p!=0)
+  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)
   #
   if(parallel==FALSE){
     return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)

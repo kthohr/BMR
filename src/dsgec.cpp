@@ -188,11 +188,12 @@ SEXP UhligCpp( SEXP mA, SEXP mB, SEXP mC, SEXP mD, SEXP mF, SEXP mG, SEXP mH,
   return Rcpp::List::create(Rcpp::Named("P") = P,Rcpp::Named("Q") = Q,Rcpp::Named("R") = R,Rcpp::Named("S") = S,Rcpp::Named("EigValueSorted") = EigValueSortedRet,Rcpp::Named("EigVecSorted") = EigVecSortedRet);
 }
 
-SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
+SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
                  SEXP mR, SEXP mMaxIter )
 {
   arma::mat dsgedata = as<arma::mat>(mdsgedata);
   arma::mat ObserveMat = as<arma::mat>(mObserveMat);
+  arma::mat ObsCons = as<arma::mat>(mObsCons);
   arma::mat F = as<arma::mat>(mF);
   arma::mat G = as<arma::mat>(mG);
   arma::mat N = as<arma::mat>(mN);
@@ -215,12 +216,8 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   //
   arma::mat Q(G.n_rows,G.n_rows);
   Q.zeros();
-  arma::mat QShocks(1,1);
-  QShocks.zeros();
-  for(i = (G.n_rows-N.n_rows + 1); i <= G.n_rows;i++) {
-    QShocks = shocks(arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)),arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)));
-    Q(arma::span(i-1,i-1),arma::span(i-1,i-1)) = QShocks;
-  }
+  Q(arma::span(G.n_rows-N.n_rows,G.n_rows-1),arma::span(G.n_rows-N.n_rows,G.n_rows-1)) = shocks;
+  //
   arma::mat GQG = G*Q*trans(G);
   //
   //
@@ -248,7 +245,7 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   arma::mat invSigma = inv_sympd(Sigma);
   //
   arma::mat KalmanGain = StateCovPredicted*ObserveMat*invSigma;
-  arma::mat KalmanResid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StatePredicted;
+  arma::mat KalmanResid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StatePredicted - ObsCons;
   arma::mat StateFiltered = StatePredicted + KalmanGain*KalmanResid;
   arma::mat StateCovFiltered = StateCovPredicted - KalmanGain*tObserveMat*StateCovPredicted;
   LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
@@ -260,7 +257,7 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
     invSigma = inv_sympd(Sigma);
     //
     KalmanGain = StateCovPredicted*ObserveMat*invSigma;
-    KalmanResid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StatePredicted;
+    KalmanResid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StatePredicted - ObsCons;
     StateFiltered = StatePredicted + KalmanGain*KalmanResid;
     StateCovFiltered = StateCovPredicted - KalmanGain*tObserveMat*StateCovPredicted;
     LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
@@ -271,11 +268,12 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SE
   return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
 }
 
-SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
+SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
              SEXP mR, SEXP mMaxIter )
 {
   arma::mat dsgedata = as<arma::mat>(mdsgedata);
   arma::mat ObserveMat = as<arma::mat>(mObserveMat);
+  arma::mat ObsCons = as<arma::mat>(mObsCons);
   arma::mat F = as<arma::mat>(mF);
   arma::mat G = as<arma::mat>(mG);
   arma::mat N = as<arma::mat>(mN);
@@ -298,12 +296,8 @@ SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP m
   //
   arma::mat Q(G.n_rows,G.n_rows);
   Q.zeros();
-  arma::mat QShocks(1,1);
-  QShocks.zeros();
-  for(i = (G.n_rows-N.n_rows + 1); i <= G.n_rows;i++) {
-    QShocks = shocks(arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)),arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)));
-    Q(arma::span(i-1,i-1),arma::span(i-1,i-1)) = QShocks;
-  }
+  Q(arma::span(G.n_rows-N.n_rows,G.n_rows-1),arma::span(G.n_rows-N.n_rows,G.n_rows-1)) = shocks;
+  //
   arma::mat GQG = G*Q*trans(G);
   //
   //
@@ -334,7 +328,7 @@ SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP m
   arma::mat Mt = -iSigma;    
   arma::mat Kt = St*iSigma;
   //
-  arma::mat Resid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StateFiltered;
+  arma::mat Resid = trans(dsgedata(arma::span(0,0),arma::span())) - tObserveMat*StateFiltered - ObsCons;
   //
   LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(Resid)*iSigma*Resid;
   //
@@ -355,7 +349,7 @@ SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mF, SEXP mG, SEXP mN, SEXP m
   //
   for(i=2; i<=T; i++){
     //
-    Resid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StateFiltered;
+    Resid = trans(dsgedata(arma::span(i-1,i-1),arma::span())) - tObserveMat*StateFiltered - ObsCons;
     //
     LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(Resid)*iSigma*Resid;
     //

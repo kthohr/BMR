@@ -1,12 +1,12 @@
-modecheck.EDSGE <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
-  .edsgemodecheck(obj,scalepar,plottransform,save,height,width) 
+modecheck.EDSGE <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
+  .edsgemodecheck(obj,gridsize,scalepar,plottransform,save,height,width) 
 }
 
-modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
-  .dsgevarmodecheck(obj,scalepar,plottransform,save,height,width) 
+modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
+  .dsgevarmodecheck(obj,gridsize,scalepar,plottransform,save,height,width) 
 }
 
-.edsgemodecheck <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
+.edsgemodecheck <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
   #
   dsgedata <- obj$data
   ObserveMat <- obj$ObserveMat
@@ -32,13 +32,12 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   }
   parametersModeHessian <- parametersModeHessian*scalepar
   #
-  GridSize <- 1000
-  ParModeCheck <- array(NA,dim=c(GridSize+1,2,nParam))
+  ParModeCheck <- array(NA,dim=c(gridsize+1,2,nParam))
   #
   ParamTemp <- parametersMode
   for(j in 1:nParam){
     ParamTemp <- parametersMode
-    ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(GridSize+1))
+    ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(gridsize+1))
     for(i in 1:length(ParamGrid)){
       ParamTemp[j] <- ParamGrid[i]
       if(plottransform==FALSE){
@@ -55,6 +54,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   #
   plot=TRUE
   MR <- 0; MC <- 0
+  plotpages <- 1
   if(plot==TRUE){
     if(plottransform==FALSE){
       parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
@@ -70,44 +70,59 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
       MR <- 3; MC <- 3
     }else if(nParam > 9 && nParam < 13){
       MR <- 4; MC <- 3
-    }else if(nParam > 12 && nParam < 17){
-      MR <- 4; MC <- 4
+    }else if(nParam > 12 && nParam < 25){
+      MR <- 4; MC <- 3
+      plotpages <- 2
+    }else if(nParam > 24 && nParam < 37){
+      MR <- 4; MC <- 3
+      plotpages <- 3
+    }else if(nParam > 36 && nParam < 49){
+      MR <- 4; MC <- 3
+      plotpages <- 4
+    }else if(nParam > 48 && nParam < 61){
+      MR <- 4; MC <- 3
+      plotpages <- 5
+    }else if(nParam > 60 && nParam < 73){
+      MR <- 4; MC <- 3
+      plotpages <- 6
     }
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     #
-    #
-    if(save==TRUE){
-      if(class(dev.list()) != "NULL"){dev.off()}
-      cairo_ps(file="DSGEModeCheck.eps",height=height,width=width)
-    }
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(MR,MC)))
-    #
     ParamCount <- 1
-    for(i in 1:MR){
-      for(k in 1:MC){
+    #
+    for(ii in 1:plotpages){
+      if(save==TRUE){
+        if(class(dev.list()) != "NULL"){dev.off()}
         #
-        if(ParamCount <= (nParam)){
-          ParamDF <- data.frame(ParModeCheck[,,ParamCount])
-          colnames(ParamDF) <- c("ParameterVals","LogPosterior")
-          #
-          print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]),vp = vplayout(i,k))
-          #
-          ParamCount <- ParamCount + 1
-          #
-          Sys.sleep(0.6)
-        }else{ParamCount <- ParamCount + 1}
+        SaveMode <- paste("DSGEModeCheck",as.character(ii),".eps",sep="")
+        cairo_ps(file=SaveMode,height=height,width=width)
       }
+      grid.newpage()
+      pushViewport(viewport(layout=grid.layout(MR,MC)))
+      #
+      for(i in 1:MR){
+        for(k in 1:MC){
+          #
+          if(ParamCount <= (nParam)){
+            ParamDF <- data.frame(ParModeCheck[,,ParamCount])
+            colnames(ParamDF) <- c("ParameterVals","LogPosterior")
+            #
+            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]),vp = vplayout(i,k))
+            #
+            ParamCount <- ParamCount + 1
+            #
+            Sys.sleep(0.6)
+          }else{ParamCount <- ParamCount + 1}
+        }
+      }
+      if(save==TRUE){dev.off()}
     }
-    if(save==TRUE){dev.off()}
   }
-  #
-  #colnames(IRFs) <- varnames
   #
 }
 
-.dsgevarmodecheck <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
+.dsgevarmodecheck <- function(obj,gridsize=1000,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
   #
   dsgedata <- obj$data
   ObserveMat <- obj$ObserveMat
@@ -123,7 +138,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   lambda <- obj$lambda
   p <- obj$p
   #
-  prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds)
+  prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,obj$constant,matrix(0,1,1),FALSE,ObserveMat,partomats,priorform,priorpars,parbounds)
   kdata <- prelimwork$kdata; priorform <- prelimwork$priorform;
   dsgedata <- kdata$Y
   #
@@ -138,15 +153,14 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   }
   parametersModeHessian <- parametersModeHessian*scalepar
   #
-  GridSize <- 1000
-  ParModeCheck <- array(NA,dim=c(GridSize+1,2,nParam))
+  ParModeCheck <- array(NA,dim=c(gridsize+1,2,nParam))
   #
   ParamTemp <- parametersMode
   #
   if(is.finite(lambda)==TRUE){
     for(j in 1:nParam){
       ParamTemp <- parametersMode
-      ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(GridSize+1))
+      ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(gridsize+1))
       for(i in 1:length(ParamGrid)){
         ParamTemp[j] <- ParamGrid[i]
         if(plottransform==FALSE){
@@ -154,14 +168,14 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
         }else{
           ParModeCheck[i,1,j] <- ParamGrid[i]
         }
-        #Remember, dsgeposteriorfn will return the NEGATIVE of the log posterior!
+        #
         ParModeCheck[i,2,j] <- (-1)*.DSGEVARLogPosterior(ParamTemp,kdata,lambda,p,kdata$YY,kdata$XY,kdata$XX,ObserveMat,partomats,priorform,priorpars,parbounds)
       }
     }
   }else{
     for(j in 1:nParam){
       ParamTemp <- parametersMode
-      ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(GridSize+1))
+      ParamGrid <- seq(from=(ParamTemp[j]-parametersModeHessian[j]),to=(ParamTemp[j]+parametersModeHessian[j]),length.out=(gridsize+1))
       for(i in 1:length(ParamGrid)){
         ParamTemp[j] <- ParamGrid[i]
         if(plottransform==FALSE){
@@ -169,7 +183,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
         }else{
           ParModeCheck[i,1,j] <- ParamGrid[i]
         }
-        #Remember, dsgeposteriorfn will return the NEGATIVE of the log posterior!
+        #
         ParModeCheck[i,2,j] <- (-1)*.DSGEVARLogPosteriorInf(ParamTemp,kdata,lambda,p,kdata$YY,kdata$XY,kdata$XX,ObserveMat,partomats,priorform,priorpars,parbounds)
       }
     }
@@ -179,6 +193,7 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
   #
   plot=TRUE
   MR <- 0; MC <- 0
+  plotpages <- 1
   if(plot==TRUE){
     if(plottransform==FALSE){
       parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
@@ -194,39 +209,53 @@ modecheck.DSGEVAR <- function(obj,scalepar=NULL,plottransform=TRUE,save=FALSE,he
       MR <- 3; MC <- 3
     }else if(nParam > 9 && nParam < 13){
       MR <- 4; MC <- 3
-    }else if(nParam > 12 && nParam < 17){
-      MR <- 4; MC <- 4
+    }else if(nParam > 12 && nParam < 25){
+      MR <- 4; MC <- 3
+      plotpages <- 2
+    }else if(nParam > 24 && nParam < 37){
+      MR <- 4; MC <- 3
+      plotpages <- 3
+    }else if(nParam > 36 && nParam < 49){
+      MR <- 4; MC <- 3
+      plotpages <- 4
+    }else if(nParam > 48 && nParam < 61){
+      MR <- 4; MC <- 3
+      plotpages <- 5
+    }else if(nParam > 60 && nParam < 73){
+      MR <- 4; MC <- 3
+      plotpages <- 6
     }
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     #
-    #
-    if(save==TRUE){
-      if(class(dev.list()) != "NULL"){dev.off()}
-      cairo_ps(file="DSGEModeCheck.eps",height=height,width=width)
-    }
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(MR,MC)))
-    #
     ParamCount <- 1
-    for(i in 1:MR){
-      for(k in 1:MC){
+    #
+    for(ii in 1:plotpages){
+      if(save==TRUE){
+        if(class(dev.list()) != "NULL"){dev.off()}
         #
-        if(ParamCount <= (nParam)){
-          ParamDF <- data.frame(ParModeCheck[,,ParamCount])
-          colnames(ParamDF) <- c("ParameterVals","LogPosterior")
-          #
-          print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]),vp = vplayout(i,k))
-          #
-          ParamCount <- ParamCount + 1
-          #
-          Sys.sleep(0.6)
-        }else{ParamCount <- ParamCount + 1}
+        SaveMode <- paste("DSGEVARModeCheck",as.character(ii),".eps",sep="")
+        cairo_ps(file=SaveMode,height=height,width=width)
       }
+      grid.newpage()
+      pushViewport(viewport(layout=grid.layout(MR,MC)))
+      #
+      for(i in 1:MR){
+        for(k in 1:MC){
+          #
+          if(ParamCount <= (nParam)){
+            ParamDF <- data.frame(ParModeCheck[,,ParamCount])
+            colnames(ParamDF) <- c("ParameterVals","LogPosterior")
+            #
+            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]),vp = vplayout(i,k))
+            #
+            ParamCount <- ParamCount + 1
+            #
+            Sys.sleep(0.6)
+          }else{ParamCount <- ParamCount + 1}
+        }
+      }
+      if(save==TRUE){dev.off()}
     }
-    if(save==TRUE){dev.off()}
   }
-  #
-  #colnames(IRFs) <- varnames
-  #
 }

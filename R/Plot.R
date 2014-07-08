@@ -429,7 +429,7 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
   #
   p <- floor(dim(Betas)[1]/dim(Betas)[2])
   M <- as.numeric(dim(Betas)[2])
-  K <- as.numeric(dim(Betas)[1]) # K is (M*p)+1 in standard BVARs, but it's  ((M*p)+1)*M in BVARTVPs; let's stick with the standard BVAR definiton here.
+  K <- as.numeric(dim(Betas)[1])
   keep <- as.numeric(dim(Betas)[3])
   kT <- as.numeric(dim(Betas)[4])
   # kT x K x M x keep, for sorting
@@ -490,8 +490,6 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
           #
           CFDF <- data.frame(BetaPerm[CTPLower,,((i-1)*M+j+1),l],BetaPerm[CTPMid,,((i-1)*M+j+1),l],BetaPerm[CTPUpper,,((i-1)*M+j+1),l],tau:(kT+tau-1))
           colnames(CFDF) <- c("CTPL","CTPM","CTPU","Time")
-          #CFDF <- data.frame(BetaPerm[,((i-1)*M+j+1),l])
-          #colnames(CFDF) <- "CFDF"
           #
           #j==1 is for the variable title;l==1 is the coefficient label on y-axis
           if(j==1){
@@ -571,6 +569,9 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     stop("no MCMC draws detected.\n",call.=FALSE)
   }
   #
+  library(ggplot2)
+  library(grid)
+  #
   if(class(dev.list()) != "NULL"){dev.off()}
   #
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -584,6 +585,8 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   }
   #
   MR <- 0; MC <- 0
+  plotpages <- 1
+  #
   if(nParam < 4){
     MR <- nParam; MC <- 1
   }else if(nParam == 4){
@@ -594,15 +597,28 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     MR <- 3; MC <- 3
   }else if(nParam > 9 && nParam < 13){
     MR <- 4; MC <- 3
-  }else if(nParam > 12 && nParam < 17){
-    MR <- 4; MC <- 4
+  }else if(nParam > 12 && nParam < 25){
+    MR <- 4; MC <- 3
+    plotpages <- 2
+  }else if(nParam > 24 && nParam < 37){
+    MR <- 4; MC <- 3
+    plotpages <- 3
+  }else if(nParam > 36 && nParam < 49){
+    MR <- 4; MC <- 3
+    plotpages <- 4
+  }else if(nParam > 48 && nParam < 61){
+    MR <- 4; MC <- 3
+    plotpages <- 5
+  }else if(nParam > 60 && nParam < 73){
+    MR <- 4; MC <- 3
+    plotpages <- 6
   }
   #
-  nParGraphs<-1
-  for(j in 1:nParGraphs){
+  ParamCount <- 1
+  for(j in 1:plotpages){
     #
     if(save==TRUE){
-      if(nParGraphs==1){
+      if(plotpages==1){
         cairo_ps(file="DSGEParameters.eps",height=height,width=width)
       }else{
         SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
@@ -613,7 +629,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
     #
-    ParamCount <- 1
     for(i in 1:MR){
       for(k in 1:MC){
         #
@@ -624,7 +639,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           #
           ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
           print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName),vp = vplayout(i,k))
-          #print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_density(colour="darkblue",fill="purple",alpha=0.25) + labs(title=ParName),vp = vplayout(i,k))
           #
           ParamCount <- ParamCount + 1
           #
@@ -638,11 +652,12 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   #
   if(MCMCPlot==TRUE){
-    for(j in 1:nParGraphs){
+    ParamCount <- 1
+    for(j in 1:plotpages){
       #
       if(save==TRUE){
         if(class(dev.list()) != "NULL"){dev.off()}
-        if(nParGraphs==1){
+        if(plotpages==1){
           cairo_ps(file="MCMCPlot.eps",height=height,width=width)
         }else{
           SaveParam <- paste("MCMCPlot_",j,".eps",sep="")
@@ -653,7 +668,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(MR,MC)))
       #
-      ParamCount <- 1
       for(i in 1:MR){
         for(k in 1:MC){
           #
@@ -698,6 +712,8 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   }
   #
   MR <- 0; MC <- 0
+  plotpages <- 1
+  #
   if(nParam < 4){
     MR <- nParam; MC <- 1
   }else if(nParam == 4){
@@ -708,12 +724,25 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     MR <- 3; MC <- 3
   }else if(nParam > 9 && nParam < 13){
     MR <- 4; MC <- 3
-  }else if(nParam > 12 && nParam < 17){
-    MR <- 4; MC <- 4
+  }else if(nParam > 12 && nParam < 25){
+    MR <- 4; MC <- 3
+    plotpages <- 2
+  }else if(nParam > 24 && nParam < 37){
+    MR <- 4; MC <- 3
+    plotpages <- 3
+  }else if(nParam > 36 && nParam < 49){
+    MR <- 4; MC <- 3
+    plotpages <- 4
+  }else if(nParam > 48 && nParam < 61){
+    MR <- 4; MC <- 3
+    plotpages <- 5
+  }else if(nParam > 60 && nParam < 73){
+    MR <- 4; MC <- 3
+    plotpages <- 6
   }
   #
-  nParGraphs<-1
-  for(j in 1:nParGraphs){
+  ParamCount <- 1
+  for(j in 1:plotpages){
     #
     if(save==TRUE){
       if(nParGraphs==1){
@@ -727,7 +756,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
     #
-    ParamCount <- 1
     for(i in 1:MR){
       for(k in 1:MC){
         #
@@ -738,7 +766,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           #
           ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
           print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName),vp = vplayout(i,k))
-          #print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_density(colour="darkblue",fill="purple",alpha=0.25) + labs(title=ParName),vp = vplayout(i,k))
           #
           ParamCount <- ParamCount + 1
           #
@@ -752,6 +779,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   #
   if(MCMCPlot==TRUE){
+    ParamCount <- 1
     for(j in 1:nParGraphs){
       #
       if(save==TRUE){
@@ -767,7 +795,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(MR,MC)))
       #
-      ParamCount <- 1
       for(i in 1:MR){
         for(k in 1:MC){
           #

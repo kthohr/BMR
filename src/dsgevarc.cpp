@@ -18,15 +18,19 @@
 #include "dsgevarc.h"
 using namespace Rcpp;
 
-SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG , 
-                    SEXP mN , SEXP mshocks , SEXP mp , SEXP mMaxIter )
+SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mObsCons , SEXP mF , SEXP mG , 
+                    SEXP mN , SEXP mshocks , SEXP mR , SEXP mp , SEXP mMaxIter )
 {
   arma::mat dsgedata = as<arma::mat>(mdsgedata);
   arma::mat ObserveMat = as<arma::mat>(mObserveMat);
+  arma::mat ObsCons = as<arma::mat>(mObsCons);
   arma::mat F = as<arma::mat>(mF);
   arma::mat G = as<arma::mat>(mG);
   arma::mat N = as<arma::mat>(mN);
   arma::mat shocks = as<arma::mat>(mshocks);
+  arma::mat R = as<arma::mat>(mR);
+  //
+  arma::mat OC2 = ObsCons*trans(ObsCons);
   //
   int p = as<int>(mp);
   //
@@ -36,12 +40,7 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
   //
   arma::mat Q(G.n_rows,G.n_rows);
   Q.zeros();
-  arma::mat QShocks(1,1);
-  QShocks.zeros();
-  for(i = (G.n_rows-N.n_rows + 1); i <= G.n_rows;i++){
-    QShocks = shocks(arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)),arma::span(i+(N.n_rows-G.n_rows-1),i+(N.n_rows-G.n_rows-1)));
-    Q(arma::span(i-1,i-1),arma::span(i-1,i-1)) = QShocks;
-  }
+  Q(arma::span(G.n_rows-N.n_rows,G.n_rows-1),arma::span(G.n_rows-N.n_rows,G.n_rows-1)) = shocks;
   //
   arma::mat GQG = G*Q*trans(G);
   //
@@ -52,7 +51,7 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
   arma::mat IMat = F;
   //
   for(j=1;j<=MaxIter;j++){
-    SigmaSSNew = SigmaSSOld + IMat*SigmaSSOld*trans(IMat);
+    SigmaSSNew = SigmaSSOld + (IMat*SigmaSSOld*trans(IMat));
     IMat *= IMat;
     //
     SigmaSSOld = SigmaSSNew;
@@ -62,20 +61,20 @@ SEXP DSGEVARPriorC( SEXP mdsgedata , SEXP mObserveMat , SEXP mF , SEXP mG ,
   arma::cube SigmaX(dsgedata.n_cols, dsgedata.n_cols, p+1);
   SigmaX.zeros();
   //
-  SigmaX(arma::span(),arma::span(),arma::span(0,0)) = trans(ObserveMat)*SigmaSS*ObserveMat;
+  SigmaX(arma::span(),arma::span(),arma::span(0,0)) = OC2 + trans(ObserveMat)*SigmaSS*ObserveMat + R;
   //
   arma::mat Fp = arma::eye(F.n_cols,F.n_cols);
   for(i=1;i<=p;i++){
     Fp *= F;
-    SigmaX(arma::span(),arma::span(),arma::span(i,i)) = trans(ObserveMat)*Fp*SigmaSS*ObserveMat;
+    SigmaX(arma::span(),arma::span(),arma::span(i,i)) = OC2 + trans(ObserveMat)*Fp*SigmaSS*ObserveMat;
   }
   //
-  return Rcpp::List::create(Rcpp::Named("SigmaX") = SigmaX,Rcpp::Named("SigmaSS") = SigmaSS);
+  return Rcpp::List::create(Rcpp::Named("SigmaX") = SigmaX);
 }
 
 SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , SEXP mGammaXX , 
                         SEXP mGammaBarYY , SEXP mGammaBarXY, SEXP mGammaBarXX , 
-                        SEXP mlambda , SEXP mTp , SEXP mM , SEXP mp )
+                        SEXP mlambda , SEXP mTp , SEXP mM , SEXP mp , SEXP mkcons )
 {
   //
   float logGPR = as<double>(mlogGPR);
@@ -83,6 +82,7 @@ SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , S
   float Tp = as<int>(mTp);
   float M = as<int>(mM);
   float p = as<int>(mp);
+  int kcons = as<int>(mkcons);
   //
   arma::mat XX = as<arma::mat>(mXX);
   //
@@ -106,8 +106,8 @@ SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , S
   arma::mat invlambdaXX = invlambda*XX;
   double Term1 = -M2*log(arma::det(GammaXX + invlambdaXX)) + M2*log(arma::det(GammaXX));
   arma::mat invlambdaSigma = (1 + invlambda)*SigmaHatEpsilon;
-  double Term2 = -((Tp + lambdaT - M*p)/2)*log(arma::det( invlambdaSigma ));
-  double Term3 = ((lambdaT - M*p)/2)*log(arma::det(SigmaEpsilon));
+  double Term2 = -((Tp + lambdaT - M*p - kcons)/2)*log(arma::det( invlambdaSigma ));
+  double Term3 = ((lambdaT - M*p - kcons)/2)*log(arma::det(SigmaEpsilon));
   double logLikelihood = Term1 + Term2 + Term3 + logGPR - (((M*Tp)/2)*log(lambdaT*arma::datum::pi));
   //
   return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);
@@ -141,7 +141,8 @@ SEXP DSGEVARLikelihoodInf( SEXP mYY , SEXP mXY , SEXP mXX ,
 }
 
 SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP mGXX , 
-                  SEXP mGHXX , SEXP mlambda , SEXP mkreps , SEXP mTp , SEXP mM , SEXP mp )
+                  SEXP mGHXX , SEXP mlambda , SEXP mkreps , SEXP mTp , SEXP mM , SEXP mp ,
+                  SEXP mkcons )
 {
   //
   float lambda = as<double>(mlambda);
@@ -149,6 +150,7 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
   float Tp = as<int>(mTp);
   float M = as<int>(mM);
   float p = as<int>(mp);
+  int kcons = as<int>(mkcons);
   //
   NumericVector GGammaBarYY(mGammaBarYY);
   NumericVector GGammaBarXY(mGammaBarXY);
@@ -156,13 +158,13 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
   NumericVector GGXX(mGXX);
   //
   arma::cube GammaBarYY(GGammaBarYY.begin(), M, M, kreps, false);
-  arma::cube GammaBarXY(GGammaBarXY.begin(), M*p, M, kreps, false);
-  arma::cube GammaBarXX(GGammaBarXX.begin(), M*p, M*p, kreps, false);
-  arma::cube GXX(GGXX.begin(), M*p, M*p, kreps, false);
+  arma::cube GammaBarXY(GGammaBarXY.begin(), M*p + kcons, M, kreps, false);
+  arma::cube GammaBarXX(GGammaBarXX.begin(), M*p + kcons, M*p + kcons, kreps, false);
+  arma::cube GXX(GGXX.begin(), M*p + kcons, M*p + kcons, kreps, false);
   //
   arma::mat GHXX = as<arma::mat>(mGHXX);
   //
-  arma::cube BetaDraws(M*p, M, kreps);
+  arma::cube BetaDraws(M*p + kcons, M, kreps);
   arma::cube SigmaDraws(M, M, kreps);
   //
   int j;
@@ -177,7 +179,7 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
   //
   float S2 = (1+lambda)*Tp;
   arma::mat SigmaDraw = S2*SigmaEpsilon;
-  int S3 = (1+lambda)*Tp - M*p;
+  int S3 = (1+lambda)*Tp - M*p - kcons;
   arma::mat KSigmaRand = arma::randn(SigmaDraw.n_rows,S3);
   arma::mat A = trans(arma::chol(arma::inv_sympd(SigmaDraw)))*KSigmaRand;
   SigmaDraw = arma::inv_sympd(A*trans(A));
@@ -185,11 +187,11 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
   float B1 = 1/lambda;
   arma::mat GammaXX = GXX(arma::span(),arma::span(),arma::span(0,0));
   arma::mat BetaCov = arma::inv_sympd(GammaXX + B1*GHXX);
-  arma::vec KBetaRand = arma::randn(M*M*p);
+  arma::vec KBetaRand = arma::randn(M*(M*p+kcons));
   arma::colvec VecBetaHat(BetaHat.begin(),BetaHat.size(),false);
   float B2 = 1/(Tp*lambda);
   arma::mat VecBetaDraw = VecBetaHat + trans(arma::chol(B2*arma::kron(SigmaEpsilon,BetaCov)))*KBetaRand;
-  arma::mat BetaDraw(VecBetaDraw.begin(),M*p,M,false);
+  arma::mat BetaDraw(VecBetaDraw.begin(),M*p+kcons,M,false);
   //
   BetaDraws(arma::span(),arma::span(),arma::span(0,0)) = BetaDraw;
   SigmaDraws(arma::span(),arma::span(),arma::span(0,0)) = SigmaDraw;
@@ -210,10 +212,10 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
     //
     GammaXX = GXX(arma::span(),arma::span(),arma::span(j-1,j-1));
     BetaCov = arma::inv_sympd(GammaXX + B1*GHXX);
-    KBetaRand = arma::randn(M*M*p);
+    KBetaRand = arma::randn(M*(M*p+kcons));
     arma::colvec VecBetaHat(BetaHat.begin(),BetaHat.size(),false);
     VecBetaDraw = VecBetaHat + trans(arma::chol(B2*arma::kron(SigmaEpsilon,BetaCov)))*KBetaRand;
-    arma::mat BetaDraw(VecBetaDraw.begin(),M*p,M,false);
+    arma::mat BetaDraw(VecBetaDraw.begin(),M*p+kcons,M,false);
     //
     BetaDraws(arma::span(),arma::span(),arma::span(j-1,j-1)) = BetaDraw;
     SigmaDraws(arma::span(),arma::span(),arma::span(j-1,j-1)) = SigmaDraw;
@@ -223,7 +225,7 @@ SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP 
 }
 
 SEXP DSGEVARRepsInf( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP mlambda , 
-                     SEXP mkreps , SEXP mTp , SEXP mM , SEXP mp )
+                     SEXP mkreps , SEXP mTp , SEXP mM , SEXP mp , SEXP mkcons )
 {
   //
   float lambda = as<double>(mlambda);
@@ -231,16 +233,17 @@ SEXP DSGEVARRepsInf( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SE
   float Tp = as<int>(mTp);
   float M = as<int>(mM);
   float p = as<int>(mp);
+  int kcons = as<int>(mkcons);
   //
   NumericVector GGammaBarYY(mGammaBarYY);
   NumericVector GGammaBarXY(mGammaBarXY);
   NumericVector GGammaBarXX(mGammaBarXX);
   //
   arma::cube GammaBarYY(GGammaBarYY.begin(), M, M, kreps, false);
-  arma::cube GammaBarXY(GGammaBarXY.begin(), M*p, M, kreps, false);
-  arma::cube GammaBarXX(GGammaBarXX.begin(), M*p, M*p, kreps, false);
+  arma::cube GammaBarXY(GGammaBarXY.begin(), M*p + kcons, M, kreps, false);
+  arma::cube GammaBarXX(GGammaBarXX.begin(), M*p + kcons, M*p + kcons, kreps, false);
   //
-  arma::cube BetaDraws(M*p, M, kreps);
+  arma::cube BetaDraws(M*p + kcons, M, kreps);
   arma::cube SigmaDraws(M, M, kreps);
   //
   int j;

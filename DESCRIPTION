@@ -1,7 +1,7 @@
 Package: BMR
 Title: Bayesian Macroeconometrics in R
-Version: 0.3.0
-Date: 2014-06-25
+Version: 0.4.0
+Date: 2014-07-09
 Author: Keith O'Hara
 Maintainer: Keith O'Hara <keith.ohara@nyu.edu>
 Description: A package for estimating Bayesian macroeconometric models.

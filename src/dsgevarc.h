@@ -20,11 +20,11 @@
 #include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
-RcppExport SEXP DSGEVARPriorC( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
-RcppExport SEXP DSGEVARLikelihood( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
+RcppExport SEXP DSGEVARPriorC( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
+RcppExport SEXP DSGEVARLikelihood( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
 RcppExport SEXP DSGEVARLikelihoodInf( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
-RcppExport SEXP DSGEVARReps( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
-RcppExport SEXP DSGEVARRepsInf( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
+RcppExport SEXP DSGEVARReps( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
+RcppExport SEXP DSGEVARRepsInf( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
 RcppExport SEXP DSGEVARIRFs( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
 RcppExport SEXP dsgevarforecast( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
 #endif
