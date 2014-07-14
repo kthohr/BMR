@@ -114,7 +114,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
     #
     for(i in 1:nparam){
       if(priorform[i] == 2 || priorform[i] == 3){
-        if(class(parbounds[i,1]) != "numeric"){
+        if(is.na(parbounds[i,1]) != TRUE){
           parametersTrans[i] <- log(parameters[i] - parbounds[i,1])
         }else{
           parametersTrans[i] <- log(parameters[i])
@@ -133,7 +133,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
     #
     for(i in 1:nparam){
       if(priorform[i] == 2 || priorform[i] == 3){
-        if(class(parbounds[i,1]) != "numeric"){
+        if(is.na(parbounds[i,1]) != TRUE){
           TransBack[i] <- exp(parameters[i]) + parbounds[i,1]
         }else{
           TransBack[i] <- exp(parameters[i])
