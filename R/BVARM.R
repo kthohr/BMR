@@ -185,7 +185,7 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   #
   Sigma <- kronecker(solve(Sigma),diag(nrow(Y)))
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   #RepsRun <- MBVARReps(Sigma,as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),BVPr,M,K,burnin,keep,BetaDraws)
   RepsRun <- .Call("MBVARReps", Sigma,as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),BVPr,M,K,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
   cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
@@ -211,7 +211,7 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   }
   rownames(BetaMean) <- BNames
   if(class(colnames(Y)) == "character"){
-    colnames(BetaMean) <- colnames(Y)
+    colnames(BetaMean) <- paste0("Eq: ", colnames(Y))
   }
   #
   ImpSorted <- apply(ImpStore2,c(3,1,2),sort)
