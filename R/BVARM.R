@@ -1,4 +1,4 @@
-# 12/06/2014
+# 01/12/2015
 BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2){
   #
   kerr <- .bvarmerrors(mydata,p,coefprior,constant,VType,decay,HP4)
@@ -16,6 +16,7 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
 }
 
 .bvarmerrors <- function(mydata,p,coefprior,constant,VType,decay,HP4){
+  #
   if(ncol(mydata)<2){
     stop("need more than 1 variable.\n",call.=FALSE)
   }
@@ -32,7 +33,8 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   }
   #
   # Errors around prior coefs
-  #No priors specified for the coefficients, set equal to random walk (in levels)
+  #
+  # If no prior is provided for the coefficients, set to a random walk (in levels)
   if(class(coefprior)=="NULL"){
     coefprior <- c(rep(1,ncol(mydata)))
   }
@@ -54,7 +56,7 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   }else{coefprior <- coefprior}
   #
   #
-  # Some possible errors around prior hyperparameters and such
+  # Some possible errors around hyperparameters and such
   if(VType != 1 && VType != 2){
     stop("VType can only be 1 or 2.\n",call.=FALSE)
   }
@@ -185,13 +187,11 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   #
   Sigma <- kronecker(solve(Sigma),diag(nrow(Y)))
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
-  #RepsRun <- MBVARReps(Sigma,as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),BVPr,M,K,burnin,keep,BetaDraws)
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   RepsRun <- .Call("MBVARReps", Sigma,as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),BVPr,M,K,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
-  cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   kcons <- 0; if(constant==T){kcons<-1}
-  #ImpStore <- MBVARIRFs(shock,M,K,kcons,keep,irf.periods,RepsRun$Beta,ImpStore)
   ImpStore <- .Call("MBVARIRFs", shock,M,K,kcons,keep,irf.periods,RepsRun$Beta, PACKAGE = "BMR", DUP = FALSE)
   ImpStore <- ImpStore$ImpStore
   ImpStore2 <- array(NA,dim=c(M,M,irf.periods,keep))

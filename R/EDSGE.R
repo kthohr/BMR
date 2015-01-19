@@ -5,13 +5,14 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
                           optimLower=NULL,optimUpper=NULL,
                           optimControl=list(),
                           DSGEIRFs=TRUE,irf.periods=20,
-                          scalepar=1,keep=50000,burnin=10000){
+                          scalepar=1,keep=50000,burnin=10000,
+                          tables=TRUE){
   #
-  cat('Trying to solve the model with your initial values... ')
+  message('Trying to solve the model with your initial values... ',appendLF=FALSE)
   dsgemats1t <- partomats(initialvals)
   dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
   StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
-  cat('Done. \n')
+  message('Done.')
   #
   priorformRet <- priorform
   prelimwork <- .edsgePrelimWork(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
@@ -19,7 +20,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   #
   #
   #
-  Mode <- .DSGEModeEstimate(dsgedata,ObserveMat,initialvals,partomats,priorform,priorpars,parbounds,parnames,optimMethod,optimLower,optimUpper,optimControl)
+  Mode <- .DSGEModeEstimate(dsgedata,ObserveMat,initialvals,partomats,priorform,priorpars,parbounds,parnames,optimMethod,optimLower,optimUpper,optimControl,tables)
   #
   dsgemode <- Mode$dsgemode; parMode <- Mode$parMode; parModeSEs <- Mode$parModeSEs
   #
@@ -37,28 +38,28 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   #
   #
   #
-  cat(' \n', sep="")
-  cat('Beginning MCMC run, ', date(),'. \n', sep="")
+  message(' ', sep="")
+  message('Beginning MCMC run, ', date(),'.', sep="")
   MCMCRes <- 0
   if(chains==1){
     MCMCRes <- .DSGEMCMC(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
   }else if(chains > 1){
     MCMCRes <- .DSGEMCMCMulti(dsgemode,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores)
   }
-  cat('MCMC run finished, ', date(),'. \n', sep="")
+  message('MCMC run finished, ', date(),'.', sep="")
   #
   if(class(parnames)=="character"){
     colnames(MCMCRes$parameters) <- parnames
   }
   #
-  PostMCMCInfo <- .DSGEMCMCPrint(MCMCRes,chains,parMode,parModeSEs,parnames)
+  PostMCMCInfo <- .DSGEMCMCPrint(MCMCRes,chains,parMode,parModeSEs,parnames,tables)
   #
   #
   #
   IRFs <- NULL
   if(DSGEIRFs == TRUE){
-    cat(' \n')
-    cat('Computing IRFs now... ')
+    message(' ', sep="")
+    message('Computing IRFs now... ',appendLF=FALSE)
     IRFs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
     for(i in 1:keep){
       dsgemats <- partomats(MCMCRes$parameters[i,])
@@ -66,7 +67,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
       iIRF <- IRF(dsgesolved,sqrt(diag(dsgemats$shocks)),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
       IRFs[,,,i] <- iIRF$IRFs
     }
-    cat('Done. \n')
+    message('Done.')
   }
   #
   dsgeret <- list(Parameters=MCMCRes$parameters,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,IRFs=IRFs,scalepar=scalepar,AcceptanceRate=MCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,ObserveMat=ObserveMat,data=dsgedata,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)
@@ -209,7 +210,8 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
 
 .DSGEModeEstimate <- function(dsgedata,ObserveMat,initialvals,partomats,
                              priorform,priorpars,parbounds,parnames,
-                             optimMethod,optimLower,optimUpper,optimControl){
+                             optimMethod,optimLower,optimUpper,optimControl,
+                             tables){
   #
   parametersTrans <- .DSGEParTransform(initialvals,priorform,parbounds,1)
   #
@@ -217,16 +219,16 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   #
   dsgemode <- NULL
   prevlogpost <- 0
-  cat(' \n', sep="")
-  cat('Beginning optimization, ', date(),'. \n', sep="")
+  message(' ', sep="")
+  message('Beginning optimization, ', date(),'.', sep="")
   for(jj in 1:length(OptimMethods)){
     #
     optimMethod <- OptimMethods[jj]
     #
     if(jj==1){
-      cat('Using Optimization Method: ',optimMethod,'. \n', sep="")
+      message('Using Optimization Method: ',optimMethod,'. ', sep="")
     }else{
-      cat('Using Optimization Method: ',optimMethod,'. ', sep="")
+      message('Using Optimization Method: ',optimMethod,'. ', sep="",appendLF = FALSE)
     }
     #
     if(optimMethod=="Nelder-Mead"){
@@ -244,7 +246,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
     }
     #
     if(jj>1){
-      cat('Change in the log posterior: ',-dsgemode$value - prevlogpost,'. \n', sep="")
+      message('Change in the log posterior: ',round(-dsgemode$value - prevlogpost,5),'. ', sep="")
     }
     #
     parametersTrans <- dsgemode$par
@@ -267,19 +269,21 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
     ConvReport <- "unknown"
   }
   #
-  cat('Optimization over, ', date(),'. \n', sep="")
-  cat(' \n', sep="")
-  cat('Optimizer Convergence Code: ',dsgemode$convergence,'; ',ConvReport,'. \n', sep="")
-  cat(' \n', sep="")
-  cat('Optimizer Iterations: \n', sep="")
-  print(dsgemode$counts)
+  message('Optimization over, ', date(),'. ', sep="")
+  message(' ', sep="")
+  message('Optimizer Convergence Code: ',dsgemode$convergence,'; ',ConvReport,'. ', sep="")
+  if(tables==TRUE){
+    message(' ', sep="")
+    cat('Optimizer Iterations: \n', sep="")
+    print(dsgemode$counts)
+  }
   #
   parMode <- .DSGEParTransform(dsgemode$par,priorform,parbounds,2)
   #
   logMargLikelihood <- .LaplaceMargLikelihood(dsgemode)
   #
-  cat(' \n', sep="")
-  cat('Log Marginal Likelihood: ',logMargLikelihood,'. \n', sep="")
+  message(' ', sep="")
+  message('Log Marginal Likelihood: ',round(logMargLikelihood,5),'.', sep="")
   #
   parModeHessian <- solve(dsgemode$hessian)
   parModeHessian <- diag(parModeHessian)
@@ -299,10 +303,12 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   if(class(parnames)=="character"){
     rownames(ModeTable) <- parnames
   }
-  cat(' \n', sep="")
-  cat('Parameter Estimates and Standard Errors (SE) at the Posterior Mode: \n', sep="")
-  cat(' \n', sep="")
-  print(ModeTable)
+  if(tables==TRUE){
+    message(' ', sep="")
+    message('Parameter Estimates and Standard Errors (SE) at the Posterior Mode: ', sep="")
+    message(' ', sep="")
+    print(ModeTable)
+  }
   #
   rownames(parMode) <- "Parameter:"
   rownames(parModeSEs) <- "Parameter:"
@@ -452,17 +458,17 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   return(rootR)
 }
 
-.DSGEMCMCPrint <- function(MCMCRes,chains,parMode,parModeSEs,parnames){
+.DSGEMCMCPrint <- function(MCMCRes,chains,parMode,parModeSEs,parnames,tables){
   #
   Diagnostics <- NULL
   if(chains==1){
-    cat('Acceptance Rate: ', MCMCRes$acceptRate,'. \n', sep="")
+    message('Acceptance Rate: ', MCMCRes$acceptRate,'. ', sep="")
   }else{
-    cat('Acceptance Rate: ', sep="")
+    message('Acceptance Rate: ', sep="", appendLF=FALSE)
     for(kk in 1:(chains-1)){
-      cat('Chain ',kk,': ', MCMCRes$acceptRate[kk],'; ', sep="")
+      message('Chain ',kk,': ', MCMCRes$acceptRate[kk],'; ', sep="", appendLF=FALSE)
     }
-    cat('Chain ',chains,': ', MCMCRes$acceptRate[chains],'. \n', sep="")
+    message('Chain ',chains,': ', MCMCRes$acceptRate[chains],'. ', sep="")
     #
     # Chain convergence statistics:
     #
@@ -473,10 +479,12 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
       colnames(Diagnostics) <- parnames
     }
     #
-    cat(' \n', sep="")
-    cat('Root-R Chain-Convergence Statistics: \n', sep="")
-    print(Diagnostics)
-    cat(' \n', sep="")
+    if(tables==TRUE){
+      message(' ', sep="")
+      message('Root-R Chain-Convergence Statistics: ', sep="")
+      print(Diagnostics)
+    }
+    message(' ', sep="")
   }
   #
   PostTable <- matrix(NA,nrow=length(parMode),ncol=4)
@@ -489,10 +497,12 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   if(class(parnames)=="character"){
     rownames(PostTable) <- parnames
   }
-  cat(' \n', sep="")
-  cat('Parameter Estimates and Standard Errors: \n', sep="")
-  cat(' \n', sep="")
-  print(PostTable)
+  if(tables==TRUE){
+    message(' ', sep="")
+    message('Parameter Estimates and Standard Errors: ', sep="")
+    message(' ', sep="")
+    print(PostTable)
+  }
   #
   return=list(Diagnostics=Diagnostics)
 }

@@ -13,7 +13,7 @@
 BVARW(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,
       irf.periods=20,keep=10000,burnin=1000,
       XiBeta=1,XiSigma=1,gamma=NULL)
-\method{plot}{BVARW}(obj,save=TRUE,height=13,width=13)
+\method{plot}{BVARW}(obj,type=1,plotSigma=TRUE,save=TRUE,height=13,width=13)
 }
 
 \arguments{

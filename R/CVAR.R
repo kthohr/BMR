@@ -1,4 +1,4 @@
-# 12/06/2014
+# 01/12/2014
 CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
   #
   kerr <- .cvarerrors(mydata,p)
@@ -66,17 +66,15 @@ CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
   #
   for(i in 1:boot){
     SPoints <- sample(c(1:(Tp)),replace=TRUE)
-    ResidDraws[,,i]<-Resids[SPoints,]
+    ResidDraws[,,i] <- Resids[SPoints,]
   }
   #
   kcons <- 0; if(constant==T){kcons<-1}
   #
-  cat('Starting C++, ', date(),'. \n', sep="")
-  #RepsRun<-CVARReps(Beta,Sigma,as.matrix(X),as.matrix(Y),Tp,M,K,kcons,boot,ResidDraws)
+  message('Starting C++, ', date(),'.', sep="")
   RepsRun <- .Call("CVARReps", Beta,Sigma,as.matrix(X),as.matrix(Y),Tp,M,K,kcons,boot,ResidDraws, PACKAGE = "BMR", DUP = FALSE)
-  cat('C++ reps finished, ', date(),'. Now getting IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now getting IRFs.', sep="")
   #
-  #ImpStore <- CVARIRFs(M,K,kcons,boot,irf.periods,RepsRun$Beta,RepsRun$Sigma)
   ImpStore <- .Call("CVARIRFs", M,K,kcons,boot,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
   ImpStore <- ImpStore$ImpStore
   ImpStore2 <- array(NA,dim=c(M,M,irf.periods,boot))

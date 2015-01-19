@@ -1,4 +1,4 @@
-# 12/06/2014
+# 01/12/2015
 BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL){
   #
   kerr <- .bvarwerrors(mydata,cores,p,coefprior,constant,XiBeta,XiSigma,gamma)
@@ -166,13 +166,11 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   #
   ImpStore <- 0
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
-  #RepsRun <- WBVARReps(Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin,keep)
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   RepsRun <- .Call("WBVARReps", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
-  cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   kcons <- 0; if(constant==T){kcons<-1}
-  #ImpStore <- WBVARIRFs(M,K,kcons,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma)
   ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
   ImpStore <- ImpStore$ImpStore
   IRFStore <- array(NA,dim=c(M,M,irf.periods,keep))
@@ -208,9 +206,8 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   #
   ImpStore <- 0
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   #
-  #RepsRunB <- WBVARRepsB(Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin)
   RepsRunB <- .Call("WBVARRepsB", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin, PACKAGE = "BMR", DUP = FALSE)
   #
   cl <- makeCluster(NCore)
@@ -232,7 +229,7 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   BetaArray <- BetaArray[,,1:keep]
   SigmaArray <- SigmaArray[,,1:keep]
   #
-  cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   kcons <- 0; if(constant==T){kcons<-1}
   ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,BetaArray,SigmaArray, PACKAGE = "BMR", DUP = FALSE)
@@ -268,7 +265,6 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
 
 .RepsBFn <- function(Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar){
   #
-  #Res <- WBVARRepsK(Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar)
   Res <- .Call("WBVARRepsK", Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar, PACKAGE = "BMR", DUP = FALSE)
   #
   return(list(Res$Beta,Res$Sigma))

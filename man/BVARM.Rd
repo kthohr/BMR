@@ -13,7 +13,7 @@
 BVARM(mydata,coefprior=NULL,p=4,constant=TRUE,
       irf.periods=20,keep=10000,burnin=1000,
       VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2)
-\method{plot}{BVARM}(obj,save=TRUE,height=13,width=13)
+\method{plot}{BVARM}(obj,type=1,save=TRUE,height=13,width=13)
 }
 
 \arguments{

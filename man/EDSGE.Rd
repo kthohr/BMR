@@ -17,7 +17,8 @@ EDSGE(dsgedata,chains=1,cores=1,
       optimLower=NULL,optimUpper=NULL,
       optimControl=list(),
       DSGEIRFs=TRUE,irf.periods=20,
-      scalepar=1,keep=50000,burnin=10000)
+      scalepar=1,keep=50000,burnin=10000,
+      tables=TRUE)
 \method{plot}{EDSGE}(obj,BinDenom=40,save=FALSE,height=13,width=13)
 }
 
@@ -62,6 +63,8 @@ EDSGE(dsgedata,chains=1,cores=1,
 	The number of replications to keep. If keep is set to zero, the function will end with the normal approximation at the posterior mode.}
 	\item{burnin}{
 	The number of sample burn-in points.}
+  \item{tables}{
+  Whether to print the results of posterior mode estimation and summary statistics of the MCMC run.}
 }
 
 \details{
