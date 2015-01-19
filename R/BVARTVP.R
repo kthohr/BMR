@@ -1,3 +1,4 @@
+# 01/12/2015
 BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.periods=20,irf.points=NULL,keep=10000,burnin=5000,XiBeta=1,XiQ=0.01,gammaQ=NULL,XiSigma=1,gammaS=NULL){
   #
   kerr <- .bvartvperror(mydata,p,coefprior,tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
@@ -6,7 +7,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   #
   kprior <- .bvartvpprior(kdata$Y,kdata$Z,p,kdata$M,kdata$K,kdata$kT,kerr$coefprior,tau,keep,irf.periods,kerr$XiBeta,kerr$XiQ,kerr$gammaQ,kerr$XiSigma,kerr$gammaS)
   #
-  cat('Finished Prior. \n')
+  message('Finished Prior.')
   #
   kreps <- .bvartvpreps(kdata$Y,kdata$y,kdata$Z,kprior$B0Pr,kprior$B0VPr,kprior$invB0VPr,
                        kprior$QPr,kprior$QVPr,kprior$SPr,kprior$SVPr,kprior$QDraw,kprior$Qchol,
@@ -36,7 +37,6 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   }
   #
   # Errors around user-given priors. First, Beta.
-  #
   #
   # Prior on Beta
   if(class(coefprior)=="NULL"){
@@ -160,7 +160,6 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
 
 .bvartvpprior <- function(Y,Z,p,M,K,kT,coefprior,tau,keep,irf.periods,XiBeta,XiQ,gammaQ,XiSigma,gammaS){
   #
-  #
   B0Pr <- matrix(NA,nrow=K,ncol=1); B0VPr <- 0; invB0VPr <- 0
   QPr <- 0; QVPr <- 0; QDraw <- 0; Qchol <- 0
   SPr <- 0; SVPr <- 0; SDraw <- 0; invSDraw <- 0
@@ -192,7 +191,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
       for(i in 1:M){BPr[(i+1),i]<-coefprior[i]}
     }else{BPr <- coefprior}
     #
-    QSortIndex <- matrix(1,ncol=3,nrow=K/M)
+    QSortIndex <- matrix(1,ncol=M,nrow=K/M)
     for(i in 1:M){
       QSortIndex[,i] <- QSortIndex[,i] + (i-1)
     }
@@ -200,7 +199,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
     for(i in 1:p){
       for(k in 1:M){
         for(j in 1:M){
-          QSortIndex[(M*i-1)+j-1,k] <- IndexCount
+          QSortIndex[M*(i-1)+1+j,k] <- IndexCount
           IndexCount = IndexCount + 1
         }
       }
@@ -235,15 +234,15 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
 
 .bvartvpreps <- function(Y,y,Z,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw,K,M,p,kT,keep,burnin,timelab,nIRFs,irf.points,cumulative,irf.periods){
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   RepsRun <- .Call("BVARTVPReps", y,Z,M,K,kT,keep,burnin,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw, PACKAGE = "BMR", DUP = FALSE)
-  cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   BetaDraws <- RepsRun$BetaDraws; QDraws <- RepsRun$QDraws; SDraws <- RepsRun$SDraws
   #
+  # We need to reorder the matrices due to the stacking being not vectorised as we usually have it. Sigma should be okay.
   #
-  #
-  QSortIndex <- matrix(1,ncol=3,nrow=K/M)
+  QSortIndex <- matrix(1,ncol=M,nrow=K/M)
   for(i in 1:M){
     QSortIndex[,i] <- QSortIndex[,i] + (i-1)
   }
@@ -251,13 +250,13 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   for(i in 1:p){
     for(k in 1:M){
       for(j in 1:M){
-        QSortIndex[(M*i-1)+j-1,k] <- IndexCount
+        QSortIndex[M*(i-1)+1+j,k] <- IndexCount
         IndexCount = IndexCount + 1
       }
     }
   }
   QSortIndex <- c(QSortIndex)
-  #
+  # BetaT is for use in IRFs later
   BetaT <- array(0,dim=c(K/M,M,keep,kT+1))
   #
   for(i in 1:keep){
@@ -282,7 +281,6 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
     if(KTC < (nIRFs+1)){
       if(timelab[i] == irf.points[KTC]){
         Beta <- BetaT[,,,i]
-        #
         ImpStore <- .Call("BVARTVPIRFs", M,K/M,keep,irf.periods,Beta,SDraws, PACKAGE = "BMR", DUP = FALSE)
         ImpStore <- ImpStore$ImpStore
         ImpStoreE <- array(NA,dim=c(M,M,irf.periods,keep))

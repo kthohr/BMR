@@ -10,19 +10,19 @@ Bayesian Macroeconometrics in R (`BMR') is a collection of R and C++ routines fo
 \tabular{ll}{
 Package: \tab BMR\cr
 Type: \tab Package\cr
-Version: \tab 0.4.0\cr
-Date: \tab 2014-07-09\cr
-License: \tab GPL\cr
+Version: \tab 0.4.1\cr
+Date: \tab 2015-01-13\cr
+License: \tab GPL-3\cr
 LazyLoad: \tab Yes\cr
 Depends: \tab Rcpp, RcppArmadillo, doSNOW, ggplot2, grid \cr }
 }
 \section{How to cite this package}{
 
- \preformatted{@Manual{OHara2014,
+ \preformatted{@Manual{OHara2015,
  author       = {Keith O'Hara},
  title        = {{BMR}: Bayesian Macroeconometrics in R.},
- year         = {2014},
- note         = {R package version 0.4.0.}}}
+ year         = {2015},
+ note         = {R package version 0.4.1.}}}
 \emph{}
 }
 \section{License}{

@@ -1,266 +1,21 @@
-plot.BVARM <- function(obj,save=FALSE,height=13,width=13){
-  .plotbvarm(obj,save,height,width)
+# 01/12/15
+plot.BVARM <- function(obj,type=1,save=FALSE,height=13,width=13){
+  .plotbvarm(obj,type,save,height,width)
 }
 
-plot.BVARS <- function(obj,save=FALSE,height=13,width=13){
-  .plotbvars(obj,save,height,width)
+plot.BVARS <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
+  .plotbvars(obj,type,plotSigma,save,height,width)
 }
 
-plot.BVARW <- function(obj,save=FALSE,height=13,width=13){
-  .plotbvarw(obj,save,height,width)
+plot.BVARW <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
+  .plotbvarw(obj,type,plotSigma,save,height,width)
 }
 
 plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13){
   .plotbvartvp(obj,percentiles,save,height,width)
 }
 
-.plotbvarm <- function(obj,save=FALSE,height=13,width=13){
-  Betas <- obj$BDraws
-  #
-  mydata <- obj$data
-  constant <- obj$constant
-  p <- floor(dim(Betas)[1]/dim(Betas)[2])
-  M <- as.numeric(dim(Betas)[2])
-  K <- as.numeric(dim(Betas)[1])
-  keep<-as.numeric(dim(Betas)[3])
-  # 
-  BetaPerm <- aperm(Betas,c(3,1,2))
-  #
-  CoefLabels<-character(p*M)
-  jj <- 1
-  for(i in 1:p){
-    for(k in 1:M){
-      CoefLabels[jj]<-paste("L",i,".",k,sep="")
-      jj = jj + 1
-    }
-  }
-  #
-  if(class(dev.list()) != "NULL"){dev.off()}
-  #
-  vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-  #
-  CoefCount <- 1
-  #
-  if(constant==TRUE){
-    for(i in 1:1){
-      if(save==TRUE){cairo_ps(file="Constant.eps",height=(floor(height/M)),width=width)}
-      pushViewport(viewport(layout=grid.layout(1,M)))
-      #
-      for(j in 1:M){
-        VarName <- colnames(mydata)[j]
-        #
-        CFDF <- data.frame(BetaPerm[,i,j])
-        colnames(CFDF) <- "CFDF"
-        #
-        if(j==1){
-          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
-        }else{
-          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
-        }
-        Sys.sleep(0.6)
-      }
-      if(save==TRUE){dev.off()}
-    }
-    for(i in 1:p){
-      SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
-      #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
-      grid.newpage()
-      pushViewport(viewport(layout=grid.layout(M,M)))
-      #
-      for(j in 1:M){
-        for(l in 1:M){
-          VarName <- colnames(mydata)[l]
-          #
-          CFDF <- data.frame(BetaPerm[,((i-1)*M+j+1),l])
-          colnames(CFDF) <- "CFDF"
-          #
-          #j==1 is for the variable title;l==1 is the coefficient label on y-axis
-          if(j==1){
-            if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
-            }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            }
-          }else{
-            if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
-            }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            }
-          }
-          Sys.sleep(0.6)
-        }
-      }
-      if(save==TRUE){dev.off()}
-    }
-  }else{
-    for(i in 1:p){
-      SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
-      #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
-      grid.newpage()
-      pushViewport(viewport(layout=grid.layout(M,M)))
-      #
-      for(j in 1:M){
-        for(l in 1:M){
-          VarName <- colnames(mydata)[l]
-          #
-          CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
-          colnames(CFDF) <- "CFDF"
-          #
-          #j==1 is for the variable title;l==1 is the coefficient label on y-axis
-          if(j==1){
-            if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
-            }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            }
-          }else{
-            if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
-            }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            }
-          }
-          Sys.sleep(0.6)
-        }
-      }
-      if(save==TRUE){dev.off()}
-    }
-  }
-  #
-}
-
-.plotbvars <- function(obj,save=FALSE,height=13,width=13){
-  Psis <- obj$PDraws
-  Betas <- obj$BDraws
-  #
-  mydata <- obj$data
-  p <- floor(dim(Betas)[1]/dim(Betas)[2])
-  M <- as.numeric(dim(Betas)[2])
-  K <- as.numeric(dim(Betas)[1])
-  keep<-as.numeric(dim(Betas)[3])
-  # 
-  BetaPerm <- aperm(Betas,c(3,1,2))
-  PsiPerm <- aperm(Psis,c(3,1,2))
-  #
-  CoefLabels<-character(p*M)
-  jj <- 1
-  for(i in 1:p){
-    for(k in 1:M){
-      CoefLabels[jj]<-paste("L",i,".",k,sep="")
-      jj = jj + 1
-    }
-  }
-  #
-  if(class(dev.list()) != "NULL"){dev.off()}
-  #
-  vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-  #
-  CoefCount <- 1
-  #
-  for(i in 1:1){
-    if(save==TRUE){cairo_ps(file="Psi.eps",height=(floor(height/M)),width=width)}
-    pushViewport(viewport(layout=grid.layout(1,M)))
-    #
-    for(j in 1:M){
-      VarName <- colnames(mydata)[j]
-      #
-      CFDF <- data.frame(PsiPerm[,1,j])
-      colnames(CFDF) <- "CFDF"
-      #
-      if(j==1){
-        print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Psi") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
-      }else{
-        print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
-      }
-      Sys.sleep(0.6)
-    }
-    if(save==TRUE){dev.off()}
-  }
-  #
-  for(i in 1:p){
-    SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
-    #
-    if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(M,M)))
-    #
-    for(j in 1:M){
-      for(l in 1:M){
-        VarName <- colnames(mydata)[l]
-        #
-        CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
-        colnames(CFDF) <- "CFDF"
-        #
-        #j==1 is for the variable title;l==1 is the coefficient label on y-axis
-        if(j==1){
-          if(l==1){
-            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            CoefCount <- CoefCount + 1
-          }else{
-            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-          }
-        }else{
-          if(l==1){
-            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-            CoefCount <- CoefCount + 1
-          }else{
-            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-          }
-        }
-        Sys.sleep(0.6)
-      }
-    }
-    if(save==TRUE){dev.off()}
-  }
-  #
-  plotSigma <- TRUE
-  if(plotSigma==TRUE){
-    Sigmas <- obj$SDraws
-    SigmaPerm <- aperm(Sigmas,c(3,1,2))
-    #
-    SaveSig <- paste("Sigma.eps",sep="")
-    if(save==TRUE){cairo_ps(file=SaveSig,height=height,width=width)}
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(M,M)))
-    #
-    for(j in 1:M){
-      for(l in 1:M){
-        VarNameY <- colnames(mydata)[j]
-        VarNameX <- colnames(mydata)[l]
-        #
-        SDF <- data.frame(SigmaPerm[,j,l])
-        colnames(SDF) <- "SDF"
-        #
-        #j==1 is for the variable title;l==1 is the coefficient label on y-axis
-        if(j==1){
-          if(l==1){
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
-          }else{
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
-          }
-        }else{
-          if(l==1){
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
-          }else{
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
-          }
-        }
-        Sys.sleep(0.6)
-      }
-    }
-    if(save==TRUE){dev.off()}
-  }
-  #
-}
-
-.plotbvarw <- function(obj,save=FALSE,height=13,width=13){
+.plotbvarm <- function(obj,type=1,save=FALSE,height=13,width=13){
   Betas <- obj$BDraws
   #
   mydata <- obj$data
@@ -286,6 +41,8 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
   #
   CoefCount <- 1
+  BinDenom <- 40
+  ParamBin <- 1
   #
   if(constant==TRUE){
     for(i in 1:1){
@@ -299,9 +56,19 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
         colnames(CFDF) <- "CFDF"
         #
         if(j==1){
-          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          if(type==1){
+            ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+          }else{
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          }
         }else{
-          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          if(type==1){
+            ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+          }else{
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          }
         }
         Sys.sleep(0.6)
       }
@@ -324,17 +91,39 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
           #j==1 is for the variable title;l==1 is the coefficient label on y-axis
           if(j==1){
             if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
             }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
             }
           }else{
             if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
             }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
             }
           }
           Sys.sleep(0.6)
@@ -360,17 +149,39 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
           #j==1 is for the variable title;l==1 is the coefficient label on y-axis
           if(j==1){
             if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
             }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
             }
           }else{
             if(l==1){
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
-              CoefCount <- CoefCount + 1
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
             }else{
-              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
             }
           }
           Sys.sleep(0.6)
@@ -380,7 +191,126 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
     }
   }
   #
-  plotSigma <- TRUE
+}
+
+.plotbvars <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
+  Psis <- obj$PDraws
+  Betas <- obj$BDraws
+  #
+  mydata <- obj$data
+  p <- floor(dim(Betas)[1]/dim(Betas)[2])
+  M <- as.numeric(dim(Betas)[2])
+  K <- as.numeric(dim(Betas)[1])
+  keep<-as.numeric(dim(Betas)[3])
+  #
+  BetaPerm <- aperm(Betas,c(3,1,2))
+  PsiPerm <- aperm(Psis,c(3,1,2))
+  #
+  CoefLabels<-character(p*M)
+  jj <- 1
+  for(i in 1:p){
+    for(k in 1:M){
+      CoefLabels[jj]<-paste("L",i,".",k,sep="")
+      jj = jj + 1
+    }
+  }
+  #
+  if(class(dev.list()) != "NULL"){dev.off()}
+  #
+  vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+  #
+  CoefCount <- 1
+  BinDenom <- 40
+  ParamBin <- 1
+  #
+  for(i in 1:1){
+    if(save==TRUE){cairo_ps(file="Psi.eps",height=(floor(height/M)),width=width)}
+    pushViewport(viewport(layout=grid.layout(1,M)))
+    #
+    for(j in 1:M){
+      VarName <- colnames(mydata)[j]
+      #
+      CFDF <- data.frame(PsiPerm[,1,j])
+      colnames(CFDF) <- "CFDF"
+      #
+      if(j==1){
+        if(type==1){
+          ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Psi") + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+        }else{
+          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Psi") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+        }
+      }else{
+        if(type==1){
+          ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+        }else{
+          print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+        }
+      }
+      Sys.sleep(0.6)
+    }
+    if(save==TRUE){dev.off()}
+  }
+  #
+  for(i in 1:p){
+    SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
+    #
+    if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+    grid.newpage()
+    pushViewport(viewport(layout=grid.layout(M,M)))
+    #
+    for(j in 1:M){
+      for(l in 1:M){
+        VarName <- colnames(mydata)[l]
+        #
+        CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
+        colnames(CFDF) <- "CFDF"
+        #
+        #j==1 is for the variable title;l==1 is the coefficient label on y-axis
+        if(j==1){
+          if(l==1){
+            if(type==1){
+              ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              CoefCount <- CoefCount + 1
+            }else{
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              CoefCount <- CoefCount + 1
+            }
+          }else{
+            if(type==1){
+              ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+            }
+          }
+        }else{
+          if(l==1){
+            if(type==1){
+              ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              CoefCount <- CoefCount + 1
+            }else{
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              CoefCount <- CoefCount + 1
+            }
+          }else{
+            if(type==1){
+              ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+            }
+          }
+        }
+        Sys.sleep(0.6)
+      }
+    }
+    if(save==TRUE){dev.off()}
+  }
+  #
   if(plotSigma==TRUE){
     Sigmas <- obj$SDraws
     SigmaPerm <- aperm(Sigmas,c(3,1,2))
@@ -401,15 +331,270 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
         #j==1 is for the variable title;l==1 is the coefficient label on y-axis
         if(j==1){
           if(l==1){
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + labs(title=paste(VarNameX)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
           }else{
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + labs(title=paste(VarNameX)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
           }
         }else{
           if(l==1){
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
           }else{
-            print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
+          }
+        }
+        Sys.sleep(0.6)
+      }
+    }
+    if(save==TRUE){dev.off()}
+  }
+  #
+}
+
+.plotbvarw <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
+  Betas <- obj$BDraws
+  #
+  mydata <- obj$data
+  constant <- obj$constant
+  p <- floor(dim(Betas)[1]/dim(Betas)[2])
+  M <- as.numeric(dim(Betas)[2])
+  K <- as.numeric(dim(Betas)[1])
+  keep <- as.numeric(dim(Betas)[3])
+  # 
+  BetaPerm <- aperm(Betas,c(3,1,2))
+  #
+  CoefLabels<-character(p*M)
+  jj <- 1
+  for(i in 1:p){
+    for(k in 1:M){
+      CoefLabels[jj]<-paste("L",i,".",k,sep="")
+      jj = jj + 1
+    }
+  }
+  #
+  if(class(dev.list()) != "NULL"){dev.off()}
+  #
+  vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+  #
+  CoefCount <- 1
+  BinDenom <- 40
+  ParamBin <- 1
+  #
+  if(constant==TRUE){
+    for(i in 1:1){
+      if(save==TRUE){cairo_ps(file="Constant.eps",height=(floor(height/M)),width=width)}
+      pushViewport(viewport(layout=grid.layout(1,M)))
+      #
+      for(j in 1:M){
+        VarName <- colnames(mydata)[j]
+        #
+        CFDF <- data.frame(BetaPerm[,i,j])
+        colnames(CFDF) <- "CFDF"
+        #
+        if(j==1){
+          if(type==1){
+            ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+          }else{
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          }
+        }else{
+          if(type==1){
+            ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
+          }else{
+            print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
+          }
+        }
+        Sys.sleep(0.6)
+      }
+      if(save==TRUE){dev.off()}
+    }
+    for(i in 1:p){
+      SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
+      #
+      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      grid.newpage()
+      pushViewport(viewport(layout=grid.layout(M,M)))
+      #
+      for(j in 1:M){
+        for(l in 1:M){
+          VarName <- colnames(mydata)[l]
+          #
+          CFDF <- data.frame(BetaPerm[,((i-1)*M+j+1),l])
+          colnames(CFDF) <- "CFDF"
+          #
+          #j==1 is for the variable title;l==1 is the coefficient label on y-axis
+          if(j==1){
+            if(l==1){
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
+            }else{
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
+            }
+          }else{
+            if(l==1){
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
+            }else{
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
+            }
+          }
+          Sys.sleep(0.6)
+        }
+      }
+      if(save==TRUE){dev.off()}
+    }
+  }else{
+    for(i in 1:p){
+      SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
+      #
+      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      grid.newpage()
+      pushViewport(viewport(layout=grid.layout(M,M)))
+      #
+      for(j in 1:M){
+        for(l in 1:M){
+          VarName <- colnames(mydata)[l]
+          #
+          CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
+          colnames(CFDF) <- "CFDF"
+          #
+          #j==1 is for the variable title;l==1 is the coefficient label on y-axis
+          if(j==1){
+            if(l==1){
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
+            }else{
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
+            }
+          }else{
+            if(l==1){
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(paste(CoefLabels[CoefCount])) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+                CoefCount <- CoefCount + 1
+              }
+            }else{
+              if(type==1){
+                ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkblue",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+              }else{
+                print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
+              }
+            }
+          }
+          Sys.sleep(0.6)
+        }
+      }
+      if(save==TRUE){dev.off()}
+    }
+  }
+  #
+  if(plotSigma==TRUE){
+    Sigmas <- obj$SDraws
+    SigmaPerm <- aperm(Sigmas,c(3,1,2))
+    #
+    SaveSig <- paste("Sigma.eps",sep="")
+    if(save==TRUE){cairo_ps(file=SaveSig,height=height,width=width)}
+    grid.newpage()
+    pushViewport(viewport(layout=grid.layout(M,M)))
+    #
+    for(j in 1:M){
+      for(l in 1:M){
+        VarNameY <- colnames(mydata)[j]
+        VarNameX <- colnames(mydata)[l]
+        #
+        SDF <- data.frame(SigmaPerm[,j,l])
+        colnames(SDF) <- "SDF"
+        #
+        #j==1 is for the variable title;l==1 is the coefficient label on y-axis
+        if(j==1){
+          if(l==1){
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + labs(title=paste(VarNameX)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
+          }else{
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + labs(title=paste(VarNameX)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarNameX)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
+          }
+        }else{
+          if(l==1){
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(paste(VarNameY)) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
+          }else{
+            if(type==1){
+              ParamBin <- (max(SDF) - min(SDF))/BinDenom
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="orchid4",fill="black",binwidth=ParamBin) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(j,l))
+            }else{
+              print(ggplot(SDF,aes(x=SDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="orchid4",alpha=0.25),vp = vplayout(j,l))
+            }
           }
         }
         Sys.sleep(0.6)
@@ -638,7 +823,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           ParName <- ParNames[ParamCount]
           #
           ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
-          print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName),vp = vplayout(i,k))
+          print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           #
           ParamCount <- ParamCount + 1
           #
@@ -676,7 +861,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             colnames(ParamDF) <- c("DSGEPar","Keep")
             ParName <- ParNames[ParamCount]
             #
-            print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black"),vp = vplayout(i,k))
+            print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             ParamCount <- ParamCount + 1
             #
@@ -765,7 +950,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           ParName <- ParNames[ParamCount]
           #
           ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
-          print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName),vp = vplayout(i,k))
+          print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           #
           ParamCount <- ParamCount + 1
           #
@@ -803,7 +988,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             colnames(ParamDF) <- c("DSGEPar","Keep")
             ParName <- ParNames[ParamCount]
             #
-            print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black"),vp = vplayout(i,k))
+            print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             ParamCount <- ParamCount + 1
             #

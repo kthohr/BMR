@@ -1,4 +1,4 @@
-# 12/07/2014
+# 01/12/2015
 BVARS.default <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20,keep=10000,burnin=1000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL){
   #
   kerr <- .bvarserrors(mydata,p,coefprior,psiprior,XiPsi,HP1,HP4,gamma)
@@ -157,11 +157,12 @@ BVARS.default <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20
   #
   ImpStore <- 0
   #
-  cat('Starting Gibbs C++, ', date(),'. \n', sep="")
+  message('Starting Gibbs C++, ', date(),'.', sep="")
   RepsRun <- .Call("SBVARReps", as.matrix(X),as.matrix(Y),d,dX,yd,Zd,PsiPr,invPsiVPr,BPr,Beta,invBVPr,Sigma,SigmaML,gamma,Tp,M,p,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
-  cat('C++ reps finished, ', date(),'. Now generating IRFs. \n', sep="")
+  message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   ImpStore <- .Call("SBVARIRFs", M,K,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
+  #
   ImpStore <- ImpStore$ImpStore
   ImpStore2 <- array(NA,dim=c(M,M,irf.periods,keep))
   for(i in 1:keep){

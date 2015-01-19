@@ -13,7 +13,7 @@
 BVARS(mydata,psiprior=NULL,coefprior=NULL,p=4,
       irf.periods=20,keep=10000,burnin=1000,
       XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
-\method{plot}{BVARS}(obj,save=TRUE,height=13,width=13)
+\method{plot}{BVARS}(obj,type=1,plotSigma=TRUE,save=TRUE,height=13,width=13)
 }
 
 \arguments{
