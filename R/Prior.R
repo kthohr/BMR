@@ -1,3 +1,4 @@
+# 01/23/15
 prior <- function(priorform,priorpars,parname=NULL,moments=TRUE,NR=NULL,NC=NULL){
   .priorfunction(priorform,priorpars,parname,moments,NR,NC)
 }

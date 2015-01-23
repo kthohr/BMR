@@ -1,3 +1,4 @@
+# 01/23/15
 forecast.BVARM <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
   forecastdata <- .forecastbvarm(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
@@ -16,6 +17,16 @@ forecast.BVARW <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.0
 forecast.CVAR <- function(obj,periods=20,plot=TRUE,confint=0.95,backdata=0,save=FALSE,height=13,width=11){
   forecastdata <- .forecastcvar(obj,periods,plot,confint,backdata,save,height,width)
   return=list(PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
+}
+
+forecast.EDSGE <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  forecastdata <- .forecastdsge(obj,periods,plot,percentiles,useMean,backdata,save,height,width)
+  return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
+}
+
+forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  forecastdata <- .forecastdsgevar(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
+  return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
 .forecastbvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
@@ -371,9 +382,104 @@ forecast.CVAR <- function(obj,periods=20,plot=TRUE,confint=0.95,backdata=0,save=
   return=list(PointForecast=Forecasts[,,1],Forecasts=Forecasts)
 }
 
-forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
-  forecastdata <- .forecastdsgevar(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
-  return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
+.forecastdsge <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  DSGEPars <- obj$Parameters
+  partomats <- obj$partomats
+  ObserveMat <- obj$ObserveMat
+  #
+  Y <- obj$data
+  Y <- as.matrix(Y,ncol=(ncol(Y)))
+  M <- as.numeric(ncol(Y))
+  p <- 1
+  K <- 1 + p*M
+  runs <- nrow(DSGEPars)
+  #
+  dsgemats <- partomats(DSGEPars[1,])
+  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  #
+  IterMat <- diag(ncol(StateMats$F))
+  Forecasts <- array(0,dim=c(periods,M,runs))
+  #
+  for(jj in 1:runs){
+    dsgemats <- partomats(DSGEPars[jj,])
+    dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+    StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+    #
+    IterMat <- diag(ncol(StateMats$F))
+    IState <- .Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)$dsgestate[,nrow(Y)]
+    IState <- matrix(IState)
+    #
+    for(kk in 1:periods){
+      IterMat <- StateMats$F%*%IterMat
+      Forecasts[kk,,jj] <- t(dsgemats$ObsCons + t(ObserveMat)%*%IterMat%*%IState)
+    }
+  }
+  #
+  ForecastsSorted <- apply(Forecasts,c(1,2),sort)
+  ForecastsSorted <- aperm(ForecastsSorted,c(2,3,1))
+  ForecastsMean <- apply(ForecastsSorted,c(1,2),mean)
+  #
+  UpperCInt <- round(percentiles[3]*runs)
+  MidCInt <- round(percentiles[2]*runs)
+  LowCInt <- round(percentiles[1]*runs)
+  #
+  # Plotting
+  #
+  if(plot==T){
+    if(class(dev.list()) != "NULL"){dev.off()}
+    #
+    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+    #
+    ForecastData <- array(NA,dim=c((periods+backdata),4,M))
+    for(i in 1:M){
+      # Use the mean or selected percentile?
+      if(useMean == T){
+        FDataTemp<-data.frame(ForecastsSorted[,i,LowCInt],ForecastsMean[,i],ForecastsSorted[,i,UpperCInt])
+      }else{
+        FDataTemp<-data.frame(ForecastsSorted[,i,LowCInt],ForecastsSorted[,i,MidCInt],ForecastsSorted[,i,UpperCInt])
+      }
+      FDataTemp<-as.matrix(FDataTemp)
+      #
+      if(backdata > 0){
+        FDataTemp<-rbind(matrix(rep(Y[(nrow(Y)-backdata+1):nrow(Y),i],3),ncol=3),FDataTemp)
+      }
+      FDataTemp<-cbind(FDataTemp,(as.numeric(nrow(Y))-backdata+1):(nrow(Y)+periods))
+      ForecastData[,,i] <- FDataTemp
+    }
+    #
+    if(class(dev.list()) != "NULL"){dev.off()}
+    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    pushViewport(viewport(layout=grid.layout(M,1)))
+    #
+    # Include a dashed line to mark where the forecast begins
+    if(backdata > 0){
+      for(i in 1:M){
+        FCastName <- colnames(obj$data)[i]
+        FCDF <- ForecastData[,,i]
+        FCDF <- data.frame(FCDF)
+        colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+        #
+        print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+        #
+        Sys.sleep(1)
+      }
+    }else{
+      for(i in 1:M){
+        FCastName <- colnames(obj$data)[i]
+        FCDF <- ForecastData[,,i]
+        FCDF <- data.frame(FCDF)
+        colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+        #
+        print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+        #
+        Sys.sleep(1)
+      }
+    }
+    if(save==TRUE){dev.off()}
+  }
+  #
+  return=list(MeanForecast=ForecastsMean,PointForecast=ForecastsSorted[,,MidCInt],Forecasts=Forecasts)
 }
 
 .forecastdsgevar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){

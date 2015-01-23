@@ -41,7 +41,6 @@ SEXP CVARReps( SEXP mBeta, SEXP mSigma, SEXP mX, SEXP mY, SEXP mTp, SEXP mM,
     //
     arma::mat BetaS = Beta;
     arma::mat SigmaS = Sigma;
-    //float SigmaS2 = Tp/((Tp-K)*(Tp-K));
     float SigmaS2 = 1/(Tp-K);
     arma::mat Epsilon = Y;
     Epsilon.zeros();
