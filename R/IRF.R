@@ -1,3 +1,4 @@
+# 01/23/15
 IRF.BVARM <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
   .irfbvarm(obj,percentiles,save,height,width)
 }
@@ -16,6 +17,18 @@ IRF.CVAR <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13
 
 IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13){
   .irfbvartvp(obj,whichirfs,percentiles,save,height,width)
+}
+
+IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
+  .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
+}
+
+IRF.EDSGE <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+  .irfedsge(obj,ObservableIRFs,varnames,percentiles,save,height,width)
+}
+
+IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+  .irfdsgevar(obj,varnames,percentiles,save,height,width)
 }
 
 .irfbvarm <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
@@ -313,18 +326,6 @@ IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE
   }
   if(save==TRUE){dev.off()}
   #
-}
-
-IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
-  .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-}
-
-IRF.EDSGE <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-  .irfedsge(obj,ObservableIRFs,varnames,percentiles,save,height,width)
-}
-
-IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-  .irfdsgevar(obj,varnames,percentiles,save,height,width)
 }
 
 .irfsdsge <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){

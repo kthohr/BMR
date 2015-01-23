@@ -1,4 +1,4 @@
-# 01/12/15
+# 01/23/15
 plot.BVARM <- function(obj,type=1,save=FALSE,height=13,width=13){
   .plotbvarm(obj,type,save,height,width)
 }
@@ -13,6 +13,14 @@ plot.BVARW <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
 
 plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13){
   .plotbvartvp(obj,percentiles,save,height,width)
+}
+
+plot.EDSGE <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+  .plotedsge(obj,BinDenom,MCMCPlot,save,height,width)
+}
+
+plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+  .plotdsgevar(obj,BinDenom,MCMCPlot,save,height,width)
 }
 
 .plotbvarm <- function(obj,type=1,save=FALSE,height=13,width=13){
@@ -735,14 +743,6 @@ plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,wid
     }
   }
   #
-}
-
-plot.EDSGE <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
-  .plotedsge(obj,BinDenom,MCMCPlot,save,height,width)
-}
-
-plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
-  .plotdsgevar(obj,BinDenom,MCMCPlot,save,height,width)
 }
 
 .plotedsge <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
