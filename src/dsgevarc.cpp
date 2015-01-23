@@ -110,7 +110,7 @@ SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , S
     arma::mat invGammaBarXX = arma::inv_sympd(GammaBarXX);
     arma::mat SigmaEpsilon = GammaYY - GammaXY*invGammaXX*trans(GammaXY);
     arma::mat SigmaHatEpsilon = GammaBarYY - trans(GammaBarXY)*invGammaBarXX*GammaBarXY;
-    #
+    //
     arma::mat invlambdaXX = invlambda*XX;
     double Term1 = -M2*log(arma::det(GammaXX + invlambdaXX)) + M2*log(arma::det(GammaXX));
     arma::mat invlambdaSigma = (1 + invlambda)*SigmaHatEpsilon;
@@ -149,7 +149,7 @@ SEXP DSGEVARLikelihoodInf( SEXP mYY , SEXP mXY , SEXP mXX ,
     arma::mat SigmaEpsilon = GammaYY - GammaXY*invGammaXX*trans(GammaXY);
     arma::mat Beta = invGammaXX*trans(GammaXY);
     arma::mat SigmaBarEpsilon = YY + trans(Beta)*XX*Beta - trans(Beta)*XY - trans(XY)*Beta;
-    #
+    //
     double logLikelihood = - (((M*Tp)/2)*log(2*arma::datum::pi)) - ((Tp/2)*log(arma::det(SigmaEpsilon))) - ((Tp/2)*arma::trace(arma::inv_sympd(SigmaEpsilon)*SigmaBarEpsilon));
     //
     return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);

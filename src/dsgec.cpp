@@ -257,7 +257,7 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP 
     arma::mat StateFiltered = StatePredicted + KalmanGain*KalmanResid;
     arma::mat StateCovFiltered = StateCovPredicted - KalmanGain*tObserveMat*StateCovPredicted;
     LogLikelihood += nlog2pi + log(arma::det(Sigma)) + trans(KalmanResid)*invSigma*KalmanResid;
-    #
+    //
     for(i=2; i<=T; i++){
       StatePredicted = F*StateFiltered;
       StateCovPredicted = F*StateCovFiltered*tF + GQG;
