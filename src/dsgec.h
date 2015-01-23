@@ -27,4 +27,6 @@ RcppExport SEXP DSGEKalman( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP, SEXP,
                             SEXP , SEXP );
 RcppExport SEXP DSGECR( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP, SEXP, 
                         SEXP , SEXP );
+RcppExport SEXP DSGEKalmanFilt( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP, SEXP, 
+                                SEXP , SEXP );
 #endif
