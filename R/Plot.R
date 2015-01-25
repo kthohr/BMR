@@ -930,7 +930,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   for(j in 1:plotpages){
     #
     if(save==TRUE){
-      if(nParGraphs==1){
+      if(plotpages==1){
         cairo_ps(file="DSGEParameters.eps",height=height,width=width)
       }else{
         SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
@@ -965,11 +965,11 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   if(MCMCPlot==TRUE){
     ParamCount <- 1
-    for(j in 1:nParGraphs){
+    for(j in 1:plotpages){
       #
       if(save==TRUE){
         if(class(dev.list()) != "NULL"){dev.off()}
-        if(nParGraphs==1){
+        if(plotpages==1){
           cairo_ps(file="MCMCPlot.eps",height=height,width=width)
         }else{
           SaveParam <- paste("MCMCPlot_",j,".eps",sep="")
