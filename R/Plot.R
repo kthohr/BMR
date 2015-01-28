@@ -754,9 +754,6 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     stop("no MCMC draws detected.\n",call.=FALSE)
   }
   #
-  library(ggplot2)
-  library(grid)
-  #
   if(class(dev.list()) != "NULL"){dev.off()}
   #
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
