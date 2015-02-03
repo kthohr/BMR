@@ -1,10 +1,10 @@
 Package: BMR
 Title: Bayesian Macroeconometrics in R
-Version: 0.4.2
-Date: 2015-01-23
+Version: 0.4.3
+Date: 2015-02-06
 Author: Keith O'Hara
 Maintainer: Keith O'Hara <keith.ohara@nyu.edu>
 Description: A package for estimating Bayesian macroeconometric models.
 License: GPL-3
-Depends: Rcpp (>= 0.11.3), RcppArmadillo (>= 0.4.6.0), doSNOW (>= 1.0.12), ggplot2 (>= 1.0.0), grid
+Depends: Rcpp (>= 0.11.4), RcppArmadillo (>= 0.4.6.4.0), doSNOW (>= 1.0.12), ggplot2 (>= 1.0.0), grid
 LinkingTo: Rcpp, RcppArmadillo, doSNOW, ggplot2, grid

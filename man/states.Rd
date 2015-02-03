@@ -17,9 +17,9 @@ states(obj,percentiles=c(.05,.50,.95),
 }
 
 \arguments{
-  For objects of class `EDSGE',
+  For objects of class `EDSGE' or `DSGEVAR',
   \item{obj}{
-  An object of class `EDSGE'.}
+  An object of class `EDSGE' or `DSGEVAR'.}
 	\item{percentiles}{
 	The percentiles of the distribution the user wants to use.}
   \item{varnames}{
@@ -35,7 +35,7 @@ states(obj,percentiles=c(.05,.50,.95),
 }
 
 \details{
-  This function will work with DSGE models estimated with BMR.
+  This function will work with DSGE and DSGEVAR models estimated with BMR.
 }
 
 \value{
