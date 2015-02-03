@@ -198,6 +198,7 @@ SEXP UhligCpp( SEXP mA, SEXP mB, SEXP mC, SEXP mD, SEXP mF, SEXP mG, SEXP mH,
 SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
                  SEXP mR, SEXP mMaxIter )
 {
+  //
   try {
     arma::mat dsgedata = as<arma::mat>(mdsgedata);
     arma::mat ObserveMat = as<arma::mat>(mObserveMat);
@@ -275,16 +276,19 @@ SEXP DSGEKalman( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP 
     //
     return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
   } catch( std::exception &ex ) {
-    forward_exception_to_r( ex );
+    //forward_exception_to_r( ex );
   } catch(...) {
     ::Rf_error( "BMR: DSGE Kalman C++ exception (unknown reason)" );
   }
-  return R_NilValue;
+  //return R_NilValue;
+  double LLKerr = 1000000;
+  return Rcpp::List::create(Rcpp::Named("dsgelike") = LLKerr);
 }
 
 SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
              SEXP mR, SEXP mMaxIter )
 {
+  //
   try {
     arma::mat dsgedata = as<arma::mat>(mdsgedata);
     arma::mat ObserveMat = as<arma::mat>(mObserveMat);
@@ -388,11 +392,13 @@ SEXP DSGECR( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, 
     //
     return Rcpp::List::create(Rcpp::Named("dsgelike") = LogLikelihood);
   } catch( std::exception &ex ) {
-    forward_exception_to_r( ex );
+  //  forward_exception_to_r( ex );
   } catch(...) {
     ::Rf_error( "BMR: DSGE CR C++ exception (unknown reason)" );
   }
-  return R_NilValue;
+  //return R_NilValue;
+  double LLKerr = 1000000;
+  return Rcpp::List::create(Rcpp::Named("dsgelike") = LLKerr);
 }
 // This returns the period-by-period likelihood value and filtered values of the state variables.
 SEXP DSGEKalmanFilt( SEXP mdsgedata, SEXP mObserveMat, SEXP mObsCons, SEXP mF, SEXP mG, SEXP mN, SEXP mshocks, 
