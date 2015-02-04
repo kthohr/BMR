@@ -117,14 +117,16 @@ SEXP DSGEVARLikelihood( SEXP mlogGPR, SEXP mXX, SEXP mGammaYY, SEXP mGammaXY , S
     double Term2 = -((Tp + lambdaT - M*p - kcons)/2)*log(arma::det( invlambdaSigma ));
     double Term3 = ((lambdaT - M*p - kcons)/2)*log(arma::det(SigmaEpsilon));
     double logLikelihood = Term1 + Term2 + Term3 + logGPR - (((M*Tp)/2)*log(lambdaT*arma::datum::pi));
-    //
+    // (note that this is not the negative of the loglikelihood)
     return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);
   } catch( std::exception &ex ) {
-    forward_exception_to_r( ex );
+    //forward_exception_to_r( ex );
   } catch(...) {
     ::Rf_error( "BMR: DSGEVAR Likelihood C++ exception (unknown reason)" );
   }
-  return R_NilValue;
+  //return R_NilValue;
+  double LLKerr = -1000000;
+  return Rcpp::List::create(Rcpp::Named("logLikelihood") = LLKerr);
 }
 
 SEXP DSGEVARLikelihoodInf( SEXP mYY , SEXP mXY , SEXP mXX , 
@@ -151,14 +153,16 @@ SEXP DSGEVARLikelihoodInf( SEXP mYY , SEXP mXY , SEXP mXX ,
     arma::mat SigmaBarEpsilon = YY + trans(Beta)*XX*Beta - trans(Beta)*XY - trans(XY)*Beta;
     //
     double logLikelihood = - (((M*Tp)/2)*log(2*arma::datum::pi)) - ((Tp/2)*log(arma::det(SigmaEpsilon))) - ((Tp/2)*arma::trace(arma::inv_sympd(SigmaEpsilon)*SigmaBarEpsilon));
-    //
+    // (note that this is not the negative of the loglikelihood)
     return Rcpp::List::create(Rcpp::Named("logLikelihood") = logLikelihood);
   } catch( std::exception &ex ) {
-    forward_exception_to_r( ex );
+    //forward_exception_to_r( ex );
   } catch(...) {
     ::Rf_error( "BMR: DSGEVAR Likelihood C++ exception (unknown reason)" );
   }
-  return R_NilValue;
+  //return R_NilValue;
+  double LLKerr = -1000000;
+  return Rcpp::List::create(Rcpp::Named("logLikelihood") = LLKerr);
 }
 
 SEXP DSGEVARReps( SEXP mGammaBarYY , SEXP mGammaBarXY , SEXP mGammaBarXX , SEXP mGXX , 
