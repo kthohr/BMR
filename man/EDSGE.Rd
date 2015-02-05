@@ -6,7 +6,7 @@
 \title{DSGE Estimation.}
 
 \description{
-  Estimating a DSGE model.
+  Estimate a DSGE model.
 }
 
 \usage{
@@ -98,7 +98,7 @@ The function returns an object of class EDSGE, which contains:
 \author{Keith O'Hara}
 
 \seealso{
-  \code{\link{plot}}, \code{\link{optim}}
+  \code{\link{forecast}}, \code{\link{IRF}}, \code{\link{optim}}, \code{\link{plot}}, \code{\link{states}}.
 }
 
 \examples{

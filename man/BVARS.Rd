@@ -6,7 +6,7 @@
 \title{BVAR with Steady-State Prior.}
 
 \description{
-  Estimating a Bayesian VAR with a steady-state prior.
+  Estimate a Bayesian VAR with steady-state prior.
 }
 
 \usage{
@@ -73,7 +73,7 @@ The function returns an object of class BVARS, which contains:
 }
 
 \seealso{
-  \code{\link{plot}}
+  \code{\link{forecast}}, \code{\link{IRF}}, \code{\link{plot}}.
 }
 
 \examples{
@@ -81,7 +81,11 @@ The function returns an object of class BVARS, which contains:
 data(BMRVARData)
 mycfp = c(0.9,0.95,0.95)
 mypsi = c(3,6,5)
-testbvars <- BVARS(USMacroData[,2:4],mypsi,mycfp,p=4,irf.periods=20,keep=20000,burnin=5000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
+testbvars <- BVARS(USMacroData[,2:4],mypsi,mycfp,p=4,irf.periods=20,
+                   keep=20000,burnin=5000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
+plot(testbvars,save=F)
+IRF(testbvars,save=F)
+forecast(testbvars,shocks=T,backdata=10,save=F)
 }
 }
 
