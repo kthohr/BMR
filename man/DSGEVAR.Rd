@@ -6,7 +6,7 @@
 \title{DSGE-VAR Estimation.}
 
 \description{
-  Estimating a DSGE-VAR model.
+  Estimate a DSGE-VAR model.
 }
 
 \usage{
@@ -112,7 +112,7 @@ The function returns an object of class DSGEVAR, which contains:
 \author{Keith O'Hara}
 
 \seealso{
-  \code{\link{plot}}, \code{\link{optim}}
+  \code{\link{forecast}}, \code{\link{IRF}}, \code{\link{optim}}, \code{\link{plot}}, \code{\link{states}}.
 }
 
 \examples{

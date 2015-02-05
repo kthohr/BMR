@@ -108,7 +108,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     #
     IRFDVs <- aperm(IRFDVs,c(2,3,1,4)); IRFDVs <- aperm(IRFDVs,c(1,2,4,3))
     #
-    message('DSGEVAR IRFs finished, ', date(),'. ', sep="")
+    message('DSGE-VAR IRFs finished, ', date(),'. ', sep="")
   }
   #
   dsgevarret <- list(Parameters=DSGEVARMCMCRes$parameters,Beta=DSGEVARMCMCRes$Beta,Sigma=DSGEVARMCMCRes$Sigma,DSGEIRFs=IRFDs,DSGEVARIRFs=IRFDVs,lambda=lambda,p=p,parMode=parMode,ModeHessian=dsgemode$hessian,logMargLikelihood=Mode$logMargLikelihood,scalepar=scalepar,AcceptanceRate=DSGEVARMCMCRes$acceptRate,RootRConvStats=PostMCMCInfo$Diagnostics,constant=constant,ObserveMat=ObserveMat,data=dsgedataRet,partomats=partomats,priorform=priorformRet,priorpars=priorpars,parbounds=parbounds)

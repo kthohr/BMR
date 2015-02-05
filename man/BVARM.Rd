@@ -6,7 +6,7 @@
 \title{BVAR with Minnesota Prior.}
 
 \description{
-  Estimating a Bayesian VAR with a Minnesota prior.
+  Estimate a Bayesian VAR with Minnesota prior.
 }
 
 \usage{
@@ -45,7 +45,6 @@ BVARM(mydata,coefprior=NULL,p=4,constant=TRUE,
 
 \value{
 The function returns an object of class BVARM, which contains:
-
   \item{Beta}{
 	A matrix of size (m p + 1_c) x m containing the mean posterior estimate of the coefficient matrix, beta.}
 	\item{BDraws}{
@@ -71,7 +70,7 @@ The function returns an object of class BVARM, which contains:
 }
 
 \seealso{
-  \code{\link{plot}}
+  \code{\link{forecast}}, \code{\link{IRF}}, \code{\link{plot}}.
 }
 
 \examples{
@@ -81,6 +80,9 @@ prior<-c(0.9,0.95,0.95)
 testbvarm <- BVARM(USMacroData[,2:4],prior,p=4,constant=T,irf.periods=20,
                   keep=10000,burnin=5000,VType=1,
                   HP1=0.5,HP2=0.5,HP3=10)
+plot(testbvarm,save=F)
+IRF(testbvarm,save=F)
+forecast(testbvarm,shocks=TRUE,backdata=10,save=FALSE)
 }
 }
 

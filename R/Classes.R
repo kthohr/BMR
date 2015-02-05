@@ -1,4 +1,4 @@
-# 16/06/2014
+# 01/28/2015
 BVARM <- function(x, ...) UseMethod("BVARM")
 BVARS <- function(x, ...) UseMethod("BVARS")
 BVARW <- function(x, ...) UseMethod("BVARW")
@@ -13,3 +13,5 @@ DSGESim <- function(x, ...) UseMethod("DSGESim")
 EDSGE <- function(x, ...) UseMethod("EDSGE")
 DSGEVAR <- function(x, ...) UseMethod("DSGEVAR")
 modecheck <- function(x, ...) UseMethod("modecheck")
+#
+states <- function(x, ...) UseMethod("states")

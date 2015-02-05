@@ -7,7 +7,7 @@
 \title{State Plot.}
 
 \description{
-  Plot the filtered values of the state variables of an estimated DSGE model.
+  Plot the filtered state variables of an estimated DSGE model.
 }
 
 \usage{
@@ -35,18 +35,29 @@ states(obj,percentiles=c(.05,.50,.95),
 }
 
 \details{
-  This function will work with DSGE and DSGEVAR models estimated with BMR.
+  This function will work with estimated DSGE and DSGEVAR models.
 }
 
 \value{
-The function returns a plot of the forecast with user-selected percentiles, as well as the values used to create the plot; see the vignette for more details on the values returned.
+The function returns a plot of the states with user-selected percentiles, as well as the values used to create the plot; see the vignette for more details on the values returned.
 }
 
 \author{Keith O'Hara}
 
 \examples{
 \dontrun{
-states(NKMest)
+NKMest <- EDSGE(dsgedata,chains=1,cores=1,
+                ObserveMat,initialvals,partomats,
+                priorform,priorpars,parbounds,parnames,
+                optimMethod=c("Nelder-Mead","CG"),
+                optimLower=NULL,optimUpper=NULL,
+                optimControl=list(maxit=10000),
+                DSGEIRFs=TRUE,irf.periods=40,
+                scalepar=0.27,keep=50000,burnin=75000,
+                tables=TRUE)
+#
+varnames=c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply","Technology","MonetaryPolicy")
+states(NKMest,percentiles=c(0.01,0.50,0.99),varnames=varnames)
 }
 }
 

@@ -1,4 +1,4 @@
-# 01/23/15
+# 01/29/15
 IRF.BVARM <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
   .irfbvarm(obj,percentiles,save,height,width)
 }
@@ -27,8 +27,8 @@ IRF.EDSGE <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.5
   .irfedsge(obj,ObservableIRFs,varnames,percentiles,save,height,width)
 }
 
-IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-  .irfdsgevar(obj,varnames,percentiles,save,height,width)
+IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13){
+  .irfdsgevar(obj,varnames,percentiles,comparison,save,height,width)
 }
 
 .irfbvarm <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
@@ -585,7 +585,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
   return=list(IRFs=IRFsRet)
 }
 
-.irfdsgevar <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+.irfdsgevar <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13){
   #
   if(nrow(obj$Parameters)==0){
     stop("no MCMC draws detected.\n",call.=FALSE)
@@ -709,7 +709,11 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,h
           IRFDF <- data.frame(IRFDVPlot[,1:3,IRFCount,j],IRFDPlot[,,IRFCount,j])
           colnames(IRFDF) <- c("VARIRFL","VARIRFM","VARIRFU","IRFL","IRFM","IRFU","Time")
           #
-          print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="purple",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+          if(comparison==TRUE){
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="purple",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+          }else{
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+          }
           #
           IRFCount <- IRFCount + 1
           #
