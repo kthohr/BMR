@@ -6,7 +6,7 @@
 \title{BVAR with Time-Varying Coefficients.}
 
 \description{
-  Estimating a Bayesian VAR with time-varying coefficients.
+  Estimate a Bayesian VAR with time-varying coefficients.
 }
 
 \usage{
@@ -85,7 +85,7 @@ The function returns an object of class BVARTVP, which contains:
 }
 
 \seealso{
-  \code{\link{plot}}
+  \code{\link{IRF}}, \code{\link{plot}}.
 }
 
 \examples{

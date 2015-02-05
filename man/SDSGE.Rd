@@ -52,6 +52,10 @@ The function returns an object of class SDSGE, which contains:
   Uhlig, Harald, \emph{A Toolkit for Analysing Nonlinear Dynamic Stochastic Models Easily} Computational Methods for the Study of Dynamic Economics, Oxford University Press, 1999.
 }
 
+\seealso{
+  \code{\link{IRF}}, \code{\link{DSGESim}}.
+}
+
 \examples{
 \dontrun{
 dsgetest <- SDSGE(A,B,C,D,F,G,H,J,K,L,M,N)

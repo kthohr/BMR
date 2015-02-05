@@ -6,7 +6,7 @@
 \title{BVAR with normal-inverse-Wishart Prior.}
 
 \description{
-  Estimating a Bayesian VAR with a normal-inverse-Wishart prior.
+  Estimate a Bayesian VAR with normal-inverse-Wishart prior.
 }
 
 \usage{
@@ -71,7 +71,7 @@ The function returns an object of class BVARW, which contains:
 }
 
 \seealso{
-  \code{\link{plot}}
+  \code{\link{forecast}}, \code{\link{IRF}}, \code{\link{plot}}.
 }
 
 \examples{
@@ -80,6 +80,9 @@ data(BMRVARData)
 testbvarw <- BVARW(USMacroData[,2:4],cores=1,c(0.9,0.95,0.95),p=4,constant=T,
                     irf.periods=20,keep=10000,burnin=5000,
                     XiBeta=4,XiSigma=1,gamma=4)
+plot(testbvarw,save=F)
+IRF(testbvarw,save=F)
+forecast(testbvarw,shocks=TRUE,backdata=10,save=FALSE)
 }
 }
 

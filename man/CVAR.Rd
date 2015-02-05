@@ -50,10 +50,16 @@ The function returns an object of class CVAR, which contains:
 
 \author{Keith O'Hara}
 
+\seealso{
+  \code{\link{forecast}}, \code{\link{IRF}}.
+}
+
 \examples{
 \dontrun{
 data(BMRVARData)
 testcvar <- CVAR(USMacroData[,2:4],p=4,constant=TRUE,irf.periods=20,boot=10000)
+IRF(testcvar,save=F)
+forecast(testcvar,backdata=10,save=FALSE)
 }
 }
 
