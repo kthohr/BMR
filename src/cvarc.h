@@ -17,7 +17,7 @@
 #ifndef _cvarc_H
 #define _cvarc_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP CVARReps( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , 

@@ -17,7 +17,7 @@
 #ifndef _dsgec_H
 #define _dsgec_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP UhligCpp( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP ,

@@ -17,7 +17,7 @@
 #ifndef _adfc_H
 #define _adfc_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP ADFCheck( SEXP , SEXP , SEXP , SEXP );

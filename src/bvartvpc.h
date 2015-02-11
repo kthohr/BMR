@@ -17,7 +17,7 @@
 #ifndef _bvartvpc_H
 #define _bvartvpc_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP tsprior( SEXP , SEXP , SEXP , SEXP , SEXP );
