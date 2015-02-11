@@ -17,7 +17,7 @@
 #ifndef _dsgevarc_H
 #define _dsgevarc_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP DSGEVARPriorC( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );

@@ -17,7 +17,7 @@
 #ifndef _bvarwc_H
 #define _bvarwc_H
 #include <R.h>
-#include <Rmath.h>
+//#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
 RcppExport SEXP WBVARReps( SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );
