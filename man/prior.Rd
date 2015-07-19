@@ -2,7 +2,7 @@
 
 \alias{prior}
 
-\title{Prior Distribution Parametrization.}
+\title{Parameterize the Prior Distributions.}
 
 \description{
   Plot and print the moments of a specified prior distribution.

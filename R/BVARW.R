@@ -1,4 +1,22 @@
-# 01/12/2015
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL){
   #
   kerr <- .bvarwerrors(mydata,cores,p,coefprior,constant,XiBeta,XiSigma,gamma)
@@ -167,11 +185,11 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   ImpStore <- 0
   #
   message('Starting Gibbs C++, ', date(),'.', sep="")
-  RepsRun <- .Call("WBVARReps", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("WBVARReps", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin,keep, PACKAGE = "BMR")
   message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   kcons <- 0; if(constant==T){kcons<-1}
-  ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
+  ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR")
   ImpStore <- ImpStore$ImpStore
   IRFStore <- array(NA,dim=c(M,M,irf.periods,keep))
   for(i in 1:keep){
@@ -208,7 +226,7 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   #
   message('Starting Gibbs C++, ', date(),'.', sep="")
   #
-  RepsRunB <- .Call("WBVARRepsB", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin, PACKAGE = "BMR", DUP = FALSE)
+  RepsRunB <- .Call("WBVARRepsB", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin, PACKAGE = "BMR")
   #
   cl <- makeCluster(NCore)
   registerDoSNOW(cl)
@@ -232,7 +250,7 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   kcons <- 0; if(constant==T){kcons<-1}
-  ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,BetaArray,SigmaArray, PACKAGE = "BMR", DUP = FALSE)
+  ImpStore <- .Call("WBVARIRFs", M,K,kcons,keep,irf.periods,BetaArray,SigmaArray, PACKAGE = "BMR")
   ImpStore <- ImpStore$ImpStore
   IRFStore <- array(NA,dim=c(M,M,irf.periods,keep))
   for(i in 1:keep){
@@ -265,7 +283,7 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
 
 .RepsBFn <- function(Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar){
   #
-  Res <- .Call("WBVARRepsK", Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar, PACKAGE = "BMR", DUP = FALSE)
+  Res <- .Call("WBVARRepsK", Sigma,X,Z,Y,aPr,SPr,vPr,BVPr,Tp,M,K,keeppar, PACKAGE = "BMR")
   #
   return(list(Res$Beta,Res$Sigma))
 }

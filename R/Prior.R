@@ -1,4 +1,22 @@
-# 01/23/15
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 prior <- function(priorform,priorpars,parname=NULL,moments=TRUE,NR=NULL,NC=NULL){
   .priorfunction(priorform,priorpars,parname,moments,NR,NC)
 }
@@ -122,6 +140,8 @@ prior <- function(priorform,priorpars,parname=NULL,moments=TRUE,NR=NULL,NC=NULL)
   #
   #
   #
+  Domain <- Density <- NULL # CRAN check workaround
+  #
   if(class(NR)=="NULL" | class(NC)=="NULL"){
     if(class(parname)=="character"){
       if(priorform=="Uniform"){
@@ -137,6 +157,9 @@ prior <- function(priorform,priorpars,parname=NULL,moments=TRUE,NR=NULL,NC=NULL)
       }
     }
   }else{
+    #
+    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+    #
     if(class(parname)=="character"){
       if(priorform=="Uniform"){
         print(ggplot(data=(PriorDF),aes(x=Domain)) + xlab("") + geom_ribbon(aes(ymin=0,ymax=Density),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_vline(xintercept=xmean) + geom_line(aes(y=Density),color="red",size=1) + labs(title=parname),vp = vplayout(NR,NC))

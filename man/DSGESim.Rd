@@ -1,33 +1,41 @@
 \name{DSGESim}
 
 \alias{DSGESim}
+\alias{DSGESim.gensys}
+\alias{DSGESim.uhlig}
 \alias{DSGESim.SDSGE}
 
-\title{Simulate DSGE.}
+\title{Simulate from a DSGE Model.}
 
 \description{
-  Simulate a solved DSGE model.
+  Simulate a data series using a solved DSGE model.
 }
 
 \usage{
-DSGESim(obj,seedval=1122,shocks,sim.periods,burnin=NULL,hpfiltered=FALSE,lambda=1600)
+DSGESim(obj,...)
+
+\method{DSGESim}{gensys}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
+\method{DSGESim}{uhlig}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
+\method{DSGESim}{SDSGE}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
 }
 
 \arguments{
   \item{obj}{
-	An object of class `SDSGE'. The user should first solve a model using the `SDSGE' function, then pass the solution to the `DSGESim' function.}
+	An object of class `SDSGE', `gensys', or `uhlig'. The user should first solve a model using one of the solver functions (`SDSGE', `gensys', or `uhlig'), then pass the solution to `DSGESim'.}
+	\item{shocks.cov}{
+	A matrix of size k x k that describes the covariance structure of the model shocks.}
+	\item{sim.periods}{
+	The number of simulation periods the function should return.}
+	\item{burnin}{
+	The length of sample burn-in. The default, `burnin = NULL', will set burn-in to one-half of the number given in `sim.periods'.}
   \item{seedval}{
   Seed the random number generator.}
-	\item{shocks}{
-	A numeric vector of length k or a matrix of size k x k with the standard deviation of each shock.}
-	\item{sim.periods}{
-	The number of periods the user wishes to simulate for and keep.}
-	\item{burnin}{
-	The length of sample burn-in. The default, `burnin = NULL', will set this to one-half of the figure given in `sim.periods'.}
 	\item{hpfiltered}{
-	Whether to pass the simulated series through a Hodrick-Prescott filter before retuning it.}
+	Whether to pass the simulated series through a Hodrick-Prescott filter before retuning.}
 	\item{lambda}{
 	If `hpfiltered = TRUE', this is the value of the smoothing parameter in the H-P filter.}
+  \item{\dots}{
+  Additional arguments (not used).}
 }
 
 \details{
@@ -41,12 +49,13 @@ The function will return a matrix of simulated observations from a solved DSGE m
 \author{Keith O'Hara}
 
 \seealso{
-  \code{\link{SDSGE}}
+  \code{\link{gensys},\link{uhlig},\link{SDSGE}}
 }
 
 \examples{
 \dontrun{
-dsgetestsim <- DSGESim(dsgetest,1122,1,200,200,hpfiltered=FALSE)
+dsgetest <- gensys(Gamma0,Gamma1,C,Psi,Pi)
+dsgetestsim <- DSGESim(dsgetest,Sigma,200,200)
 }
 }
 

@@ -1,2 +1,11 @@
 useDynLib(BMR)
+
+importFrom(Rcpp, evalCpp)
+import(RcppArmadillo)
+import(doSNOW)
+import(foreach)
+importFrom(snow, makeCluster, stopCluster)
+import(ggplot2)
+importFrom(grid, grid.newpage, viewport, pushViewport, grid.layout)
+
 exportPattern("^[[:alpha:]]+")

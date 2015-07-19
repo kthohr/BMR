@@ -1,33 +1,59 @@
-# 01/29/15
-IRF.BVARM <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+IRF.BVARM <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
   .irfbvarm(obj,percentiles,save,height,width)
 }
 
-IRF.BVARS <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+IRF.BVARS <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
   .irfbvars(obj,percentiles,save,height,width)
 }
 
-IRF.BVARW <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+IRF.BVARW <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
   .irfbvarw(obj,percentiles,save,height,width)
 }
 
-IRF.CVAR <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+IRF.CVAR <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
   .irfcvar(obj,percentiles,save,height,width)
 }
 
-IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13){
+IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
   .irfbvartvp(obj,whichirfs,percentiles,save,height,width)
 }
 
-IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
+IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
   .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
 }
 
-IRF.EDSGE <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-  .irfedsge(obj,ObservableIRFs,varnames,percentiles,save,height,width)
+IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
+  .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
 }
 
-IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13){
+IRF.uhlig <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
+  .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
+}
+
+IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+  .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
+}
+
+IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
   .irfdsgevar(obj,varnames,percentiles,comparison,save,height,width)
 }
 
@@ -55,8 +81,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   if(class(dev.list()) != "NULL"){dev.off()}
-  if(save==TRUE){cairo_ps(file="IRFs.eps",height=height,width=width)}
+  if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
   pushViewport(viewport(layout=grid.layout(M,M)))
+  #
+  IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
   #
   for(i in 1:M){
     for(k in 1:M){
@@ -72,7 +100,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
       #
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
   }
   if(save==TRUE){dev.off()}
@@ -104,8 +132,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   if(class(dev.list()) != "NULL"){dev.off()}
-  if(save==TRUE){cairo_ps(file="IRFs.eps",height=height,width=width)}
+  if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
   pushViewport(viewport(layout=grid.layout(M,M)))
+  #
+  IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
   #
   for(i in 1:M){
     for(k in 1:M){
@@ -121,7 +151,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
       #
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
   }
   if(save==TRUE){dev.off()}
@@ -153,8 +183,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   if(class(dev.list()) != "NULL"){dev.off()}
-  if(save==TRUE){cairo_ps(file="IRFs.eps",height=height,width=width)}
+  if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
   pushViewport(viewport(layout=grid.layout(M,M)))
+  #
+  IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
   #
   for(i in 1:M){
     for(k in 1:M){
@@ -170,7 +202,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
       #
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
   }
   if(save==TRUE){dev.off()}
@@ -202,8 +234,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   if(class(dev.list()) != "NULL"){dev.off()}
-  if(save==TRUE){cairo_ps(file="IRFs.eps",height=height,width=width)}
+  if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
   pushViewport(viewport(layout=grid.layout(M,M)))
+  #
+  IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
   #
   for(i in 1:M){
     for(k in 1:M){
@@ -219,7 +253,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
       #
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
   }
   if(save==TRUE){dev.off()}
@@ -264,9 +298,12 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   #
+  IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
+  value <- variable <- NULL
+  #
   for(ik in 1:as.numeric(dim(IRFs)[4])){
     SaveName <- paste(as.character(irf.points[ik]),".eps",sep="")
-    if(save==TRUE){cairo_ps(file=SaveName,height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename=SaveName,height=height,width=width)}
     #
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(M,M)))
@@ -282,14 +319,14 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         #
         print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2),vp = vplayout(i,k))
         #
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
     }
     if(save==TRUE){dev.off()}
   }
   #
   SaveCompName <- "IRFComparison.eps"
-  if(save==TRUE){cairo_ps(file=SaveCompName,height=height,width=width)}
+  if(save==TRUE){cairo_ps(filename=SaveCompName,height=height,width=width)}
   grid.newpage()
   pushViewport(viewport(layout=grid.layout(M,M)))
   for(i in 1:M){
@@ -321,7 +358,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         print(ggplot(data=IRFDF,aes(x=irf.periods,y=value,colour=variable)) + geom_line() + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_hline(yintercept=0) + theme(legend.position="none"),vp = vplayout(i,k))
       }
       #
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
   }
   if(save==TRUE){dev.off()}
@@ -330,16 +367,17 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
 
 .irfsdsge <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
   #
-  StateMats <- .DSGEstatespace(obj$N,obj$P,obj$Q,obj$R,obj$S)
+  StateMats <- statespace(obj)
   F <- StateMats$F; G <- StateMats$G
-  nShocks <- as.numeric(ncol(obj$N))
+  #
+  nShocks <- ncol(G)
   #
   IRFs <- array(0,dim=c(irf.periods,ncol(F),nShocks))
   #
   for(j in 1:nShocks){
-    shockvec <- matrix(rep(0,nrow(G) - (nrow(obj$N) - j + 1)),ncol=1)
-    shockvec <- rbind( shockvec,shocks[j],matrix(rep(0,nrow(obj$N)-j),ncol=1) )
-    #shockvec <- rbind(shockvec,shocks[j],c(rep(0,nrow(obj$N)-j)))
+    shockvec <- rep(0,j-1)
+    shockvec <- matrix( c(shockvec, shocks[j], rep(0,nShocks-j)), ncol=1)
+    #
     # Resp = F*G*1, or Resp' = 1'G'F'
     IRFs[1,,j] <- t(G%*%shockvec)
     for(i in 2:irf.periods){
@@ -367,6 +405,8 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
   }
   #
   # Plot
+  #
+  IRFM <- Time <- NULL # CRAN check workaround
   #
   nRespPlot <- nResp - nShocks + 1
   MR <- 0; MC <- 0
@@ -403,11 +443,11 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       #
       if(save==TRUE){
         if(nShocks==1){
-          cairo_ps(file="DSGEIRFs.eps",height=height,width=width)
+          cairo_ps(filename="DSGEIRFs.eps",height=height,width=width)
         }else{
           SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
           #
-          if(save==TRUE){cairo_ps(file=SaveIRF,height=height,width=width)}
+          if(save==TRUE){cairo_ps(filename=SaveIRF,height=height,width=width)}
         }
       }
       grid.newpage()
@@ -425,11 +465,11 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             IRFDF <- data.frame(IRFs[,IRFCount,j],1:(irf.periods))
             colnames(IRFDF) <- c("IRFM","Time")
             #
-            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="purple",size=2),vp = vplayout(i,k))
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             IRFCount <- IRFCount + 1
             #
-            Sys.sleep(0.6)
+            Sys.sleep(0.3)
           }else{IRFCount <- IRFCount + 1}
         }
       }
@@ -442,7 +482,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
   return=list(IRFs=IRFsRet)
 }
 
-.irfedsge <- function(obj,ObservableIRFs=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+.irfedsge <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
   #
   if(nrow(obj$Parameters)==0){
     stop("no MCMC draws detected.\n",call.=FALSE)
@@ -457,7 +497,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
   ObserveMat <- obj$ObserveMat
   #
   IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),nShocks,keep))
-  if(ObservableIRFs == TRUE){
+  if(observableIRFs == TRUE){
     if(ncol(ObserveMat)==1){
       for(i in 1:keep){
         for(j in 1:nShocks){
@@ -501,7 +541,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   #
-  if(nShocks > 1 && ObservableIRFs!=TRUE){
+  if(nShocks > 1 && observableIRFs!=TRUE){
     IRFPlot <- array(0,dim=c(irf.periods,4,nResp-nShocks+1,nShocks))
     DropCount <- (nResp-nShocks+1):nResp
     for(j in 1:nShocks){
@@ -543,23 +583,25 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     if(save==TRUE){
       if(nShocks==1){
-        cairo_ps(file="DSGEBIRFs.eps",height=height,width=width)
+        cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
       }else{
         SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
         #
-        cairo_ps(file=SaveIRF,height=height,width=width)
+        cairo_ps(filename=SaveIRF,height=height,width=width)
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
     #
-    if(nShocks > 1 && ObservableIRFs!=TRUE){
+    IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
+    #
+    if(nShocks > 1 && observableIRFs!=TRUE){
       varnames2 <- varnames[-DropCount[-(j)]]
     }else{varnames2 <- varnames}
     #
     IRFCount <- 1
     IRFO <- 1
-    if(ObservableIRFs==TRUE){IRFO <- nResp}
+    if(observableIRFs==TRUE){IRFO <- nResp}
     #
     for(i in 1:MR){
       for(k in 1:MC){
@@ -569,13 +611,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
           colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
           #
           gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) 
-          gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="purple",size=2) 
+          gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) 
           gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
           print(gg3,vp = vplayout(i,k))
           #
           IRFCount <- IRFCount + 1
           #
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }else{IRFCount <- IRFCount + 1}
       }
     }
@@ -591,7 +633,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     stop("no MCMC draws detected.\n",call.=FALSE)
   }
   #
-  ObservableIRFs <- TRUE
+  observableIRFs <- TRUE
   #
   IRFDs <- round(obj$DSGEIRFs,10)
   irf.periods <- as.numeric(dim(IRFDs)[1])
@@ -602,7 +644,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
   ObserveMat <- obj$ObserveMat
   #
   IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),nShocks,keep))
-  if(ObservableIRFs == TRUE){
+  if(observableIRFs == TRUE){
     if(ncol(ObserveMat)==1){
       for(i in 1:keep){
         for(j in 1:nShocks){
@@ -653,7 +695,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
   }
   #
-  if(nShocks > 1 && ObservableIRFs!=TRUE){
+  if(nShocks > 1 && observableIRFs!=TRUE){
     IRFDPlot <- array(0,dim=c(irf.periods,4,nResp-nShocks+1,nShocks))
     DropCount <- (nResp-nShocks+1):nResp
     for(j in 1:nShocks){
@@ -684,23 +726,26 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     if(save==TRUE){
       if(nShocks==1){
-        cairo_ps(file="DSGEBIRFs.eps",height=height,width=width)
+        cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
       }else{
         SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
         #
-        cairo_ps(file=SaveIRF,height=height,width=width)
+        cairo_ps(filename=SaveIRF,height=height,width=width)
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
     #
-    if(nShocks > 1 && ObservableIRFs!=TRUE){
+    IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
+    VARIRFM <- VARIRFL <- VARIRFU <- NULL
+    #
+    if(nShocks > 1 && observableIRFs!=TRUE){
       varnames2 <- varnames[-DropCount[-(j)]]
     }else{varnames2 <- varnames}
     #
     IRFCount <- 1
     IRFO <- 1
-    if(ObservableIRFs==TRUE){IRFO <- nResp}
+    if(observableIRFs==TRUE){IRFO <- nResp}
     #
     for(i in 1:MR){
       for(k in 1:MC){
@@ -710,14 +755,14 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
           colnames(IRFDF) <- c("VARIRFL","VARIRFM","VARIRFU","IRFL","IRFM","IRFU","Time")
           #
           if(comparison==TRUE){
-            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="purple",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           }else{
             print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           }
           #
           IRFCount <- IRFCount + 1
           #
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }else{IRFCount <- IRFCount + 1}
       }
     }

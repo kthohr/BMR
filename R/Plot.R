@@ -1,26 +1,44 @@
-# 01/23/15
-plot.BVARM <- function(obj,type=1,save=FALSE,height=13,width=13){
-  .plotbvarm(obj,type,save,height,width)
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+plot.BVARM <- function(x,type=1,save=FALSE,height=13,width=13,...){
+  .plotbvarm(x,type,save,height,width)
 }
 
-plot.BVARS <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
-  .plotbvars(obj,type,plotSigma,save,height,width)
+plot.BVARS <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
+  .plotbvars(x,type,plotSigma,save,height,width)
 }
 
-plot.BVARW <- function(obj,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13){
-  .plotbvarw(obj,type,plotSigma,save,height,width)
+plot.BVARW <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
+  .plotbvarw(x,type,plotSigma,save,height,width)
 }
 
-plot.BVARTVP <- function(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13){
-  .plotbvartvp(obj,percentiles,save,height,width)
+plot.BVARTVP <- function(x,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
+  .plotbvartvp(x,percentiles,save,height,width)
 }
 
-plot.EDSGE <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
-  .plotedsge(obj,BinDenom,MCMCPlot,save,height,width)
+plot.EDSGE <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...){
+  .plotedsge(x,parnames,BinDenom,MCMCplot,save,height,width)
 }
 
-plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
-  .plotdsgevar(obj,BinDenom,MCMCPlot,save,height,width)
+plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...){
+  .plotdsgevar(x,parnames,BinDenom,MCMCplot,save,height,width)
 }
 
 .plotbvarm <- function(obj,type=1,save=FALSE,height=13,width=13){
@@ -54,7 +72,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   if(constant==TRUE){
     for(i in 1:1){
-      if(save==TRUE){cairo_ps(file="Constant.eps",height=(floor(height/M)),width=width)}
+      if(save==TRUE){cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)}
       pushViewport(viewport(layout=grid.layout(1,M)))
       #
       for(j in 1:M){
@@ -78,14 +96,14 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
           }
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
       if(save==TRUE){dev.off()}
     }
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -134,7 +152,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               }
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -143,7 +161,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -192,7 +210,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               }
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -232,7 +250,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   ParamBin <- 1
   #
   for(i in 1:1){
-    if(save==TRUE){cairo_ps(file="Psi.eps",height=(floor(height/M)),width=width)}
+    if(save==TRUE){cairo_ps(filename="Psi.eps",height=(floor(height/M)),width=width)}
     pushViewport(viewport(layout=grid.layout(1,M)))
     #
     for(j in 1:M){
@@ -256,7 +274,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
         }
       }
-      Sys.sleep(0.6)
+      Sys.sleep(0.3)
     }
     if(save==TRUE){dev.off()}
   }
@@ -264,7 +282,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   for(i in 1:p){
     SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
     #
-    if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(M,M)))
     #
@@ -313,7 +331,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             }
           }
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
     }
     if(save==TRUE){dev.off()}
@@ -324,7 +342,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     SigmaPerm <- aperm(Sigmas,c(3,1,2))
     #
     SaveSig <- paste("Sigma.eps",sep="")
-    if(save==TRUE){cairo_ps(file=SaveSig,height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename=SaveSig,height=height,width=width)}
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(M,M)))
     #
@@ -370,7 +388,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             }
           }
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
     }
     if(save==TRUE){dev.off()}
@@ -409,7 +427,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   if(constant==TRUE){
     for(i in 1:1){
-      if(save==TRUE){cairo_ps(file="Constant.eps",height=(floor(height/M)),width=width)}
+      if(save==TRUE){cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)}
       pushViewport(viewport(layout=grid.layout(1,M)))
       #
       for(j in 1:M){
@@ -433,14 +451,14 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
           }
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
       if(save==TRUE){dev.off()}
     }
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -489,7 +507,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               }
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -498,7 +516,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -547,7 +565,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               }
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -559,7 +577,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     SigmaPerm <- aperm(Sigmas,c(3,1,2))
     #
     SaveSig <- paste("Sigma.eps",sep="")
-    if(save==TRUE){cairo_ps(file=SaveSig,height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename=SaveSig,height=height,width=width)}
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(M,M)))
     #
@@ -605,7 +623,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             }
           }
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
     }
     if(save==TRUE){dev.off()}
@@ -648,11 +666,13 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
   #
+  Time <- CTPL <- CTPM <- CTPU <- NULL
+  #
   CoefCount <- 1
   #
   if(constant==TRUE){
     for(i in 1:1){
-      if(save==TRUE){cairo_ps(file="Constant.eps",height=(floor(height/M)),width=width)}
+      if(save==TRUE){cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)}
       pushViewport(viewport(layout=grid.layout(1,M)))
       #
       for(j in 1:M){
@@ -666,14 +686,14 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
         }else{
           print(ggplot(data=(CFDF),aes(x=Time)) + xlab("Time") + ylab(NULL) + labs(title=paste(VarName)) + geom_ribbon(aes(ymin=CTPL,ymax=CTPU),color="lightslateblue",lty=1,fill="lightslateblue",alpha=0.2,size=0.1) + geom_line(aes(y=CTPM),color="darkgreen",size=2),vp = vplayout(1,j))
         }
-        Sys.sleep(0.6)
+        Sys.sleep(0.3)
       }
       if(save==TRUE){dev.off()}
     }
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -700,7 +720,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               print(ggplot(data=(CFDF),aes(x=Time)) + xlab("Time") + ylab(NULL) + geom_ribbon(aes(ymin=CTPL,ymax=CTPU),color="lightslateblue",lty=1,fill="lightslateblue",alpha=0.2,size=0.1) + geom_line(aes(y=CTPM),color="darkgreen",size=2),vp = vplayout(j,l))
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -709,7 +729,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     for(i in 1:p){
       SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
       #
-      if(save==TRUE){cairo_ps(file=SaveLag,height=height,width=width)}
+      if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(M,M)))
       #
@@ -736,7 +756,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
               print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_density(colour="darkblue",fill="blue",alpha=0.25),vp = vplayout(j,l))
             }
           }
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }
       }
       if(save==TRUE){dev.off()}
@@ -745,7 +765,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
 }
 
-.plotedsge <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+.plotedsge <- function(obj,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13){
   #
   Parameters <- obj$Parameters
   nParam <- as.numeric(ncol(Parameters))
@@ -758,11 +778,14 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
   #
-  ParNames <- colnames(Parameters)
-  if(class(ParNames) != "character"){
-    ParNames <- character(length=nParam)
-    for(i in 1:nParam){  
-      ParNamess[i] <- paste("Parameter",i,sep="")
+  ParNames <- parnames
+  if(is.null(parnames)==TRUE){
+    ParNames <- colnames(Parameters)
+    if(class(ParNames) != "character"){
+      ParNames <- character(length=nParam)
+      for(i in 1:nParam){  
+        ParNames[i] <- paste("Parameter",i,sep="")
+      }
     }
   }
   #
@@ -801,15 +824,17 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     #
     if(save==TRUE){
       if(plotpages==1){
-        cairo_ps(file="DSGEParameters.eps",height=height,width=width)
+        cairo_ps(filename="DSGEParameters.eps",height=height,width=width)
       }else{
         SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
         #
-        if(save==TRUE){cairo_ps(file=SaveParam,height=height,width=width)}
+        if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
+    #
+    DSGEPar <- Keep <- NULL # CRAN check workaround
     #
     for(i in 1:MR){
       for(k in 1:MC){
@@ -824,7 +849,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           #
           ParamCount <- ParamCount + 1
           #
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }else{ParamCount <- ParamCount + 1}
       }
     }
@@ -833,18 +858,18 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   #
   #
-  if(MCMCPlot==TRUE){
+  if(MCMCplot==TRUE){
     ParamCount <- 1
     for(j in 1:plotpages){
       #
       if(save==TRUE){
         if(class(dev.list()) != "NULL"){dev.off()}
         if(plotpages==1){
-          cairo_ps(file="MCMCPlot.eps",height=height,width=width)
+          cairo_ps(filename="MCMCplot.eps",height=height,width=width)
         }else{
-          SaveParam <- paste("MCMCPlot_",j,".eps",sep="")
+          SaveParam <- paste("MCMCplot_",j,".eps",sep="")
           #
-          if(save==TRUE){cairo_ps(file=SaveParam,height=height,width=width)}
+          if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
         }
       }
       grid.newpage()
@@ -862,7 +887,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             #
             ParamCount <- ParamCount + 1
             #
-            Sys.sleep(0.6)
+            Sys.sleep(0.3)
           }else{ParamCount <- ParamCount + 1}
         }
       }
@@ -872,7 +897,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
 }
 
-.plotdsgevar <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,width=13){
+.plotdsgevar <- function(obj,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13){
   #
   Parameters <- obj$Parameters
   nParam <- as.numeric(ncol(Parameters))
@@ -885,11 +910,14 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
   #
-  ParNames <- colnames(Parameters)
-  if(class(ParNames) != "character"){
-    ParNames <- character(length=nParam)
-    for(i in 1:nParam){  
-      ParNamess[i] <- paste("Parameter",i,sep="")
+  ParNames <- parnames
+  if(is.null(parnames)==TRUE){
+    ParNames <- colnames(Parameters)
+    if(class(ParNames) != "character"){
+      ParNames <- character(length=nParam)
+      for(i in 1:nParam){  
+        ParNames[i] <- paste("Parameter",i,sep="")
+      }
     }
   }
   #
@@ -928,15 +956,17 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
     #
     if(save==TRUE){
       if(plotpages==1){
-        cairo_ps(file="DSGEParameters.eps",height=height,width=width)
+        cairo_ps(filename="DSGEParameters.eps",height=height,width=width)
       }else{
         SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
         #
-        if(save==TRUE){cairo_ps(file=SaveParam,height=height,width=width)}
+        if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
+    #
+    DSGEPar <- Keep <- NULL # CRAN check workaround
     #
     for(i in 1:MR){
       for(k in 1:MC){
@@ -951,7 +981,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
           #
           ParamCount <- ParamCount + 1
           #
-          Sys.sleep(0.6)
+          Sys.sleep(0.3)
         }else{ParamCount <- ParamCount + 1}
       }
     }
@@ -960,18 +990,18 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
   #
   #
   #
-  if(MCMCPlot==TRUE){
+  if(MCMCplot==TRUE){
     ParamCount <- 1
     for(j in 1:plotpages){
       #
       if(save==TRUE){
         if(class(dev.list()) != "NULL"){dev.off()}
         if(plotpages==1){
-          cairo_ps(file="MCMCPlot.eps",height=height,width=width)
+          cairo_ps(filename="MCMCplot.eps",height=height,width=width)
         }else{
-          SaveParam <- paste("MCMCPlot_",j,".eps",sep="")
+          SaveParam <- paste("MCMCplot_",j,".eps",sep="")
           #
-          if(save==TRUE){cairo_ps(file=SaveParam,height=height,width=width)}
+          if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
         }
       }
       grid.newpage()
@@ -989,7 +1019,7 @@ plot.DSGEVAR <- function(obj,BinDenom=40,MCMCPlot=FALSE,save=FALSE,height=13,wid
             #
             ParamCount <- ParamCount + 1
             #
-            Sys.sleep(0.6)
+            Sys.sleep(0.3)
           }else{ParamCount <- ParamCount + 1}
         }
       }

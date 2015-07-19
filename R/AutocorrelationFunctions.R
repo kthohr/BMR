@@ -1,12 +1,31 @@
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 gacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="purple",names=FALSE,save=FALSE,height=12,width=12){
   .ggplotacf(y,lags,ci,plot,barcolor,names,save,height,width)
 }
 
-gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALSE,height=12,width=12){
+gpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=FALSE,height=12,width=12){
   .ggplotpacf(y,lags,ci,plot,barcolor,names,save,height,width)
 }
 
-.ggplotacf<-function(y,lags=10,ci=.95,plot=T,barcolor="purple",names=FALSE,save=FALSE,height=12,width=12){
+.ggplotacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="purple",names=FALSE,save=FALSE,height=12,width=12){
   #
   M <- as.numeric(ncol(y))
   #
@@ -23,7 +42,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
   }
   #
   for(j in 1:M){
-    myacf <- acf(y[,j],lags,plot=F)
+    myacf <- acf(y[,j],lags,plot=FALSE)
     myacf2 <- as.numeric(myacf$acf)
     myacf2 <- myacf2[2:(lags+1)]
     ACFMat[,j] <- myacf2
@@ -40,7 +59,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
   if(plot==TRUE){
     if(save==TRUE){
       if(class(dev.list()) != "NULL"){dev.off()}
-      cairo_ps(file="ACF.eps",height=height,width=width)
+      cairo_ps(filename="ACF.eps",height=height,width=width)
     }else{
       grid.newpage()
     }
@@ -76,7 +95,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
   #
 }
 
-.ggplotpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALSE,height=12,width=12){
+.ggplotpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=FALSE,height=12,width=12){
   #
   M <- as.numeric(ncol(y))
   #
@@ -93,7 +112,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
   }
   #
   for(j in 1:M){
-    mypacf <- pacf(y[,j],lags,plot=F)
+    mypacf <- pacf(y[,j],lags,plot=FALSE)
     mypacf2 <- as.numeric(mypacf$acf)
     mypacf2 <- mypacf2[1:lags]
     PACFMat[,j] <- mypacf2
@@ -110,7 +129,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=T,barcolor="darkred",names=FALSE,save=FALS
   if(plot==TRUE){
     if(save==TRUE){
       if(class(dev.list()) != "NULL"){dev.off()}
-      cairo_ps(file="PACF.eps",height=height,width=width)
+      cairo_ps(filename="PACF.eps",height=height,width=width)
     }else{
       grid.newpage()
     }

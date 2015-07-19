@@ -4,16 +4,21 @@
 \alias{states.DSGEVAR}
 \alias{states.EDSGE}
 
-\title{State Plot.}
+\title{Plot State Variables.}
 
 \description{
-  Plot the filtered state variables of an estimated DSGE model.
+  Plot the filtered state variables of an estimated DSGE or DSGE-VAR model.
 }
 
 \usage{
-states(obj,percentiles=c(.05,.50,.95),
+states(obj,...)
+
+\method{states}{DSGEVAR}(obj,percentiles=c(.05,.50,.95),
        varnames=NULL,useMean=FALSE,
-       save=FALSE,height=13,width=11)
+       save=FALSE,height=13,width=11,...)
+\method{states}{EDSGE}(obj,percentiles=c(.05,.50,.95),
+       varnames=NULL,useMean=FALSE,
+       save=FALSE,height=13,width=11,...)
 }
 
 \arguments{
@@ -21,7 +26,7 @@ states(obj,percentiles=c(.05,.50,.95),
   \item{obj}{
   An object of class `EDSGE' or `DSGEVAR'.}
 	\item{percentiles}{
-	The percentiles of the distribution the user wants to use.}
+	Which percentiles of the distribution to use.}
   \item{varnames}{
   Name labels for the states.}
 	\item{useMean}{
@@ -32,6 +37,8 @@ states(obj,percentiles=c(.05,.50,.95),
 	If save=TRUE, use this to set the height of the plot.}
 	\item{width}{
 	If save=TRUE, use this to set the width of the plot.}
+  \item{\dots}{
+  Additional arguments (not used).}
 }
 
 \details{
@@ -56,7 +63,8 @@ NKMest <- EDSGE(dsgedata,chains=1,cores=1,
                 scalepar=0.27,keep=50000,burnin=75000,
                 tables=TRUE)
 #
-varnames=c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply","Technology","MonetaryPolicy")
+varnames=c("Output Gap","Output","Inflation","Natural Int",
+           "Nominal Int","Labour Supply","Technology","MonetaryPolicy")
 states(NKMest,percentiles=c(0.01,0.50,0.99),varnames=varnames)
 }
 }

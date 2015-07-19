@@ -1,0 +1,21 @@
+/*
+ * Add a QZ Decomposition to the Armadillo C++ Matrix Algebra Library.
+ *
+ * Keith O'Hara
+ * 29/07/15
+ */
+
+namespace arma
+  {
+
+  #include "armadillo_add/lapack_bones_qz.hpp"
+
+  #include "armadillo_add/lapack_wrapper_qz.hpp"
+
+  #include "armadillo_add/auxlib_bones_qz.hpp"
+  
+  #include "armadillo_add/fn_qz.hpp"
+
+  #include "armadillo_add/auxlib_meat_qz.hpp"
+ 
+}

@@ -1,3 +1,22 @@
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 EDSGE.default <- function(dsgedata,chains=1,cores=1,
                           ObserveMat,initialvals,partomats,
                           priorform,priorpars,parbounds,parnames=NULL,
@@ -10,9 +29,15 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   #
   message('Trying to solve the model with your initial values... ',appendLF=FALSE)
   dsgemats1t <- partomats(initialvals)
-  dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
-  StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
-  message('Done.')
+  dsgesolved1t <- SDSGE(dsgemats1t)
+  StateMats1t <- statespace(dsgesolved1t)
+  soltype <- NULL
+  if(dsgesolved1t$sol_type==1){
+    soltype <- "gensys."
+  }else if(dsgesolved1t$sol_type==2){
+    soltype <- "Uhlig\'s method."
+  }
+  message('Done, using ', soltype)
   #
   priorformRet <- priorform
   prelimwork <- .edsgePrelimWork(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)
@@ -60,10 +85,10 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   if(DSGEIRFs == TRUE){
     message(' ', sep="")
     message('Computing IRFs now... ',appendLF=FALSE)
-    IRFs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
+    IRFs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),ncol(StateMats1t$G),keep))
     for(i in 1:keep){
       dsgemats <- partomats(MCMCRes$parameters[i,])
-      dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+      dsgesolved <- SDSGE(dsgemats)
       iIRF <- IRF(dsgesolved,sqrt(diag(dsgemats$shocks)),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
       IRFs[,,,i] <- iIRF$IRFs
     }
@@ -190,12 +215,12 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
   parameters <- .DSGEParTransform(parametersTrans,priorform,parbounds,2)
   #
   dsgemats <- partomats(parameters)
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+  dsgesolved <- SDSGE(dsgemats)
   #
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  StateMats <- statespace(dsgesolved)
   #
-  #dsgelike <- .Call("DSGEKalman", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)
-  dsgelike <- .Call("DSGECR", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)
+  #dsgelike <- .Call("DSGEKalman", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR")
+  dsgelike <- .Call("DSGECR", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR")
   #
   dsgeposterior <- .DSGEPriors(parameters,parametersTrans,priorform,priorpars,parbounds,dsgelike$dsgelike)
   #

@@ -1,4 +1,22 @@
-# 01/12/2015
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 BVARS.default <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20,keep=10000,burnin=1000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL){
   #
   kerr <- .bvarserrors(mydata,p,coefprior,psiprior,XiPsi,HP1,HP4,gamma)
@@ -158,10 +176,10 @@ BVARS.default <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20
   ImpStore <- 0
   #
   message('Starting Gibbs C++, ', date(),'.', sep="")
-  RepsRun <- .Call("SBVARReps", as.matrix(X),as.matrix(Y),d,dX,yd,Zd,PsiPr,invPsiVPr,BPr,Beta,invBVPr,Sigma,SigmaML,gamma,Tp,M,p,burnin,keep, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("SBVARReps", as.matrix(X),as.matrix(Y),d,dX,yd,Zd,PsiPr,invPsiVPr,BPr,Beta,invBVPr,Sigma,SigmaML,gamma,Tp,M,p,burnin,keep, PACKAGE = "BMR")
   message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
-  ImpStore <- .Call("SBVARIRFs", M,K,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
+  ImpStore <- .Call("SBVARIRFs", M,K,keep,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR")
   #
   ImpStore <- ImpStore$ImpStore
   ImpStore2 <- array(NA,dim=c(M,M,irf.periods,keep))

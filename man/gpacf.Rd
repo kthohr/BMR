@@ -5,11 +5,11 @@
 \title{Partial Autocorrelation Function.}
 
 \description{
-  Plotting the partial autocorrelation function using ggplot2.
+  Plotting a partial autocorrelation function using ggplot2.
 }
 
 \usage{
-gpacf(y,lags=10,ci=.95,plot=T,barcolor="darkred",
+gpacf(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",
       names=FALSE,save=FALSE,height=12,width=12)
 }
 
@@ -20,6 +20,8 @@ gpacf(y,lags=10,ci=.95,plot=T,barcolor="darkred",
 	The number of lags to plot.}
 	\item{ci}{
 	A numeric value betweein 0 and 1 specifying the confidence interval to use; the default value is 0.95.}
+  \item{plot}{
+  Whether to plot the PACF.}
 	\item{barcolor}{
 	The color of the bars.}
   \item{names}{
@@ -33,7 +35,7 @@ gpacf(y,lags=10,ci=.95,plot=T,barcolor="darkred",
 }
 
 \details{
-Plotting the partial autocorrelation function.
+ Plot a partial autocorrelation function (PACF) using ggplot2.
 }
 
 \value{

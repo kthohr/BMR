@@ -2,7 +2,7 @@
 
 \alias{gtsplot}
 
-\title{Time-series plot with ggplot2.}
+\title{Time-series plot using ggplot2.}
 
 \description{
   A simple wrapper function for plotting time-series data with ggplot2.

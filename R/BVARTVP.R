@@ -1,4 +1,22 @@
-# 01/12/2015
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.periods=20,irf.points=NULL,keep=10000,burnin=5000,XiBeta=1,XiQ=0.01,gammaQ=NULL,XiSigma=1,gammaS=NULL){
   #
   kerr <- .bvartvperror(mydata,p,coefprior,tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
@@ -12,7 +30,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   kreps <- .bvartvpreps(kdata$Y,kdata$y,kdata$Z,kprior$B0Pr,kprior$B0VPr,kprior$invB0VPr,
                        kprior$QPr,kprior$QVPr,kprior$SPr,kprior$SVPr,kprior$QDraw,kprior$Qchol,
                        kprior$SDraw,kprior$invSDraw,kdata$K,kdata$M,p,kdata$kT,
-                       keep,burnin,kdata$timelab,kdata$nIRFs,kdata$irf.points,cumulative,irf.periods)
+                       keep,burnin,kdata$timelab,kdata$nIRFs,kdata$irf.points,irf.periods)
   #
   bvartvpret <- list(IRFs=kreps$IRFs,Beta=kreps$BetaMean,Q=kreps$QMean,Sigma=kreps$SigmaMean,BDraws=kreps$Betas,QDraws=kreps$QDraws,SDraws=kreps$SDraws,data=mydata,irf.points=irf.points,tau=tau)
   class(bvartvpret) <- "BVARTVP"
@@ -165,7 +183,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   SPr <- 0; SVPr <- 0; SDraw <- 0; invSDraw <- 0
   #
   if(class(tau)!="NULL"){
-    TauSamplingRun <- .Call("tsprior", Y,tau,M,K,p, PACKAGE = "BMR", DUP = FALSE)
+    TauSamplingRun <- .Call("tsprior", Y,tau,M,K,p, PACKAGE = "BMR")
     #
     BetaVariance <- TauSamplingRun$BVPrOLS
     #
@@ -206,7 +224,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
     }
     QSortIndex <- c(QSortIndex)
     #
-    BPr <- c(t(ktest1))[c(t(QSortIndex))]
+    BPr <- c(t(BPr))[c(t(QSortIndex))]
     B0Pr <- matrix(BPr,ncol=1)
     #
     if(class(XiBeta)=="numeric"){
@@ -232,10 +250,10 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
   return=list(B0Pr=B0Pr,B0VPr=B0VPr,invB0VPr=invB0VPr,QPr=QPr,QVPr=QVPr,SPr=SPr,SVPr=SVPr,QDraw=QDraw,Qchol=Qchol,SDraw=SDraw,invSDraw=invSDraw)
 }
 
-.bvartvpreps <- function(Y,y,Z,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw,K,M,p,kT,keep,burnin,timelab,nIRFs,irf.points,cumulative,irf.periods){
+.bvartvpreps <- function(Y,y,Z,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw,K,M,p,kT,keep,burnin,timelab,nIRFs,irf.points,irf.periods){
   #
   message('Starting Gibbs C++, ', date(),'.', sep="")
-  RepsRun <- .Call("BVARTVPReps", y,Z,M,K,kT,keep,burnin,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("BVARTVPReps", y,Z,M,K,kT,keep,burnin,B0Pr,B0VPr,invB0VPr,QPr,QVPr,SPr,SVPr,QDraw,Qchol,SDraw,invSDraw, PACKAGE = "BMR")
   message('C++ reps finished, ', date(),'. Now generating IRFs.', sep="")
   #
   BetaDraws <- RepsRun$BetaDraws; QDraws <- RepsRun$QDraws; SDraws <- RepsRun$SDraws
@@ -281,7 +299,7 @@ BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.
     if(KTC < (nIRFs+1)){
       if(timelab[i] == irf.points[KTC]){
         Beta <- BetaT[,,,i]
-        ImpStore <- .Call("BVARTVPIRFs", M,K/M,keep,irf.periods,Beta,SDraws, PACKAGE = "BMR", DUP = FALSE)
+        ImpStore <- .Call("BVARTVPIRFs", M,K/M,keep,irf.periods,Beta,SDraws, PACKAGE = "BMR")
         ImpStore <- ImpStore$ImpStore
         ImpStoreE <- array(NA,dim=c(M,M,irf.periods,keep))
         for(j in 1:keep){

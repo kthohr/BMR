@@ -5,11 +5,11 @@
 \title{Autocorrelation Function.}
 
 \description{
-  Plotting the autocorrelation function using ggplot2.
+  Plot an autocorrelation function using ggplot2.
 }
 
 \usage{
-gacf(y,lags=10,ci=.95,plot=T,barcolor="purple",
+gacf(y,lags=10,ci=.95,plot=TRUE,barcolor="purple",
      names=FALSE,save=FALSE,height=12,width=12)
 }
 
@@ -20,6 +20,8 @@ gacf(y,lags=10,ci=.95,plot=T,barcolor="purple",
 	The number of lags to plot.}
 	\item{ci}{
 	A numeric value between 0 and 1 specifying the confidence interval to use; the default value is 0.95.}
+  \item{plot}{
+  Whether to plot the ACF.}
 	\item{barcolor}{
 	The color of the bars.}
   \item{names}{
@@ -33,7 +35,7 @@ gacf(y,lags=10,ci=.95,plot=T,barcolor="purple",
 }
 
 \details{
-Plotting the autocorrelation function.
+ Plot an autocorrelation function (ACF) using ggplot2.
 }
 
 \value{

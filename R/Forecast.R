@@ -1,35 +1,56 @@
-# 01/23/15
-forecast.BVARM <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+forecast.BVARM <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastbvarm(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-forecast.BVARS <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+forecast.BVARS <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastbvars(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-forecast.BVARW <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+forecast.BVARW <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastbvarw(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-forecast.CVAR <- function(obj,periods=20,plot=TRUE,confint=0.95,backdata=0,save=FALSE,height=13,width=11){
+forecast.CVAR <- function(obj,periods=20,plot=TRUE,confint=0.95,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastcvar(obj,periods,plot,confint,backdata,save,height,width)
   return=list(PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-forecast.EDSGE <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+forecast.EDSGE <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastdsge(obj,periods,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
   forecastdata <- .forecastdsgevar(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
   return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
 .forecastbvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  
+  #if(getRversion() >= "3.1.0") utils::suppressForeignCheck(names=c("Time", "FCL", "FCU", "FCM"))
+  
   Betas <- obj$BDraws
   Sigma <- obj$Sigma
   Shock <- chol(Sigma); Shock <- t(Shock)
@@ -53,7 +74,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   if(constant==T){kY0 <- rbind(1,kY0)}
   kY0<-t(kY0)
   #
-  Forecasts <- .Call("bvarmforecast", kY0,M,p,K,kcons,runs,periods,inclshocks,Betas,Shock, PACKAGE = "BMR", DUP = FALSE)
+  Forecasts <- .Call("bvarmforecast", kY0,M,K,kcons,runs,periods,inclshocks,Betas,Shock, PACKAGE = "BMR")
   Forecasts <- Forecasts$Forecasts
   #
   ForecastsSorted <- apply(Forecasts,c(1,2),sort)
@@ -66,7 +87,9 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -89,7 +112,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
@@ -143,7 +166,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   dX <- matrix(rep(1,p),nrow=1)
   #
-  Forecasts <- .Call("bvarsforecast", kY0,dX,M,p,K,runs,periods,inclshocks,Psis,Betas,Sigmas, PACKAGE = "BMR", DUP = FALSE)
+  Forecasts <- .Call("bvarsforecast", kY0,dX,M,p,K,runs,periods,inclshocks,Psis,Betas,Sigmas, PACKAGE = "BMR")
   Forecasts <- Forecasts$Forecasts
   #
   ForecastsSorted<-apply(Forecasts,c(1,2),sort)
@@ -156,7 +179,9 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -179,7 +204,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
@@ -235,7 +260,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   if(constant==T){kY0 <- rbind(1,kY0)}
   kY0<-t(kY0)
   #
-  Forecasts <- .Call("bvarwforecast", kY0,M,p,K,kcons,runs,periods,inclshocks,Betas,Sigmas, PACKAGE = "BMR", DUP = FALSE)
+  Forecasts <- .Call("bvarwforecast", kY0,M,K,kcons,runs,periods,inclshocks,Betas,Sigmas, PACKAGE = "BMR")
   Forecasts <- Forecasts$Forecasts
   #
   ForecastsSorted <- apply(Forecasts,c(1,2),sort)
@@ -248,7 +273,9 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -271,7 +298,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
@@ -325,12 +352,14 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   ci <- -qnorm((1-confint)/2)
   #
-  Forecasts <- .Call("cvarforecast", kY0,M,p,K,kcons,periods,ci,Beta,Sigma, PACKAGE = "BMR", DUP = FALSE)
+  Forecasts <- .Call("cvarforecast", kY0,M,p,K,kcons,periods,ci,Beta,Sigma, PACKAGE = "BMR")
   Forecasts <- Forecasts$Forecasts
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -349,7 +378,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
@@ -383,6 +412,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
 }
 
 .forecastdsge <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+  #
   DSGEPars <- obj$Parameters
   partomats <- obj$partomats
   ObserveMat <- obj$ObserveMat
@@ -394,21 +424,23 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   K <- 1 + p*M
   runs <- nrow(DSGEPars)
   #
+  # Try to solve the model for the first set of values
   dsgemats <- partomats(DSGEPars[1,])
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  dsgesolved <- SDSGE(dsgemats)
+  StateMats <- statespace(dsgesolved)
   #
   IterMat <- diag(ncol(StateMats$F))
   Forecasts <- array(0,dim=c(periods,M,runs))
   #
   for(jj in 1:runs){
     dsgemats <- partomats(DSGEPars[jj,])
-    dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-    StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+    dsgesolved <- SDSGE(dsgemats)
+    StateMats <- statespace(dsgesolved)
+    #
+    IState <- .Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR")$dsgestate[,nrow(Y)]
+    IState <- matrix(IState)
     #
     IterMat <- diag(ncol(StateMats$F))
-    IState <- .Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)$dsgestate[,nrow(Y)]
-    IState <- matrix(IState)
     #
     for(kk in 1:periods){
       IterMat <- StateMats$F%*%IterMat
@@ -426,7 +458,9 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -449,7 +483,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
@@ -510,7 +544,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   if(constant==T){kY0 <- rbind(1,kY0)}
   kY0 <- t(kY0)
   #
-  Forecasts <- .Call("dsgevarforecast", kY0,M,p,K,kcons,runs,periods,inclshocks,Betas,Sigmas, PACKAGE = "BMR", DUP = FALSE)
+  Forecasts <- .Call("dsgevarforecast", kY0,M,K,kcons,runs,periods,inclshocks,Betas,Sigmas, PACKAGE = "BMR")
   Forecasts <- Forecasts$Forecasts
   #
   ForecastsSorted <- apply(Forecasts,c(1,2),sort)
@@ -523,7 +557,9 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
   #
   # Plotting
   #
-  if(plot==T){
+  if(plot==TRUE){
+    Time <- FCL <- FCU <- FCM <- NULL # get around a CRAN check note
+    #
     if(class(dev.list()) != "NULL"){dev.off()}
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
@@ -546,7 +582,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     }
     #
     if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(file="Forecast.eps",height=height,width=width)}
+    if(save==TRUE){cairo_ps(filename="Forecast.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,1)))
     #
     # Include a dashed line to mark where the forecast begins
