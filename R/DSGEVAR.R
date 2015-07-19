@@ -1,3 +1,22 @@
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
                             constant=FALSE,ObserveMat,initialvals,partomats,
                             priorform,priorpars,parbounds,parnames=NULL,
@@ -10,9 +29,15 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   #
   message('Trying to solve the model with your initial values... ',appendLF=FALSE)
   dsgemats1t <- partomats(initialvals)
-  dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
-  StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
-  message('Done. ')
+  dsgesolved1t <- SDSGE(dsgemats1t)
+  StateMats1t <- statespace(dsgesolved1t)
+  soltype <- NULL
+  if(dsgesolved1t$sol_type==1){
+    soltype <- "gensys."
+  }else if(dsgesolved1t$sol_type==2){
+    soltype <- "uhlig\'s method."
+  }
+  message('Done, using ', soltype)
   #
   dsgedataRet <- dsgedata; priorformRet <- priorform
   #
@@ -79,12 +104,12 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     message(' ')
     message('Computing DSGE IRFs now... ',appendLF=FALSE)
     dsgemats1t <- partomats(c(parMode))
-    dsgesolved1t <- SDSGE(dsgemats1t$A,dsgemats1t$B,dsgemats1t$C,dsgemats1t$D,dsgemats1t$F,dsgemats1t$G,dsgemats1t$H,dsgemats1t$J,dsgemats1t$K,dsgemats1t$L,dsgemats1t$M,dsgemats1t$N)
-    StateMats1t <- .DSGEstatespace(dsgesolved1t$N,dsgesolved1t$P,dsgesolved1t$Q,dsgesolved1t$R,dsgesolved1t$S)
-    IRFDs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),nrow(dsgemats1t$N),keep))
+    dsgesolved1t <- SDSGE(dsgemats1t)
+    StateMats1t <- statespace(dsgesolved1t)
+    IRFDs <- array(0,dim=c(irf.periods,ncol(StateMats1t$F),ncol(StateMats1t$G),keep))
     for(i in 1:keep){
       dsgemats <- partomats(DSGEVARMCMCRes$parameters[i,])
-      dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+      dsgesolved <- SDSGE(dsgemats)
       iIRF <- IRF(dsgesolved,sqrt(diag(dsgemats$shocks)),irf.periods,varnames=NULL,plot=FALSE,save=FALSE)
       IRFDs[,,,i] <- iIRF$IRFs
     }
@@ -96,7 +121,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     IRFDVs <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods*keep))
     #
     DSGEVARImpact <- .DSGEVARIRFMatrices(DSGEVARMCMCRes$parameters,DSGEVARMCMCRes$Sigma,p,ObserveMat,partomats,priorform,priorpars,parbounds)
-    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p+kcons,kcons,keep,irf.periods,DSGEVARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR", DUP = FALSE)
+    IRFDVs <- .Call("DSGEVARIRFs", ncol(dsgedata),ncol(dsgedata)*p+kcons,kcons,keep,irf.periods,DSGEVARMCMCRes$Beta,DSGEVARImpact,IRFDVs, PACKAGE = "BMR")
     IRFDVs <- IRFDVs$ImpStore
     IRFStore <- array(NA,dim=c(ncol(dsgedata),ncol(dsgedata),irf.periods,keep))
     for(i in 1:keep){
@@ -204,7 +229,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   GammaBarXY <- tau*t(GammaXY) + (1-tau)*XY
   GammaBarXX <- tau*GammaXX + (1-tau)*XX
   #
-  logLikelihood <- -.Call("DSGEVARLikelihood", logGPR,XX,GammaYY,GammaXY,GammaXX,GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
+  logLikelihood <- -.Call("DSGEVARLikelihood", logGPR,XX,GammaYY,GammaXY,GammaXX,GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR")$logLikelihood
   #
   logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
   #
@@ -220,7 +245,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   dsgeprior <- .DSGEVARPrior(dsgepar,Y,X,p,ObserveMat,partomats,priorform,priorpars,parbounds)
   GammaYY <- dsgeprior$GammaYY; GammaXY <- dsgeprior$GammaXY; GammaXX <- dsgeprior$GammaXX
   #
-  logLikelihood <- -.Call("DSGEVARLikelihoodInf", YY,XY,XX,GammaYY,GammaXY,GammaXX,nrow(Y),ncol(Y),p, PACKAGE = "BMR", DUP = FALSE)$logLikelihood
+  logLikelihood <- -.Call("DSGEVARLikelihoodInf", YY,XY,XX,GammaYY,GammaXY,GammaXX,nrow(Y),ncol(Y), PACKAGE = "BMR")$logLikelihood
   #
   logPosterior <- .DSGEPriors(dsgepar,dsgeparTrans,priorform,priorpars,parbounds,logLikelihood)
   #
@@ -238,11 +263,11 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
 .DSGEVARPrior <- function(parameters,dsgedata,X,p,ObserveMat,partomats,priorform,priorpars,parbounds){
   #
   dsgemats <- partomats(parameters)
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+  dsgesolved <- SDSGE(dsgemats)
   #
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  StateMats <- statespace(dsgesolved)
   #
-  SigmaX <- .Call("DSGEVARPriorC", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,p,500, PACKAGE = "BMR", DUP = FALSE)$SigmaX
+  SigmaX <- .Call("DSGEVARPriorC", dsgedata,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,p,500, PACKAGE = "BMR")$SigmaX
   #
   GammaYY <- SigmaX[,,1]
   #
@@ -523,7 +548,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   }
   #
   kcons <- (ncol(X)%%p!=0)*(ncol(X)%%p!=0)
-  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("DSGEVARReps", GammaBarYY,GammaBarXY,GammaBarXX,GXX,XX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR")
   #
   if(parallel==FALSE){
     return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)
@@ -622,7 +647,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   }
   #
   kcons <- (ncol(X)%%p!=0)*(ncol(X)%%p!=0)
-  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,lambda,nrow(DSGEDraws),nrow(Y),ncol(Y),p,kcons, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("DSGEVARRepsInf", GammaBarYY,GammaBarXY,GammaBarXX,nrow(DSGEDraws),ncol(Y),p,kcons, PACKAGE = "BMR")
   #
   if(parallel==FALSE){
     return=list(parameters=DSGEDraws,acceptRate=accept,Beta=RepsRun$Beta,Sigma=RepsRun$Sigma)
@@ -723,16 +748,12 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
     SigmaEpsilon <- Sigma[,,i]
     #
     dsgemats <- partomats(parameters)
-    dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
+    dsgesolved <- SDSGE(dsgemats)
     #
-    StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+    StateMats <- statespace(dsgesolved)
     #
-    Shocks <- matrix(0,nrow(StateMats$G),nrow(StateMats$G))
-    Shocks[(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G),(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G)] <- sqrt(dsgemats$shocks)
-    #
-    Shocks <- StateMats$G%*%Shocks
-    #
-    GMatShocks <- Shocks[,(nrow(StateMats$G)-nrow(dsgemats$shocks)+1):nrow(StateMats$G)]
+    Shocks <- sqrt(dsgemats$shocks)
+    GMatShocks <- StateMats$G%*%Shocks
     #
     SigmaChol <- t(chol(SigmaEpsilon))
     #

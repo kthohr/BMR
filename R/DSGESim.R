@@ -1,11 +1,43 @@
-DSGESim.SDSGE <- function(obj,seedval=1122,shocks,sim.periods,burnin=NULL,hpfiltered=FALSE,lambda=1600){
-  results <- .dsgesimulation(obj,seedval,shocks,sim.periods,burnin,hpfiltered,lambda)
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+DSGESim.SDSGE <- function(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...){
+  results <- .dsgesimulation(obj,shocks.cov,sim.periods,burnin,seedval,hpfiltered,lambda)
   return(results)
 }
 
-.dsgesimulation <- function(obj,seedval,shocks,sim.periods,burnin=NULL,hpfiltered=FALSE,lambda=1600){
-  StateMats <- .DSGEstatespace(obj$N,obj$P,obj$Q,obj$R,obj$S)
+DSGESim.gensys <- function(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...){
+  results <- .dsgesimulation(obj,shocks.cov,sim.periods,burnin,seedval,hpfiltered,lambda)
+  return(results)
+}
+
+DSGESim.uhlig <- function(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...){
+  results <- .dsgesimulation(obj,shocks.cov,sim.periods,burnin,seedval,hpfiltered,lambda)
+  return(results)
+}
+
+.dsgesimulation <- function(obj,shocks.cov,sim.periods,burnin=NULL,seedval,hpfiltered=FALSE,lambda=1600){
+  #
+  StateMats <- statespace(obj)
   F <- StateMats$F; G <- StateMats$G
+  #
+  nShocks <- ncol(G)
   #
   if(class(burnin) != "numeric"){
     burnin <- ceiling(0.5*sim.periods)
@@ -15,49 +47,17 @@ DSGESim.SDSGE <- function(obj,seedval=1122,shocks,sim.periods,burnin=NULL,hpfilt
   #
   set.seed(seedval)
   #
-  shockvec1 <- matrix(rep(0,nrow(obj$N)*(nrow(G) - nrow(obj$N))),ncol=nrow(obj$N))
-  shockvec2 <- diag(nrow(obj$N))
-  for(j in 1:nrow(obj$N)){
-    shockvec2[j,j] <- rnorm(1,mean=0,sd=shocks[j])
+  A <- t(chol(shocks.cov))
+  krun <- (sim.periods + burnin)*nShocks
+  samp <- matrix(rnorm(krun),ncol=nShocks)
+  shocks <- t(samp%*%t(A))
+  #
+  DSim[1,] <- t(G%*%shocks[,1])
+  for(i in 2:(burnin+sim.periods)){
+    DSim[i,] <- DSim[i-1,]%*%t(F) + t(G%*%shocks[,i])
   }
-  shockvec <- rbind(shockvec1,shockvec2)
-  #shockvec <- rbind(shockvec1,c(rep(rnorm(1),nrow(obj$N))))
-  if(nrow(obj$N) > 1){
-    DSim[1,] <- apply(t(G%*%shockvec),c(2),sum)
-    for(i in 2:burnin){
-      for(j in 1:nrow(obj$N)){
-        shockvec2[j,j] <- rnorm(1,mean=0,sd=shocks[j])
-      }
-      shockvec <- rbind(shockvec1,shockvec2)
-      shockvec3 <- apply(t(G%*%shockvec),c(2),sum)
-      DSim[i,] <- DSim[i-1,]%*%t(F) + shockvec3
-    }
-    #
-    for(i in 1:sim.periods){
-      for(j in 1:nrow(obj$N)){
-        shockvec2[j,j] <- rnorm(1,mean=0,sd=shocks[j])
-      }
-      shockvec <- rbind(shockvec1,shockvec2)
-      shockvec3 <- apply(t(G%*%shockvec),c(2),sum)
-      DSim[i+burnin,] <- DSim[i-1+burnin,]%*%t(F) + shockvec3
-    }
-    #
-    DSim <- DSim[(burnin+1):(burnin+sim.periods),]
-  }else{
-    DSim[1,] <- t(G%*%shockvec)
-    #
-    for(i in 2:burnin){
-      shockvec <- rbind(shockvec1,c(rnorm(1,0,shocks[1])))
-      DSim[i,] <- DSim[i-1,]%*%t(F) + t(G%*%shockvec)
-    }
-    #
-    for(i in 1:sim.periods){
-      shockvec <- rbind(shockvec1,c(rnorm(1,0,shocks[1])))
-      DSim[i+burnin,] <- DSim[i-1+burnin,]%*%t(F) + t(G%*%shockvec)
-    }
-    #
-    DSim <- DSim[(burnin+1):(burnin+sim.periods),]
-  }
+  #
+  DSim <- DSim[(burnin+1):(burnin+sim.periods),]
   #
   if(hpfiltered==TRUE){
     hpfilterq <- function(x,lambda=1600){

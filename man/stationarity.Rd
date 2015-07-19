@@ -25,7 +25,7 @@ stationarity(y,KPSSp=4,ADFp=8,print=TRUE)
 
 \details{
   Remember, the null hypothesis of the ADF test is NOT the same as the KPSS test; 
-  the former is a test with a null of a unit root, and the latter is a test with a null of stationarity.
+  the former is a test with a null of a unit root, while the latter is a test with a null of stationarity.
 }
 
 \value{

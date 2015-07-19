@@ -1,3 +1,22 @@
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 gtsplot <- function(X,dates=NULL,rowdates=FALSE,dates.format="%Y-%m-%d",save=FALSE,height=13,width=11){
   .bmrgtsplot(X,dates,rowdates,dates.format,save,height,width)
 }
@@ -68,17 +87,18 @@ gtsplot <- function(X,dates=NULL,rowdates=FALSE,dates.format="%Y-%m-%d",save=FAL
   vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
   #
   SeriesCount <- 1
+  Orig <- NULL # CRAN check workaround
   #
   for(j in 1:plotpages){
     #
     if(save==TRUE){
       if(class(dev.list()) != "NULL"){dev.off()}
       if(plotpages==1){
-        cairo_ps(file="TimeSeriesPlot.eps",height=height,width=width)
+        cairo_ps(filename="TimeSeriesPlot.eps",height=height,width=width)
       }else{
         SaveIRF <- paste("TimeSeries_",j,".eps",sep="")
         #
-        cairo_ps(file=SaveIRF,height=height,width=width)
+        cairo_ps(filename=SaveIRF,height=height,width=width)
       }
     }else{
       grid.newpage()

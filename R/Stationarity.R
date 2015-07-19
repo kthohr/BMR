@@ -1,3 +1,22 @@
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 stationarity <- function(y,KPSSp=4,ADFp=8,print=TRUE){
   results <- .stationarity(y,KPSSp,ADFp,print)
   return=list(KPSS=results$KPSS, ADF=results$ADF, ADFLags=results$ADFLags)
@@ -144,7 +163,7 @@ stationarity <- function(y,KPSSp=4,ADFp=8,print=TRUE){
   kT <- as.numeric(nrow(Y))
   XL<-cbind(1:kT,rep(1,kT),XO[(p):(nrow(XO)-1),],XL)
   #
-  whichp <- whichp <- .Call("ADFCheck", Y,XL,p,kT, PACKAGE = "BMR", DUP = FALSE)
+  whichp <- whichp <- .Call("ADFCheck", Y,XL,p,kT, PACKAGE = "BMR")
   PMin <- whichp$BIC + 1
   #
   XL3<-embed(X,PMin[3]+1); Y3 <- matrix(XL3[,1]); XL3<-as.matrix(XL3[,2:ncol(XL3)],ncol=PMin[3]); XL3 <- cbind(XO[(PMin[3]):(nrow(XO)-1),],XL3)

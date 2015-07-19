@@ -1,4 +1,23 @@
-states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11){
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
   #
   DSGEPars <- obj$Parameters
   partomats <- obj$partomats
@@ -14,8 +33,8 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
   #
   # Try to solve the model for the first set of values
   dsgemats <- partomats(DSGEPars[1,])
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  dsgesolved <- SDSGE(dsgemats)
+  StateMats <- statespace(dsgesolved)
   nstates <- ncol(StateMats$F)
   #
   if(class(varnames) != "character"){
@@ -29,10 +48,10 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
   #
   for(jj in 1:runs){
     dsgemats <- partomats(DSGEPars[jj,])
-    dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-    StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+    dsgesolved <- SDSGE(dsgemats)
+    StateMats <- statespace(dsgesolved)
     #
-    States[,,jj] <- t(.Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)$dsgestate)
+    States[,,jj] <- t(.Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR")$dsgestate)
   }
   #
   StatesSorted <- apply(States,c(1,2),sort)
@@ -98,15 +117,17 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
     #
     if(save==TRUE){
       if(plotpages==1){
-        cairo_ps(file="States.eps",height=height,width=width)
+        cairo_ps(filename="States.eps",height=height,width=width)
       }else{
         SaveState <- paste("States_",j,".eps",sep="")
         #
-        if(save==TRUE){cairo_ps(file=SaveState,height=height,width=width)}
+        if(save==TRUE){cairo_ps(filename=SaveState,height=height,width=width)}
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
+    #
+    Time <- SL <- SU <- SM <- NULL # CRAN check workaround
     #
     for(i in 1:MR){
       for(k in 1:MC){
@@ -133,7 +154,7 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
   return=list(MeanState=StatesMean,States=StateData)
 }
 
-states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11){
+states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
   #
   DSGEPars <- obj$Parameters
   partomats <- obj$partomats
@@ -149,8 +170,8 @@ states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=
   #
   # Try to solve the model for the first set of values
   dsgemats <- partomats(DSGEPars[1,])
-  dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-  StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+  dsgesolved <- SDSGE(dsgemats)
+  StateMats <- statespace(dsgesolved)
   nstates <- ncol(StateMats$F)
   #
   if(class(varnames) != "character"){
@@ -164,10 +185,10 @@ states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=
   #
   for(jj in 1:runs){
     dsgemats <- partomats(DSGEPars[jj,])
-    dsgesolved <- SDSGE(dsgemats$A,dsgemats$B,dsgemats$C,dsgemats$D,dsgemats$F,dsgemats$G,dsgemats$H,dsgemats$J,dsgemats$K,dsgemats$L,dsgemats$M,dsgemats$N)
-    StateMats <- .DSGEstatespace(dsgesolved$N,dsgesolved$P,dsgesolved$Q,dsgesolved$R,dsgesolved$S)
+    dsgesolved <- SDSGE(dsgemats)
+    StateMats <- statespace(dsgesolved)
     #
-    States[,,jj] <- t(.Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgesolved$N,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR", DUP = FALSE)$dsgestate)
+    States[,,jj] <- t(.Call("DSGEKalmanFilt", Y,ObserveMat,dsgemats$ObsCons,StateMats$F,StateMats$G,dsgemats$shocks,dsgemats$MeasErrs,200, PACKAGE = "BMR")$dsgestate)
   }
   #
   StatesSorted <- apply(States,c(1,2),sort)
@@ -233,15 +254,17 @@ states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=
     #
     if(save==TRUE){
       if(plotpages==1){
-        cairo_ps(file="States.eps",height=height,width=width)
+        cairo_ps(filename="States.eps",height=height,width=width)
       }else{
         SaveState <- paste("States_",j,".eps",sep="")
         #
-        if(save==TRUE){cairo_ps(file=SaveState,height=height,width=width)}
+        if(save==TRUE){cairo_ps(filename=SaveState,height=height,width=width)}
       }
     }
     grid.newpage()
     pushViewport(viewport(layout=grid.layout(MR,MC)))
+    #
+    Time <- SL <- SU <- SM <- NULL # CRAN check workaround
     #
     for(i in 1:MR){
       for(k in 1:MC){

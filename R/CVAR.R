@@ -1,4 +1,22 @@
-# 01/12/2014
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
 CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
   #
   kerr <- .cvarerrors(mydata,p)
@@ -72,10 +90,10 @@ CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
   kcons <- 0; if(constant==T){kcons<-1}
   #
   message('Starting C++, ', date(),'.', sep="")
-  RepsRun <- .Call("CVARReps", Beta,Sigma,as.matrix(X),as.matrix(Y),Tp,M,K,kcons,boot,ResidDraws, PACKAGE = "BMR", DUP = FALSE)
+  RepsRun <- .Call("CVARReps", Beta,Sigma,as.matrix(X),as.matrix(Y),Tp,M,K,kcons,boot,ResidDraws, PACKAGE = "BMR")
   message('C++ reps finished, ', date(),'. Now getting IRFs.', sep="")
   #
-  ImpStore <- .Call("CVARIRFs", M,K,kcons,boot,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR", DUP = FALSE)
+  ImpStore <- .Call("CVARIRFs", M,K,kcons,boot,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR")
   ImpStore <- ImpStore$ImpStore
   ImpStore2 <- array(NA,dim=c(M,M,irf.periods,boot))
   for(i in 1:boot){

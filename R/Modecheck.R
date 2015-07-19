@@ -1,12 +1,31 @@
-modecheck.EDSGE <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
-  .edsgemodecheck(obj,gridsize,scalepar,plottransform,save,height,width) 
+################################################################################
+##
+##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   This file is part of the R package BMR.
+##
+##   The R package BMR is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 2 of the License, or
+##   (at your option) any later version.
+##
+##   The R package BMR is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+################################################################################
+
+# 07/20/2015
+
+modecheck.EDSGE <- function(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,parnames=NULL,save=FALSE,height=13,width=13,...){
+  .edsgemodecheck(obj,gridsize,scalepar,plottransform,parnames,save,height,width) 
 }
 
-modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
-  .dsgevarmodecheck(obj,gridsize,scalepar,plottransform,save,height,width) 
+modecheck.DSGEVAR <- function(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,parnames=NULL,save=FALSE,height=13,width=13,...){
+  .dsgevarmodecheck(obj,gridsize,scalepar,plottransform,parnames,save,height,width) 
 }
 
-.edsgemodecheck <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALSE,save=FALSE,height=13,width=13){
+.edsgemodecheck <- function(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,parnames=NULL,save=FALSE,height=13,width=13){
   #
   dsgedata <- obj$data
   ObserveMat <- obj$ObserveMat
@@ -16,8 +35,18 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
   parbounds <- obj$parbounds
   #
   Parameters <- obj$Parameters
-  ParNames <- colnames(Parameters)
   nParam <- as.numeric(ncol(Parameters))
+  #
+  ParNames <- parnames
+  if(is.null(parnames)==TRUE){
+    ParNames <- colnames(Parameters)
+    if(class(ParNames) != "character"){
+      ParNames <- character(length=nParam)
+      for(i in 1:nParam){  
+        ParNames[i] <- paste("Parameter",i,sep="")
+      }
+    }
+  }
   #
   priorform <- .edsgePrelimWork(dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds)$priorform
   #
@@ -56,6 +85,8 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
   MR <- 0; MC <- 0
   plotpages <- 1
   if(plot==TRUE){
+    ParameterVals <- LogPosterior <- NULL # CRAN check workaround
+    #
     if(plottransform==FALSE){
       parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
     }
@@ -96,7 +127,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
         if(class(dev.list()) != "NULL"){dev.off()}
         #
         SaveMode <- paste("DSGEModeCheck",as.character(ii),".eps",sep="")
-        cairo_ps(file=SaveMode,height=height,width=width)
+        cairo_ps(filename=SaveMode,height=height,width=width)
       }
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(MR,MC)))
@@ -112,7 +143,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
             #
             ParamCount <- ParamCount + 1
             #
-            Sys.sleep(0.6)
+            Sys.sleep(0.3)
           }else{ParamCount <- ParamCount + 1}
         }
       }
@@ -122,7 +153,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
   #
 }
 
-.dsgevarmodecheck <- function(obj,gridsize=1000,scalepar=NULL,plottransform=TRUE,save=FALSE,height=13,width=13){
+.dsgevarmodecheck <- function(obj,gridsize=200,scalepar=NULL,plottransform=TRUE,parnames=NULL,save=FALSE,height=13,width=13){
   #
   dsgedata <- obj$data
   ObserveMat <- obj$ObserveMat
@@ -132,11 +163,21 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
   parbounds <- obj$parbounds
   #
   Parameters <- obj$Parameters
-  ParNames <- colnames(Parameters)
   nParam <- as.numeric(ncol(Parameters))
   #
   lambda <- obj$lambda
   p <- obj$p
+  #
+  ParNames <- parnames
+  if(is.null(parnames)==TRUE){
+    ParNames <- colnames(Parameters)
+    if(class(ParNames) != "character"){
+      ParNames <- character(length=nParam)
+      for(i in 1:nParam){  
+        ParNames[i] <- paste("Parameter",i,sep="")
+      }
+    }
+  }
   #
   prelimwork <- .dsgevarPrelimWork(dsgedata,lambda,p,obj$constant,matrix(0,1,1),FALSE,ObserveMat,partomats,priorform,priorpars,parbounds)
   kdata <- prelimwork$kdata; priorform <- prelimwork$priorform;
@@ -195,6 +236,8 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
   MR <- 0; MC <- 0
   plotpages <- 1
   if(plot==TRUE){
+    ParameterVals <- LogPosterior <- NULL # CRAN check workaround
+    #
     if(plottransform==FALSE){
       parametersMode <- .DSGEParTransform(parametersMode,priorform,parbounds,2)
     }
@@ -235,7 +278,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
         if(class(dev.list()) != "NULL"){dev.off()}
         #
         SaveMode <- paste("DSGEVARModeCheck",as.character(ii),".eps",sep="")
-        cairo_ps(file=SaveMode,height=height,width=width)
+        cairo_ps(filename=SaveMode,height=height,width=width)
       }
       grid.newpage()
       pushViewport(viewport(layout=grid.layout(MR,MC)))
@@ -251,7 +294,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=1000,scalepar=NULL,plottransform=FALS
             #
             ParamCount <- ParamCount + 1
             #
-            Sys.sleep(0.6)
+            Sys.sleep(0.3)
           }else{ParamCount <- ParamCount + 1}
         }
       }
