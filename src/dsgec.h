@@ -20,7 +20,7 @@
 //#include <Rmath.h>
 #include <math.h>
 #include <RcppArmadillo.h>
-#include "armadillo_qz"
+//#include "armadillo_qz"
 RcppExport SEXP UhligCpp(SEXP mA, SEXP mB, SEXP mC, SEXP mD,
                          SEXP mF, SEXP mG, SEXP mH,
                          SEXP mJ, SEXP mK, SEXP mL, SEXP mM, SEXP mN,
