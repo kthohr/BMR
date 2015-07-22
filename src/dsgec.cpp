@@ -18,6 +18,10 @@
 #include "dsgec.h"
 using namespace Rcpp;
 
+#if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
+# define PREDEF_PLATFORM_UNIX
+#endif
+
 SEXP UhligCpp(SEXP mA, SEXP mB, SEXP mC, SEXP mD,
               SEXP mF, SEXP mG, SEXP mH,
               SEXP mJ, SEXP mK, SEXP mL, SEXP mM, SEXP mN,
@@ -373,6 +377,7 @@ int qzdiv(double stake, arma::cx_mat &A, arma::cx_mat &B, arma::cx_mat &Q, arma:
 //
 SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
 {
+#ifdef PREDEF_PLATFORM_UNIX
     try {
         //
         //Suppress warnings:
@@ -592,6 +597,10 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
         ::Rf_error( "BMR: gensys C++ exception (unknown reason)" );
     }
     return R_NilValue;
+#else
+    ::Rf_error( "BMR: cannot use gensys without full LAPACK" );
+    return R_NilValue;
+#endif
 }
 
 int lyapunov_dbl (arma::mat &X, arma::mat F, int max_iter)
