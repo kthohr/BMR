@@ -229,7 +229,7 @@ BVARW.default <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.pe
   RepsRunB <- .Call("WBVARRepsB", Sigma,as.matrix(X),as.matrix(Z),as.matrix(Y),matrix(aPr,ncol=1),SPr,vPr,BVPr,Tp,M,K,burnin, PACKAGE = "BMR")
   #
   cl <- makeCluster(NCore)
-  registerDoSNOW(cl)
+  registerDoParallel(cl)
   keeppar <- ceiling(keep/NCore)
   solpar <- 0
   solpar <- foreach(jj=1:NCore, .packages=c("BMR")) %dopar% {

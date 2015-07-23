@@ -423,7 +423,7 @@ EDSGE.default <- function(dsgedata,chains=1,cores=1,
 .DSGEMCMCMulti <- function(dsgeopt,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores){
   #
   cl <- makeCluster(cores)
-  registerDoSNOW(cl)
+  registerDoParallel(cl)
   parallelsol <- 0
   parallelsol <- foreach(jj=1:chains, .packages=c("BMR")) %dopar% {
     .DSGEMCMC(dsgeopt,scalepar,keep,burnin,dsgedata,ObserveMat,partomats,priorform,priorpars,parbounds,TRUE)

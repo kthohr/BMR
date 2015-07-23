@@ -14,13 +14,16 @@
 \usage{
 DSGESim(obj,...)
 
-\method{DSGESim}{gensys}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
-\method{DSGESim}{uhlig}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
-\method{DSGESim}{SDSGE}(obj,shocks.cov,sim.periods,burnin=NULL,seedval=1122,hpfiltered=FALSE,lambda=1600,...)
+\method{DSGESim}{gensys}(obj,shocks.cov,sim.periods,burnin=NULL,
+        seedval=1122,hpfiltered=FALSE,lambda=1600,...)
+\method{DSGESim}{uhlig}(obj,shocks.cov,sim.periods,burnin=NULL,
+        seedval=1122,hpfiltered=FALSE,lambda=1600,...)
+\method{DSGESim}{SDSGE}(obj,shocks.cov,sim.periods,burnin=NULL,
+        seedval=1122,hpfiltered=FALSE,lambda=1600,...)
 }
 
 \arguments{
-  \item{obj}{
+    \item{obj}{
 	An object of class `SDSGE', `gensys', or `uhlig'. The user should first solve a model using one of the solver functions (`SDSGE', `gensys', or `uhlig'), then pass the solution to `DSGESim'.}
 	\item{shocks.cov}{
 	A matrix of size k x k that describes the covariance structure of the model shocks.}
@@ -28,14 +31,14 @@ DSGESim(obj,...)
 	The number of simulation periods the function should return.}
 	\item{burnin}{
 	The length of sample burn-in. The default, `burnin = NULL', will set burn-in to one-half of the number given in `sim.periods'.}
-  \item{seedval}{
-  Seed the random number generator.}
+    \item{seedval}{
+    Seed the random number generator.}
 	\item{hpfiltered}{
 	Whether to pass the simulated series through a Hodrick-Prescott filter before retuning.}
 	\item{lambda}{
 	If `hpfiltered = TRUE', this is the value of the smoothing parameter in the H-P filter.}
-  \item{\dots}{
-  Additional arguments (not used).}
+    \item{\dots}{
+    Additional arguments (not used).}
 }
 
 \details{

@@ -37,7 +37,7 @@ EDSGE(dsgedata,chains=1,cores=1,
 	\item{partomats}{
   This is perhaps the most important function input.
   
-  `partomats' should be a function that maps the deep parameters of the DSGE model to the matrices of a solution method, and contains: a k x k matrix labelled `shocks' containing the variances of the structural shocks; a j x 1 matrix labelled `MeasCons' containing any constant terms in the measurement equation; and a j x j matrix labelled `MeasErrs' containing the variances of the measurement errors.}
+  `partomats' should be a function that maps the deep parameters of the DSGE model to the matrices of a solution method, and contain: a k x k matrix labelled `shocks' containing the variances of the structural shocks; a j x 1 matrix labelled `MeasCons' containing any constant terms in the measurement equation; and a j x j matrix labelled `MeasErrs' containing the variances of the measurement errors.}
 	\item{priorform}{
 	The prior distribution of each parameter.}
 	\item{priorpars}{

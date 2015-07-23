@@ -31,7 +31,7 @@ BVARS(mydata,psiprior=NULL,coefprior=NULL,p=4,
 	\item{burnin}{
 	The sample burn-in length for the Gibbs sampler.}
   \item{XiPsi}{
-	A numeric vector of length 1 or matrix of size m x m that defines the prior location matrix of psi.}
+	A numeric vector of length 1 or matrix of size m x m that defines the prior location matrix of Psi.}
 	\item{HP1}{
 	H_1 from section 3 of the vignette.}
 	\item{HP4}{

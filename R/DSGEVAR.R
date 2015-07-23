@@ -659,7 +659,7 @@ DSGEVAR.default <- function(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
 .DSGEVARMCMCMulti <- function(dsgemode,scalepar,keep,burnin,parMode,kdata,lambda,p,ObserveMat,partomats,priorform,priorpars,parbounds,chains,cores){
   #
   cl <- makeCluster(cores)
-  registerDoSNOW(cl)
+  registerDoParallel(cl)
   #
   parallelsol <- 0
   if(is.finite(lambda)==TRUE){

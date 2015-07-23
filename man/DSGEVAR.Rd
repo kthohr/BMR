@@ -45,7 +45,7 @@ DSGEVAR(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
 	\item{partomats}{
   This is perhaps the most important function input.
   
-  `partomats' should be a function that maps the deep parameters of the DSGE model to the matrices of a solution method, and contains: a k x k matrix labelled `shocks' containing the variances of the structural shocks; a j x 1 matrix labelled `MeasCons' containing any constant terms in the measurement equation; and a j x j matrix labelled `MeasErrs' containing the variances of the measurement errors.}
+  `partomats' should be a function that maps the deep parameters of the DSGE model to the matrices of a solution method, and contain: a k x k matrix labelled `shocks' containing the variances of the structural shocks; a j x 1 matrix labelled `MeasCons' containing any constant terms in the measurement equation; and a j x j matrix labelled `MeasErrs' containing the variances of the measurement errors.}
 	\item{priorform}{
 	The prior distribution of each parameter.}
 	\item{priorpars}{
@@ -105,8 +105,6 @@ The function returns an object of class DSGEVAR, which contains:
 	The Hessian computed at the posterior mode for the transformed parameters.}
   \item{logMargLikelihood}{
   The log marginal likelihood from a Laplacian approximation at the posterior mode.}
-	\item{IRFs}{
-	The IRFs (if any), based on the posterior parameter draws.}
 	\item{AcceptanceRate}{
 	The acceptance rate of the chain(s).}
   \item{RootRConvStats}{
