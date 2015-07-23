@@ -40,7 +40,7 @@ The function returns an object of class `gensys', which contains:
 	\item{impact}{
 	Coefficients on the exogenous shocks.}
 	\item{eu}{
-	Existence and uniqueness of the solution.}
+	A 2 x 1 vector indicating existence and uniqueness (respectively) of the solution. A value of 1 can be read as `yes', while 0 is `no'.}
 	\item{Psi}{
 	User-specified shock matrix.}
 	\item{Pi}{

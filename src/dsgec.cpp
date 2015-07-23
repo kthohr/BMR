@@ -407,10 +407,10 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
         xGamma0.set_real(Gamma0);
         xGamma1.set_real(Gamma1);
         /*
-        *
-        * QZ decomposition: Gamma0 = Q**H S Z**H,  Gamma1 = Q**H T Z**H
-        *
-        */
+         *
+         * QZ decomposition: Gamma0 = Q**H S Z**H,  Gamma1 = Q**H T Z**H
+         *
+         */
         arma::cx_mat Q; arma::cx_mat Z; arma::cx_mat S; arma::cx_mat T;
         //
         arma::qz(S, T, Q, Z, xGamma0, xGamma1);
@@ -426,44 +426,69 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
         //
         int i;
         for(i = 0; i < n; ++i){
-          //
-          if( std::abs(alpha_mat(i)) > 0 ){
-            divhat = std::abs(beta_mat(i))/std::abs(alpha_mat(i));
             //
-            if( 1 + small < divhat && divhat <= div){
-              div = 0.5*(1 + divhat);
+            if( std::abs(alpha_mat(i)) > 0 ){
+                divhat = std::abs(beta_mat(i))/std::abs(alpha_mat(i));
+                //
+                if( 1 + small < divhat && divhat <= div){
+                    div = 0.5*(1 + divhat);
+                }
+                //
             }
             //
-          }
-          //
-          if( std::abs(beta_mat(i)) > div*std::abs(alpha_mat(i)) ){
-            nstable = nstable + 1;
-          }
-          //
-          if( std::abs(alpha_mat(i)) < small && std::abs(beta_mat(i)) < small ){
-            zxz = 1;
-          }
+            if( std::abs(beta_mat(i)) > div*std::abs(alpha_mat(i)) ){
+                nstable += 1;
+            }
+            //
+            if( std::abs(alpha_mat(i)) < small && std::abs(beta_mat(i)) < small ){
+                zxz = 1;
+            }
         }
         //
         if(zxz == 0){
-          qzdiv(div,S,T,Q,Z);
+            qzdiv(div,S,T,Q,Z);
         }
         else{ // zxz == 1
-          eu(0) = -2; eu(1) = -2;
-          //
-          return Rcpp::List::create(Rcpp::Named("G1") = G1, Rcpp::Named("Cons") = Cons, Rcpp::Named("impact") = impact, Rcpp::Named("eu") = eu);
+            eu(0) = -2; eu(1) = -2;
+            //
+            return Rcpp::List::create(Rcpp::Named("G1") = G1, Rcpp::Named("Cons") = Cons, Rcpp::Named("impact") = impact, Rcpp::Named("eu") = eu);
         }
         //
         gev.set_size(n,2);
-        gev.col(0) = S.diag();
-        gev.col(1) = T.diag();
+        gev(arma::span(),0) = S.diag();
+        gev(arma::span(),1) = T.diag();
         //
-        arma::cx_mat Q1 = Q(arma::span(0,n-nstable-1),arma::span());
-        arma::cx_mat Q2 = Q(arma::span(n-nstable,n-1),arma::span());
-        arma::cx_mat Z1 = arma::trans(Z(arma::span(),arma::span(0,n-nstable-1)));
-        arma::cx_mat Z2 = arma::trans(Z(arma::span(),arma::span(n-nstable,n-1)));
-        arma::cx_mat S2 = S(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
-        arma::cx_mat T2 = T(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
+        arma::cx_mat Q1, Q2, Z1, Z2, S2, T2;
+        //
+        if(nstable < n){
+            Q1 = Q.rows(0,n-nstable-1);
+            Z1 = arma::trans(Z.cols(0,n-nstable-1));
+            //
+            if(nstable != 0){
+                Q2 = Q.rows(n-nstable,n-1);
+                Z2 = arma::trans(Z.cols(n-nstable,n-1));
+                //
+                S2 = S(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
+                T2 = T(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
+            }
+            else{
+                Q2.set_size(0,n);
+                Z2.set_size(0,n);
+                //
+                S2.set_size(0,0);
+                T2.set_size(0,0);
+            }
+        }
+        else{
+            Q1.set_size(0,n);
+            Q2 = Q.rows(n-nstable,n-1);
+            //
+            Z1.set_size(0,n);
+            Z2 = arma::trans(Z.cols(n-nstable,n-1));
+            //
+            S2 = S(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
+            T2 = T(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1));
+        }
         //
         arma::cx_mat etawt = Q2*Pi;
         int neta = Pi.n_cols;
@@ -473,20 +498,20 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
         arma::cx_mat veta = arma::zeros<arma::cx_mat>(neta,0);
         //
         if(nstable > 0){
-          arma::cx_mat tueta; arma::vec tdeta; arma::cx_mat tveta;
-          arma::uvec bigev;
-          //
-          arma::svd(tueta,tdeta,tveta,etawt);
-          //
-          bigev = arma::find(tdeta > small);
-          //
-          ueta = tueta.cols(bigev);
-          veta = tveta.cols(bigev);
-          deta = tdeta(bigev);
-          //
-          if(bigev.n_elem >= nstable){ // existence
-            eu(0) = 1;
-          }
+            arma::cx_mat tueta; arma::vec tdeta; arma::cx_mat tveta;
+            arma::uvec bigev;
+            //
+            arma::svd(tueta,tdeta,tveta,etawt);
+            //
+            bigev = arma::find(tdeta > small);
+            //
+            ueta = tueta.cols(bigev);
+            veta = tveta.cols(bigev);
+            deta = tdeta(bigev);
+            //
+            if(bigev.n_elem >= nstable){ // existence
+                eu(0) = 1;
+            }
         }
         //
         //
@@ -497,91 +522,108 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
         arma::cx_mat veta1 = arma::zeros<arma::cx_mat>(neta,0);
         //
         if(nstable != n){
-          arma::cx_mat tueta1; arma::vec tdeta1; arma::cx_mat tveta1;
-          //
-          etawt1 = Q1*Pi;
-          //
-          arma::svd(tueta1,tdeta1,tveta1,etawt1);
-          //
-          arma::uvec bigev2 = arma::find(tdeta1 > small);
-          //
-          ueta1 = tueta1.cols(bigev2);
-          veta1 = tveta1.cols(bigev2);
-          deta1 = tdeta1(bigev2);
+            arma::cx_mat tueta1; arma::vec tdeta1; arma::cx_mat tveta1;
+            //
+            etawt1 = Q1*Pi;
+            //
+            arma::svd(tueta1,tdeta1,tveta1,etawt1);
+            //
+            arma::uvec bigev2 = arma::find(tdeta1 > small);
+            //
+            ueta1 = tueta1.cols(bigev2);
+            veta1 = tveta1.cols(bigev2);
+            deta1 = tdeta1(bigev2);
         }
         //
         //
         //
         arma::cx_mat loose_temp;
         int uniq = 0;
+        int nloose = 0;
         if(veta.n_rows==0){
-          uniq = 1;
+            uniq = 1;
         }
         else{
-          loose_temp = veta1 - veta*arma::trans(veta)*veta1;
-          //
-          arma::cx_mat ul; arma::vec dl; arma::cx_mat vl;
-          arma::svd(ul,dl,vl,loose_temp);
-          //
-          arma::uvec kfind = arma::find( arma::abs(dl) > small*n);
-          //
-          if(kfind.n_elem == 0){
-            uniq = 1;
-          }
-          else{
-            uniq = 0;
-          }
+            loose_temp = veta1 - veta*arma::trans(veta)*veta1;
+            //
+            arma::cx_mat ul; arma::vec dl; arma::cx_mat vl;
+            arma::svd(ul,dl,vl,loose_temp);
+            //
+            arma::uvec kfind = arma::find( arma::abs(dl) > small*n);
+            //
+            if(kfind.n_elem == 0){
+                uniq = 1;
+            }
+            else{
+                uniq = 0;
+            }
+            nloose = kfind.n_elem;
         }
         //
         if(uniq == 1){ // uniqueness
-          eu(1) = 1;
+            eu(1) = 1;
         }
         /*
-        *
-        * Now put it all together
-        *
-        */
+         *
+         * Now put it all together
+         *
+         */
+        /*
+         *
+         * Now put it all together
+         *
+         */
         arma::mat detamat = arma::diagmat(deta);   // put the singular values in diagonal matrix form
         arma::mat deta1mat = arma::diagmat(deta1);
         //
         arma::cx_mat tmat(n - nstable,n);
-        tmat(arma::span(),arma::span(0,n-nstable-1)) = arma::eye<arma::cx_mat>(n-nstable,n-nstable);
-        tmat(arma::span(),arma::span(n-nstable,n-1)) = - arma::trans((ueta*(arma::inv(detamat)*arma::trans(veta))*veta1*deta1mat*arma::trans(ueta1)));
+        tmat.cols(0,n-nstable-1) = arma::eye<arma::cx_mat>(n-nstable,n-nstable);
+        if(nstable != 0){
+            tmat.cols(n-nstable,n-1) = - arma::trans((ueta*(arma::inv(detamat)*arma::trans(veta))*veta1*deta1mat*arma::trans(ueta1)));
+        }
         //
         //
         //
         arma::cx_mat G0(n,n);
         G0.zeros();
-        G0(arma::span(0,n-nstable-1),arma::span()) = tmat * S;
-        G0(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1)) = arma::eye<arma::cx_mat>(nstable,nstable);
+        G0.rows(0,n-nstable-1) = tmat * S;
+        if(nstable != 0){
+            G0(arma::span(n-nstable,n-1),arma::span(n-nstable,n-1)) = arma::eye<arma::cx_mat>(nstable,nstable);
+        }
         //
         arma::cx_mat G0I = arma::inv(G0);
         //
         arma::cx_mat G1_temp(n,n);
         G1_temp.zeros();
-        G1_temp(arma::span(0,n-nstable-1),arma::span()) = tmat * T;
+        G1_temp.rows(0,n-nstable-1) = tmat * T;
         //
         G1_temp = G0I*G1_temp;
+        //
+        //
         //
         int usix = n - nstable + 1;
         //
         arma::cx_mat Cons_temp;
         bool Cstatus = arma::any(arma::vectorise(C));
         if(Cstatus==true){ // if any of the elements of 'C' are non-zero...
-          arma::cx_mat C2(n,C.n_cols);
-          C2.zeros();
-          //
-          C2(arma::span(0,n-nstable-1),arma::span()) = tmat * Q * C;
-          C2(arma::span(n-nstable,n-1),arma::span()) = arma::inv( S(arma::span(usix-1,n-1),arma::span(usix-1,n-1)) - T(arma::span(usix-1,n-1),arma::span(usix-1,n-1)) ) * Q2 * C;
-          //
-          Cons_temp = G0I*C2;
+            arma::cx_mat C2(n,C.n_cols);
+            C2.zeros();
+            //
+            C2.rows(0,n-nstable-1) = tmat * Q * C;
+            if(nstable != 0){
+                C2.rows(n-nstable,n-1) = arma::inv( S(arma::span(usix-1,n-1),arma::span(usix-1,n-1)) - T(arma::span(usix-1,n-1),arma::span(usix-1,n-1)) ) * Q2 * C;
+            }
+            //
+            Cons_temp = G0I*C2;
         }else{ // ... otherwise set to zero. This avoids unnecessary calculations.
-          Cons_temp = arma::zeros<arma::cx_mat>(n,C.n_cols);
+            Cons_temp = arma::zeros<arma::cx_mat>(n,C.n_cols);
         }
+        //
+        //
         //
         arma::cx_mat impact_temp(n,Psi.n_cols);
         impact_temp.zeros();
-        impact_temp(arma::span(0,n-nstable-1),arma::span()) = tmat * Q * Psi;
+        impact_temp.rows(0,n-nstable-1) = tmat * Q * Psi;
         impact_temp = G0I * impact_temp;
         //
         //
