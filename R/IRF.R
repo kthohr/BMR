@@ -95,7 +95,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       IRFDF <- data.frame(IRFDF)
       colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
       #
-      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
+      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
       gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
@@ -146,7 +146,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       IRFDF <- data.frame(IRFDF)
       colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
       #
-      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
+      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
       gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
@@ -197,7 +197,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       IRFDF <- data.frame(IRFDF)
       colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
       #
-      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
+      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
       gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
@@ -248,7 +248,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       IRFDF <- data.frame(IRFDF)
       colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
       #
-      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
+      gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) 
       gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
       gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
       print(gg3,vp = vplayout(i,k))
@@ -317,7 +317,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         IRFDF <- data.frame(IRFDF)
         colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
         #
-        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2),vp = vplayout(i,k))
+        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2),vp = vplayout(i,k))
         #
         Sys.sleep(0.3)
       }
@@ -353,9 +353,9 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
       colnames(IRFDF) <- c("irf.periods","variable","value")
       #
       if(i == 1 & k == 1){
-        print(ggplot(data=IRFDF,aes(x=irf.periods,y=value,colour=variable)) + geom_line() + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_hline(yintercept=0) + scale_colour_hue("") + theme(legend.position="top",legend.direction="horizontal", legend.background=element_blank()),vp = vplayout(i,k))
+        print(ggplot(data=IRFDF,aes(x=irf.periods,y=value,colour=variable)) + geom_line() + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_hline(yintercept=0) + scale_colour_hue("") + theme(legend.position="top",legend.direction="horizontal", legend.background=element_blank()),vp = vplayout(i,k))
       }else{
-        print(ggplot(data=IRFDF,aes(x=irf.periods,y=value,colour=variable)) + geom_line() + xlab("Horizon") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_hline(yintercept=0) + theme(legend.position="none"),vp = vplayout(i,k))
+        print(ggplot(data=IRFDF,aes(x=irf.periods,y=value,colour=variable)) + geom_line() + xlab("") + ylab(paste("Shock from ",NameRespone," to", NameImpulse)) + geom_hline(yintercept=0) + theme(legend.position="none"),vp = vplayout(i,k))
       }
       #
       Sys.sleep(0.3)
@@ -465,7 +465,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             IRFDF <- data.frame(IRFs[,IRFCount,j],1:(irf.periods))
             colnames(IRFDF) <- c("IRFM","Time")
             #
-            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             IRFCount <- IRFCount + 1
             #
@@ -610,7 +610,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
           IRFDF <- data.frame(IRFPlot[,,IRFCount,j])
           colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
           #
-          gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) 
+          gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) 
           gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) 
           gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
           print(gg3,vp = vplayout(i,k))
@@ -755,9 +755,9 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
           colnames(IRFDF) <- c("VARIRFL","VARIRFM","VARIRFU","IRFL","IRFM","IRFU","Time")
           #
           if(comparison==TRUE){
-            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           }else{
-            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("Horizon") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
           }
           #
           IRFCount <- IRFCount + 1
