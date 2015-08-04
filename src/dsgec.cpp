@@ -568,11 +568,6 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
          * Now put it all together
          *
          */
-        /*
-         *
-         * Now put it all together
-         *
-         */
         arma::mat detamat = arma::diagmat(deta);   // put the singular values in diagonal matrix form
         arma::mat deta1mat = arma::diagmat(deta1);
         //
@@ -640,7 +635,7 @@ SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
     }
     return R_NilValue;
 #else
-    ::Rf_error( "BMR: cannot use gensys without full LAPACK" );
+    ::Rf_error( "BMR: gensys requires a full LAPACK library" );
     return R_NilValue;
 #endif
 }

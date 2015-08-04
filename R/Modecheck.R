@@ -139,7 +139,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=200,scalepar=NULL,plottransform=FALSE
             ParamDF <- data.frame(ParModeCheck[,,ParamCount])
             colnames(ParamDF) <- c("ParameterVals","LogPosterior")
             #
-            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             ParamCount <- ParamCount + 1
             #
@@ -290,7 +290,7 @@ modecheck.DSGEVAR <- function(obj,gridsize=200,scalepar=NULL,plottransform=FALSE
             ParamDF <- data.frame(ParModeCheck[,,ParamCount])
             colnames(ParamDF) <- c("ParameterVals","LogPosterior")
             #
-            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("Parameter Value") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+            print(ggplot(data=(ParamDF),aes(x=ParameterVals)) + xlab("") + ylab("Log Posterior") + geom_vline(xintercept=parametersMode[ParamCount],linetype = "longdash") + geom_line(aes(y=LogPosterior),color="springgreen4") + labs(title=ParNames[ParamCount]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
             #
             ParamCount <- ParamCount + 1
             #

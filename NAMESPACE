@@ -1,12 +1,15 @@
 useDynLib(BMR)
 
 importFrom(Rcpp, evalCpp)
-import(RcppArmadillo)
 import(doParallel)
 import(foreach)
 importFrom(parallel, makeCluster, stopCluster)
 import(ggplot2)
 importFrom(grid, grid.newpage, viewport, pushViewport, grid.layout)
+importFrom("grDevices", "cairo_ps", "dev.list", "dev.off")
+importFrom("stats", "acf", "dbeta", "dgamma", "dnorm", "dunif",
+           "embed", "optim", "pacf", "qnorm", "rnorm", "runif", "sd",
+           "var")
 
 exportClasses("BVARM")
 exportClasses("BVARS")
