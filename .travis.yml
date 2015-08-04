@@ -2,7 +2,6 @@
 #
 # See the r-travis repo and its wiki 
 #   https://github.com/craigcitro/r-travis/wiki
-#   https://github.com/eddelbuettel/r-travis/
 
 language: c
 
