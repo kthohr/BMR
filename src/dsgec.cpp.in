@@ -377,7 +377,7 @@ int qzdiv(double stake, arma::cx_mat &A, arma::cx_mat &B, arma::cx_mat &Q, arma:
 //
 SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
 {
-#ifdef PREDEF_PLATFORM_UNIX
+#ifndef PREDEF_RLAPACK
     try {
         //
         //Suppress warnings:
