@@ -18,19 +18,15 @@ echo -n "* checking LAPACK_LIBS: "
 lapack=$(${R_HOME}/bin/R CMD config LAPACK_LIBS)
 hasRlapack=$(echo ${lapack} | grep lRlapack)
 
-## internal Rlapack has the required function if "new enoug:
-# newR=$(${R_HOME}/bin/R --slave -q -e 'cat(ifelse(getRversion() >= "3.0.3","yes","no"))')
-
 if [ "${hasRlapack}" == "" ]; then
-    ## We are using a full Lapack and can use zgesdd -- so #undef remains
+    ## We are using a full Lapack
     echo "system LAPACK found"
-    cp src/dsgec.cpp.in src/dsgec.cpp
 else
     ## We are using a R's subset of Lapack
     echo "R-supplied partial LAPACK found"
     echo "* gensys solver is not available"
-    sed -e 's/\/\/#define PREDEF_RLAPACK/\#define PREDEF_RLAPACK/' \
-        src/dsgec.cpp.in > src/dsgec.cpp 
+    sed -i '' 's/\/\/#define PREDEF_RLAPACK/\#define PREDEF_RLAPACK/' \
+        src/dsgec.cpp
 fi
 
 

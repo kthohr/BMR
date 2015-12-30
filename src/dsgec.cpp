@@ -22,6 +22,10 @@ using namespace Rcpp;
 //#define PREDEF_RLAPACK
 //
 
+#if defined(WIN32) || defined(_WIN32)
+# define PREDEF_PLATFORM_WINDOWS
+#endif
+
 SEXP UhligCpp(SEXP mA, SEXP mB, SEXP mC, SEXP mD,
               SEXP mF, SEXP mG, SEXP mH,
               SEXP mJ, SEXP mK, SEXP mL, SEXP mM, SEXP mN,
@@ -377,7 +381,7 @@ int qzdiv(double stake, arma::cx_mat &A, arma::cx_mat &B, arma::cx_mat &Q, arma:
 //
 SEXP gensysCpp(SEXP mGamma0, SEXP mGamma1, SEXP mC, SEXP mPsi, SEXP mPi)
 {
-#ifndef PREDEF_RLAPACK
+#if !defined (PREDEF_RLAPACK) && !defined(PREDEF_PLATFORM_WINDOWS)
     try {
         //
         //Suppress warnings:
