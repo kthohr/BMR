@@ -24,7 +24,7 @@ exportClasses("uhlig")
 exportClasses("EDSGE")
 exportClasses("DSGEVAR")
 
-export(BVARM,BVARS,BVARW,CVAR,BVARTVP,gensys,uhlig,SDSGE,DSGESim,EDSGE,DSGEVAR,IRF,forecast,statespace,modecheck,states,prior,stationarity,gtsplot)
+export(BVARM,BVARS,BVARW,CVAR,BVARTVP,gensys,uhlig,SDSGE,DSGESim,EDSGE,DSGEVAR,IRF,forecast,statespace,modecheck,states,prior,stationarity,gtsplot,gacf,gpacf)
 
 S3method(BVARM,default)
 S3method(BVARS,default)
