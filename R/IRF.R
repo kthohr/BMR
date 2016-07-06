@@ -15,7 +15,7 @@
 ##
 ################################################################################
 
-# 07/20/2015
+# 07/06/2016
 
 IRF.BVARM <- function(obj,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
   .irfbvarm(obj,percentiles,which_shock,which_response,save,height,width)
@@ -83,7 +83,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
   #
   IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
   #
-  if (is.null(which_shock) || is.null(which_response)) {
+  if (is.null(which_shock) && is.null(which_response)) {
     if(class(dev.list()) != "NULL"){dev.off()}
     if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
     pushViewport(viewport(layout=grid.layout(M,M)))
@@ -107,6 +107,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
     if(save==TRUE){dev.off()}
   } else {
+    if (is.null((which_shock)) {
+      which_shock <- 1:M
+    }
+    if (is.null((which_response)) {
+      which_response <- 1:M
+    }
+    #
     nRespPlot <- length(which_response)
     nShocks   <- length(which_shock)
 
