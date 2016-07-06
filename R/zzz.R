@@ -1,6 +1,6 @@
 
 .onLoad <- function(libname, pkgname) {
-    suppressWarnings(loadRcppModules())
+    suppressWarnings(Rcpp::loadRcppModules())
 }
 
 #loadModule("bvarm_module",TRUE)
