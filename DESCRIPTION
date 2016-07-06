@@ -7,7 +7,17 @@ Author: Keith O'Hara <keith.ohara@nyu.edu>
 Maintainer: Keith O'Hara <keith.ohara@nyu.edu>
 Description: A package for estimating Bayesian macroeconometric models.
 License: GPL (>=2)
-Depends: R (>= 3.3.0), Rcpp (>= 0.12.2), doParallel (>= 1.0.8), ggplot2 (>= 1.0.0)
+Depends:
+    R (>= 3.3.0),
+    Rcpp (>= 0.12.2),
+    doParallel (>= 1.0.8),
+    ggplot2 (>= 1.0.0)
 LinkingTo: Rcpp, RcppArmadillo (>= 0.6.400.2)
-Imports: foreach, parallel, grid
+Imports:
+    methods,
+    Rcpp,
+    foreach,
+    parallel,
+    grid
 NeedsCompilation: yes
+RcppModules: bvarm_module
