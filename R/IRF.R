@@ -107,10 +107,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     }
     if(save==TRUE){dev.off()}
   } else {
-    if (is.null((which_shock)) {
+    if (is.null(which_shock)) {
       which_shock <- 1:M
     }
-    if (is.null((which_response)) {
+    if (is.null(which_response)) {
       which_response <- 1:M
     }
     #
