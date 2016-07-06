@@ -112,10 +112,11 @@ BVARM.default <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20
   if(class(coefprior)=="numeric"){
     if(constant==T){
       BPr<-rbind(rep(0,M),diag(M),matrix(rep(0,(p-1)*M*M),nrow=(p-1)*M,ncol=M))
+      for(i in 1:M){BPr[(i+1),i]<-coefprior[i]}
     }else{
       BPr<-rbind(diag(M),matrix(rep(0,(p-1)*M*M),nrow=(p-1)*M,ncol=M))
+      for(i in 1:M){BPr[i,i]<-coefprior[i]}
     }
-    for(i in 1:M){BPr[(i+1),i]<-coefprior[i]}
   }else{BPr <- coefprior}
   aPr <- c(BPr)
   #
