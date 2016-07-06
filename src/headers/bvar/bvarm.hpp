@@ -58,17 +58,21 @@ class bvarm
         arma::cube irfs;         // irfs based on the beta draws
 
         // member functions
-        void data(arma::mat data_raw, arma::mat* data_ext);
+        void data(arma::mat data_raw);
+        void data(arma::mat data_raw, arma::mat data_ext);
         int prior(arma::vec coef_prior);
-        void gibbs(int n_burnin, int n_draws);
+        void gibbs(int n_draws);
         void IRF(int n_irf_periods);
         void IRF(arma::mat impact_mat, int n_irf_periods);
-        arma::cube forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat* shock_cov);
+        arma::cube forecast(arma::mat Y_T, int horizon, bool incl_shocks);
+        arma::cube forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat shock_cov);
 
     //private:
 };
 
-void bvarm::data(arma::mat data_raw, arma::mat* data_ext)
+// This is broken into two functions (instead of using void data(arma::mat data_raw, arma::mat* data_ext))
+// because Rcpp modules can't handle pointers
+void bvarm::data(arma::mat data_raw)
 {
     // data_raw is a n x M matrix with 'endogenous' variables
     // data_ext is a n x n_ext_vars matrix with 'exogenous' variables
@@ -78,10 +82,32 @@ void bvarm::data(arma::mat data_raw, arma::mat* data_ext)
     M = data_raw.n_cols;
 
     n_ext_vars = 0;
-    if (data_ext) {
-        n_ext_vars = data_ext->n_cols;
-    }
+    K = c_int + M*p + n_ext_vars;
+    //
+    arma::mat data_lagged = embed(data_raw,p);
+    //
+    Y = data_lagged.cols(0,M-1);
 
+    if (cons_term) {  // setup lagged variables
+        X = arma::join_rows(arma::ones(n-p),data_lagged.cols(M,data_lagged.n_cols-1));
+    } else {
+        X = data_lagged.cols(M,data_lagged.n_cols-1);
+    }
+    //
+    Z = arma::kron(arma::eye(M,M),X);
+    //
+}
+
+void bvarm::data(arma::mat data_raw, arma::mat data_ext)
+{
+    // data_raw is a n x M matrix with 'endogenous' variables
+    // data_ext is a n x n_ext_vars matrix with 'exogenous' variables
+    c_int = !!cons_term;
+
+    n = data_raw.n_rows;
+    M = data_raw.n_cols;
+
+    n_ext_vars = data_ext.n_cols;
     K = c_int + M*p + n_ext_vars;
     //
     arma::mat data_lagged = embed(data_raw,p);
@@ -95,7 +121,7 @@ void bvarm::data(arma::mat data_raw, arma::mat* data_ext)
     }
     //
     if (n_ext_vars > 0) {
-        arma::mat X_ext = *data_ext;
+        arma::mat X_ext = data_ext;
         X_ext.shed_rows(0,p-1);
 
         X = arma::join_rows(X,X_ext);
@@ -208,7 +234,7 @@ int bvarm::prior(arma::vec coef_prior)
     return 0;
 }
 
-void bvarm::gibbs(int n_burnin, int n_draws)
+void bvarm::gibbs(int n_draws)
 {
     int i;
 
@@ -223,13 +249,11 @@ void bvarm::gibbs(int n_burnin, int n_draws)
     arma::mat chol_alpha_pt_var = arma::trans(arma::chol(alpha_pt_var)); // lower triangular
 
     arma::vec alpha(K*M);
-    //
-    for (i=0; i < (n_burnin + n_draws); i++) {
+    // no need for burnin
+    for (i=0; i < n_draws; i++) {
         alpha = rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true);
 
-        if (i >= n_burnin) {
-            beta_draws.slice(i-n_burnin) = arma::reshape(alpha,K,M);
-        }
+        beta_draws.slice(i) = arma::reshape(alpha,K,M);
     }
     //
 }
@@ -315,9 +339,11 @@ void bvarm::IRF(arma::mat impact_mat, int n_irf_periods)
     //
 }
 
-arma::cube bvarm::forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat* shock_cov)
+arma::cube bvarm::forecast(arma::mat Y_T, int horizon, bool incl_shocks)
 {
     int i,j;
+
+    int n_draws = beta_draws.n_slices;
     int K_adj = K - n_ext_vars;
     
     arma::mat beta_b(K_adj,M);       // bth draw
@@ -327,12 +353,65 @@ arma::cube bvarm::forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::m
     arma::cube forecast_mat(horizon, M, n_draws);
     //
     if (incl_shocks) {
-        arma::mat chol_shock_cov;
-        if (shock_cov) {
-            chol_shock_cov = arma::trans(arma::chol(shock_cov));
-        } else {
-            chol_shock_cov = arma::eye(M,M);
+        arma::mat chol_shock_cov = arma::eye(M,M);
+
+        for (i=0; i<n_draws; i++) {
+            beta_b = beta_draws.slice(i);
+
+            Y_forecast.zeros();
+            Y_Th = Y_T;
+            
+            for (j=1; j<=horizon; j++) {
+                Y_forecast.row(j-1) = Y_Th*beta_b + arma::trans(rmvnorm(chol_shock_cov,true));
+
+                if (K_adj > M + c_int) {
+                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                }
+
+                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+            }
+            //
+            forecast_mat.slice(i) = Y_forecast;
         }
+    } else {
+        for (i=0; i<n_draws; i++) {
+            beta_b = beta_draws.slice(i);
+
+            Y_forecast.zeros();
+            Y_Th = Y_T;
+
+            for (j=1; j<=horizon; j++) {
+                Y_forecast.row(j-1) = Y_Th*beta_b;
+
+                if (K_adj > M + c_int) {
+                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                }
+
+                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+            }
+            //
+            forecast_mat.slice(i) = Y_forecast;
+        }
+    }
+    //
+    return forecast_mat;
+}
+
+arma::cube bvarm::forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat shock_cov)
+{
+    int i,j;
+
+    int n_draws = beta_draws.n_slices;
+    int K_adj = K - n_ext_vars;
+    
+    arma::mat beta_b(K_adj,M);       // bth draw
+    arma::mat Y_forecast(horizon,M);
+    arma::mat Y_Th = Y_T;
+
+    arma::cube forecast_mat(horizon, M, n_draws);
+    //
+    if (incl_shocks) {
+        arma::mat chol_shock_cov = arma::trans(arma::chol(shock_cov));
 
         for (i=0; i<n_draws; i++) {
             beta_b = beta_draws.slice(i);
