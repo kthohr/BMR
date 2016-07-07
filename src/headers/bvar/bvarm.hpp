@@ -156,7 +156,7 @@ int bvarm::prior(arma::vec coef_prior)
     arma::vec sigma(M);
 
     arma::vec Y_AR(np), alpha_AR;
-    arma::mat X_AR(np,c_int + p); 
+    arma::mat X_AR(np, c_int+p); 
     if (cons_term) {
         X_AR.col(0).fill(1);
     }
@@ -165,7 +165,7 @@ int bvarm::prior(arma::vec coef_prior)
         Y_AR = Y.col(i);
 
         for (j=0; j<p; j++) {
-            X_AR.col(c_int + j) = X.col(c_int + j*M);
+            X_AR.col(c_int + j) = X.col(c_int + i + j*M);
         }
         //
         alpha_AR = arma::solve(X_AR.t()*X_AR,X_AR.t()*Y_AR);
@@ -244,7 +244,7 @@ void bvarm::gibbs(int n_draws)
     //
     arma::mat inv_alpha_pr_var = arma::inv(alpha_pr_var);
     
-    arma::mat alpha_pt_var = arma::inv_sympd(inv_alpha_pr_var + Z.t()*kron_inv_Sigma*Z);
+    alpha_pt_var = arma::inv_sympd(inv_alpha_pr_var + Z.t()*kron_inv_Sigma*Z);
     alpha_pt_mean = alpha_pt_var * (inv_alpha_pr_var*alpha_pr_mean + Z.t()*kron_inv_Sigma*arma::vectorise(Y));
     arma::mat chol_alpha_pt_var = arma::trans(arma::chol(alpha_pt_var)); // lower triangular
 
@@ -289,7 +289,7 @@ void bvarm::IRF(int n_irf_periods)
             irfs.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
 
             if(K_adj > M+c_int){
-                impact_mat_b.rows(M,K_adj-1-c_int) = impact_mat_b.rows(0,K_adj-M-1-c_int);
+                impact_mat_b.rows(M,K_adj-c_int-1) = impact_mat_b.rows(0,K_adj-M-c_int-1);
             }
 
             impact_mat_b.rows(0,M-1) = impact_mat_h;
