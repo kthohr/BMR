@@ -35,7 +35,7 @@ RCPP_MODULE(bvarm_module){
     arma::cube (bvarm::*forecast_2)(arma::mat, int, bool, arma::mat) = &bvarm::forecast ;
   
     // now we can declare the class
-    class_<bvarm>( "bvarm" )
+    class_<bvarm>( "R_bvarm" )
 
     .default_constructor()
 
@@ -45,8 +45,7 @@ RCPP_MODULE(bvarm_module){
 
     .field( "var_type", &bvarm::var_type )
     .field( "decay_type", &bvarm::decay_type )
-
-    .field( "hyper_pars", &bvarm::hyper_pars)
+    .field( "hyper_pars", &bvarm::hyper_pars )
 
     // read only objects
     .field_readonly( "n", &bvarm::n )
