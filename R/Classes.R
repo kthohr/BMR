@@ -17,7 +17,7 @@
 
 # 07/20/2015
 
-BVARM <- function(mydata,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2) UseMethod("BVARM")
+BVARM <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4,n_draws=10000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2) UseMethod("BVARM")
 BVARS <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20,keep=10000,burnin=1000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL) UseMethod("BVARS")
 BVARW <- function(mydata,cores=1,coefprior=NULL,p=4,constant=TRUE,irf.periods=20,keep=10000,burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL) UseMethod("BVARW")
 CVAR <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000) UseMethod("CVAR")
