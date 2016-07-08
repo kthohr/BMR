@@ -17,10 +17,9 @@
 
 #include <RcppArmadillo.h>
 
-#include "headers/misc/embed.hpp"
-#include "headers/stats/rmvnorm.hpp"
-#include "headers/stats/rchisq.hpp"
-#include "headers/stats/rinvwish.hpp"
+#include "BMR_misc.hpp"
+#include "BMR_stats.hpp"
+
 #include "headers/bvar/bvarw.hpp"
 
 RCPP_MODULE(bvarw_module){
@@ -33,8 +32,8 @@ RCPP_MODULE(bvarw_module){
     void (bvarw::*prior_1)(arma::vec, double, arma::mat, int) = &bvarw::prior ;
     void (bvarw::*prior_2)(arma::vec, arma::mat, arma::mat, int) = &bvarw::prior ;
 
-    arma::cube (bvarw::*forecast_1)(arma::mat, int, bool) = &bvarw::forecast ;
-    arma::cube (bvarw::*forecast_2)(arma::mat, int, bool, arma::mat) = &bvarw::forecast ;
+    arma::cube (bvarw::*forecast_1)(int, bool) = &bvarw::forecast ;
+    arma::cube (bvarw::*forecast_2)(arma::mat, int, bool) = &bvarw::forecast ;
   
     // now we can declare the class
     class_<bvarw>( "R_bvarw" )
@@ -75,7 +74,7 @@ RCPP_MODULE(bvarw_module){
     .method( "data", data_1 )
     .method( "data", data_2 )
     .method( "prior", prior_1 )
-    .method( "prior", prior_1 )
+    .method( "prior", prior_2 )
     .method( "gibbs", &bvarw::gibbs )
     .method( "IRF", &bvarw::IRF )
     .method( "forecast", forecast_1 )

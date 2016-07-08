@@ -15,8 +15,8 @@
   ##
   ################################################################################*/
 
-/* n draws from a Chi-Squared distribution
- * with parameter k
+/* 
+ * n draws from a Chi-Squared distribution with parameter k
  *
  * Keith O'Hara
  * 06/01/2015
@@ -24,43 +24,39 @@
 
 //#include "armadillo"
 
-using namespace std;
-
-arma::colvec rchisq(int n, int k)
-{
-	arma::colvec ret(n);
-	//
-	int j;
-	//
-	if(k < 50){
-		// use a sum of squared standard normals
-		arma::colvec X(k);
-		for(j=0; j<n; j++){
-			X = arma::randn(k);
-			ret.row(j) = X.t() * X;
-		}
-	}
-	else{ // asymptotic approximation
-		for(j=0; j<n; j++){
-			ret.row(j) = 0.5 * arma::pow(arma::randn(1) + std::sqrt(2*k - 1), 2);
-		}
-	}
-	return ret;
-}
 // 1 draw
 double rchisq(int k)
 {
 	double ret = 0;
 	//
-	if(k < 50){
-		// use a sum of squared standard normals
+	if (k < 50) { // sum of squared (standard) normals
 		arma::colvec X(k);
 		X = arma::randn(k);
+
 		ret = arma::as_scalar(X.t() * X);
-	}
-	else{ // asymptotic approximation
+	} else { // Fisher's asymptotic approximation
 		ret = 0.5 * arma::as_scalar(arma::pow(arma::randn(1) + std::sqrt(2*k - 1), 2));
 	}
+    //
 	return ret;
 }
-//END
+
+// n draws
+arma::colvec rchisq(int n, int k)
+{
+    int j;
+	arma::colvec ret(n);
+	//
+	if (k < 50) { // sum of squared (standard) normals
+		arma::colvec X(k);
+
+		for (j=0; j<n; j++) {
+			X = arma::randn(k);
+			ret.row(j) = X.t() * X;
+		}
+	} else { // Fisher's asymptotic approximation
+		ret = 0.5 * arma::pow(arma::randn(n,1) + std::sqrt(2*k - 1), 2);
+	}
+    //
+	return ret;
+}

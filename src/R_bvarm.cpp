@@ -17,8 +17,9 @@
 
 #include <RcppArmadillo.h>
 
-#include "headers/misc/embed.hpp"
-#include "headers/stats/rmvnorm.hpp"
+#include "BMR_misc.hpp"
+#include "BMR_stats.hpp"
+
 #include "headers/bvar/bvarm.hpp"
 
 RCPP_MODULE(bvarm_module){
@@ -31,8 +32,8 @@ RCPP_MODULE(bvarm_module){
     void (bvarm::*IRF_1)(int) = &bvarm::IRF ;
     void (bvarm::*IRF_2)(arma::mat,int) = &bvarm::IRF ;
 
-    arma::cube (bvarm::*forecast_1)(arma::mat, int, bool) = &bvarm::forecast ;
-    arma::cube (bvarm::*forecast_2)(arma::mat, int, bool, arma::mat) = &bvarm::forecast ;
+    arma::cube (bvarm::*forecast_1)(int, bool) = &bvarm::forecast ;
+    arma::cube (bvarm::*forecast_2)(arma::mat, int, bool) = &bvarm::forecast ;
   
     // now we can declare the class
     class_<bvarm>( "R_bvarm" )

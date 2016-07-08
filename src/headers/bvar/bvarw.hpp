@@ -67,8 +67,8 @@ class bvarw
         void prior(arma::vec coef_prior, arma::mat Xi_beta, arma::mat Xi_Sigma, int gamma);
         void gibbs(int n_draws, int n_burnin);
         void IRF(int n_irf_periods);
+        arma::cube forecast(int horizon, bool incl_shocks);
         arma::cube forecast(arma::mat Y_T, int horizon, bool incl_shocks);
-        arma::cube forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat shock_cov);
 
     //private:
 };
@@ -280,24 +280,29 @@ void bvarw::IRF(int n_irf_periods)
     //
 }
 
-arma::cube bvarw::forecast(arma::mat Y_T, int horizon, bool incl_shocks)
+arma::cube bvarw::forecast(int horizon, bool incl_shocks)
 {
     int i,j;
 
     int n_draws = beta_draws.n_slices;
     int K_adj = K - n_ext_vars;
     
-    arma::mat beta_b(K_adj,M);       // bth draw
-    arma::mat Y_forecast(horizon,M);
+    arma::mat beta_b(K_adj,M), Sigma_b(M,M);       // bth draw
+    
+    arma::mat Y_T  = arma::join_rows(Y.row(Y.n_rows-1),X(X.n_rows-1,arma::span(0,K_adj-M-1)));
     arma::mat Y_Th = Y_T;
 
+    arma::mat Y_forecast(horizon,M);
     arma::cube forecast_mat(horizon, M, n_draws);
     //
     if (incl_shocks) {
-        arma::mat chol_shock_cov = arma::eye(M,M);
+        arma::mat chol_shock_cov = arma::trans(arma::chol(Sigma_hat));
 
         for (i=0; i<n_draws; i++) {
-            beta_b = beta_draws.slice(i);
+            beta_b  = beta_draws.slice(i);
+            Sigma_b = Sigma_draws.slice(i);
+
+            chol_shock_cov = arma::trans(arma::chol(Sigma_b));
 
             Y_forecast.zeros();
             Y_Th = Y_T;
@@ -338,24 +343,28 @@ arma::cube bvarw::forecast(arma::mat Y_T, int horizon, bool incl_shocks)
     return forecast_mat;
 }
 
-arma::cube bvarw::forecast(arma::mat Y_T, int horizon, bool incl_shocks, arma::mat shock_cov)
+arma::cube bvarw::forecast(arma::mat Y_T, int horizon, bool incl_shocks)
 {
     int i,j;
 
     int n_draws = beta_draws.n_slices;
     int K_adj = K - n_ext_vars;
     
-    arma::mat beta_b(K_adj,M);       // bth draw
-    arma::mat Y_forecast(horizon,M);
+    arma::mat beta_b(K_adj,M), Sigma_b(M,M);       // bth draw
+    
     arma::mat Y_Th = Y_T;
 
+    arma::mat Y_forecast(horizon,M);
     arma::cube forecast_mat(horizon, M, n_draws);
     //
     if (incl_shocks) {
-        arma::mat chol_shock_cov = arma::trans(arma::chol(shock_cov));
+        arma::mat chol_shock_cov = arma::trans(arma::chol(Sigma_hat));
 
         for (i=0; i<n_draws; i++) {
-            beta_b = beta_draws.slice(i);
+            beta_b  = beta_draws.slice(i);
+            Sigma_b = Sigma_draws.slice(i);
+
+            chol_shock_cov = arma::trans(arma::chol(Sigma_b));
 
             Y_forecast.zeros();
             Y_Th = Y_T;

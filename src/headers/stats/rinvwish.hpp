@@ -38,7 +38,7 @@ arma::mat rinvwish(arma::mat Psi, int nu)
 			A(i,j) = arma::as_scalar(arma::randn(1));
 		}
 	}
-	//
+	
 	for (i=0; i<K; i++) {
 		A(i,i) = arma::as_scalar(arma::sqrt(rchisq(1,nu-i)));
 	}
