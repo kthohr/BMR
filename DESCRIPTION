@@ -20,4 +20,4 @@ Imports:
     parallel,
     grid
 NeedsCompilation: yes
-RcppModules: bvarm_module
+RcppModules: bvarm_module, bvarw_module
