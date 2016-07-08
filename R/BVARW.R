@@ -46,8 +46,8 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
         stop("need more data points than lags.\n",call.=FALSE)
     }
 
-    for(i in 1:ncol(mydata)){
-        if(sum(is.na(mydata[,i]))){
+    for (i in 1:ncol(mydata)) {
+        if (sum(is.na(mydata[,i]))) {
             stop("no missing observations allowed.\n",call.=FALSE)
         }
     }
@@ -108,7 +108,7 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
             stop("XiSigma must be greater than zero.\n",call.=FALSE)
         }
 
-        XiSigma <- diag(ncols(mydata) * XiSigma
+        XiSigma <- diag(ncols(mydata)) * XiSigma
     } else if (class(XiSigma) == "matrix") {
         if (nrow(XiSigma) != (ncol(mydata)) || ncol(XiSigma) != (ncol(mydata))) {
             stop("you have selected a full matrix for XiSigma.\n","Therefore, XiSigma must be of dimensions ",(ncol(mydata))," x ",(ncol(mydata)),".\n",call.=FALSE)
