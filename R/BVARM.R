@@ -17,7 +17,8 @@
 
 # 07/20/2015
 
-BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4,n_draws=10000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2){
+BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4,n_draws=10000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2)
+{
     #
     err_check <- .bvarm_errors(mydata,p,coef_prior,constant,VType,decay,HP4)
     #
@@ -29,7 +30,8 @@ BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
     return(bvarm_ret)
 }
 
-.bvarm_errors <- function(mydata,p,coef_prior,constant,VType,decay,HP4){
+.bvarm_errors <- function(mydata,p,coef_prior,constant,VType,decay,HP4)
+{
     #
     # basic sanity checks
     if (ncol(mydata) < 2) {
@@ -90,7 +92,8 @@ BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
     return=list(coef_prior=coef_prior)
 }
 
-.bvarm_run <- function(mydata,data_ext,coef_prior,constant,p,n_draws,VType,decay,HP1,HP2,HP3,HP4){
+.bvarm_run <- function(mydata,data_ext,coef_prior,constant,p,n_draws,VType,decay,HP1,HP2,HP3,HP4)
+{
     bvar_obj <- new(R_bvarm)
     data_raw <- as.matrix(mydata)
     #
