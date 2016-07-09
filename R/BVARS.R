@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -14,8 +14,6 @@
 ##   GNU General Public License for more details.
 ##
 ################################################################################
-
-# 07/20/2015
 
 BVARS.default <- function(mydata,psiprior=NULL,coefprior=NULL,p=4,irf.periods=20,keep=10000,burnin=1000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL){
     #

@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -14,8 +14,6 @@
 ##   GNU General Public License for more details.
 ##
 ################################################################################
-
-# 07/20/2015
 
 gacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="purple",names=FALSE,save=FALSE,height=12,width=12){
     .ggplotacf(y,lags,ci,plot,barcolor,names,save,height,width)

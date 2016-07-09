@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -15,12 +15,10 @@
 ##
 ################################################################################
 
-# 07/07/2016
-
 BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4,n_draws=10000,n_burnin=1000,XiBeta=1,XiSigma=1,gamma=NULL)
 {
     #
-    err_check <- .bvarwerrors(mydata,coef_prior,constant,p,XiBeta,XiSigma,gamma)
+    err_check <- .bvarw_errors(mydata,coef_prior,constant,p,XiBeta,XiSigma,gamma)
     #
     bvar_obj <- .bvarw_run(mydata,data_ext,err_check$coef_prior,constant,p,n_draws,n_burnin,err_check$XiBeta,err_check$XiSigma,err_check$gamma)
     #
@@ -30,7 +28,7 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
     return(bvarw_ret)
 }
 
-.bvarwerrors <- function(mydata,coef_prior,constant,p,XiBeta,XiSigma,gamma)
+.bvarw_errors <- function(mydata,coef_prior,constant,p,XiBeta,XiSigma,gamma)
 {
     #
     # basic sanity checks
@@ -52,9 +50,9 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
         }
     }
     #
-    # Errors around user-given priors. First, Beta.
+    # Errors around user-given priors. First: beta.
     #
-    #No priors specified for the coefficients, set equal to random walk (in levels)
+    # if no prior specified for the coefficients, set equal to random walk (in levels)
     if (class(coef_prior)=="NULL") {
         coef_prior <- c(rep(1,ncol(mydata)))
     }
@@ -126,8 +124,6 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
         stop("with this data, the minimum value for gamma is ",(ncol(mydata)+1),".\n",call.=FALSE)
     }
     #
-    #
-    #
     return=list(coef_prior=coef_prior,XiBeta=XiBeta,XiSigma=XiSigma,gamma=gamma)
 }
 
@@ -152,4 +148,3 @@ BVARW.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
     #
     return(bvar_obj)
 }
-

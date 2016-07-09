@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -14,8 +14,6 @@
 ##   GNU General Public License for more details.
 ##
 ################################################################################
-
-# 07/20/2015
 
 BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4,n_draws=10000,VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2)
 {
@@ -54,7 +52,7 @@ BVARM.default <- function(mydata,data_ext=NULL,coef_prior=NULL,constant=TRUE,p=4
     #
     # Errors around prior mean of the coefficients
     #
-    # If no prior is provided for the coefficients, set to a random walk (in levels)
+    # if no prior is provided for the coefficients, set to a random walk (in levels)
     if (class(coef_prior)=="NULL") {
         coef_prior <- c(rep(1,ncol(mydata)))
     }

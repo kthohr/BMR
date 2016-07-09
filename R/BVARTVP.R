@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -14,8 +14,6 @@
 ##   GNU General Public License for more details.
 ##
 ################################################################################
-
-# 07/20/2015
 
 BVARTVP.default <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.periods=20,irf.points=NULL,keep=10000,burnin=5000,XiBeta=1,XiQ=0.01,gammaQ=NULL,XiSigma=1,gammaS=NULL){
     #

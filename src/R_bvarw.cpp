@@ -22,7 +22,8 @@
 
 #include "headers/bvar/bvarw.hpp"
 
-RCPP_MODULE(bvarw_module){
+RCPP_MODULE(bvarw_module)
+{
     using namespace Rcpp ;
 
     // function overloading requires some trickery
