@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011, 2012, 2013, 2014, 2015
+##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -15,25 +15,23 @@
 ##
 ################################################################################
 
-# 07/20/2015
-
-CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
+CVAR.default <- function(mydata,data_ext,constant=TRUE,p=4,n_draws=10000)
+{
     #
-    kerr <- .cvarerrors(mydata,p)
+    err_check <- .cvar_errors(mydata,p)
     #
-    kdata <- .cvardata(mydata,p,constant)
+    cvar_obj <- .cvar_run(mydata,data_ext,constant,p,n_draws)
     #
-    kprior <- .cvarsetup(kdata$Y,kdata$X,kdata$K,kdata$Tp)
+    cvar_ret <- list(data=mydata,data_ext=data_ext,cvar_obj=cvar_obj)
+    class(cvar_ret) <- "CVAR"
     #
-    kreps <- .cvarboot(kdata$Y,kdata$X,kprior$Beta,kprior$Sigma,kprior$Resids,kdata$K,kdata$M,p,constant,kdata$Tp,boot,irf.periods)
-    #
-    cvarret <- list(IRFs=kreps$IRFs,Beta=kreps$Beta,Sigma=kreps$Sigma,BDraws=kreps$BetaDraws,SDraws=kreps$SigmaDraws,data=mydata,constant=constant)
-    class(cvarret) <- "CVAR"
-    return(cvarret)
-    #
+    return(cvar_ret)
 }
 
-.cvarerrors <- function(mydata,p){
+.cvar_errors <- function(mydata,p)
+{
+    #
+    # basic sanity checks
     if(ncol(mydata)<2){
         stop("need more than 1 variable in your data.\n",call.=FALSE)
     }
@@ -51,71 +49,24 @@ CVAR.default <- function(mydata,p=4,constant=TRUE,irf.periods=20,boot=10000){
     #
 }
 
-.cvardata <- function(mydata,p,constant){
-    Tr <- as.numeric(dim(mydata)[1])
-    M <- as.numeric(dim(mydata)[2])
+.cvar_run <- function(mydata,data_ext,constant,p,n_draws)
+{
+    cvar_obj <- new(R_cvar)
+    data_raw <- as.matrix(mydata)
     #
-    Yr <- as.matrix(mydata,ncol=M)
-    #
-    X <- embed(Yr,p+1); X <- X[,(M+1):ncol(X)]
-    if(constant == TRUE){X<-cbind(rep(1,(Tr-p)),X)}
-    #
-    K <- as.numeric(dim(X)[2])
-    Y <- Yr[(p+1):nrow(Yr),]
-    Tp <- Tr - p
-    #
-    return=list(Y=Y,X=X,M=M,K=K,Tp=Tp)
-}
+    cvar_obj$cons_term = constant
+    cvar_obj$p = p
 
-.cvarsetup <- function(Y,X,K,Tp){
-    Beta <- solve.qr(qr(as.matrix(X)),as.matrix(Y))
-    #
-    Resids <- as.matrix(Y) - as.matrix(X)%*%Beta
-    #
-    Sigma<-(1/(Tp-K))*(t(Resids)%*%Resids)
-    #
-    return=list(Beta=Beta,Sigma=Sigma,Resids=Resids)
-}
-
-.cvarboot <- function(Y,X,Beta,Sigma,Resids,K,M,p,constant,Tp,boot,irf.periods){
-    #
-    ImpStore <- 0
-    ResidDraws <- array(0,dim=c(Tp,M,boot))
-    #
-    for(i in 1:boot){
-        SPoints <- sample(c(1:(Tp)),replace=TRUE)
-        ResidDraws[,,i] <- Resids[SPoints,]
+    if (!is.null(data_ext)) {
+        data_ext <- as.matrix(data_ext)
+        cvar_obj$data(data_raw,data_ext)
+    } else {
+        cvar_obj$data(data_raw)
     }
     #
-    kcons <- 0; if(constant==T){kcons<-1}
+    cvar_obj$setup()
     #
-    message('Starting C++, ', date(),'.', sep="")
-    RepsRun <- .Call("CVARReps", Beta,Sigma,as.matrix(X),as.matrix(Y),Tp,M,K,kcons,boot,ResidDraws, PACKAGE = "BMR")
-    message('C++ reps finished, ', date(),'. Now getting IRFs.', sep="")
+    cvar_obj$boot(n_draws)
     #
-    ImpStore <- .Call("CVARIRFs", M,K,kcons,boot,irf.periods,RepsRun$Beta,RepsRun$Sigma, PACKAGE = "BMR")
-    ImpStore <- ImpStore$ImpStore
-    ImpStore2 <- array(NA,dim=c(M,M,irf.periods,boot))
-    for(i in 1:boot){
-        ImpStore2[,,,i] <- ImpStore[,,((i-1)*irf.periods+1):(i*irf.periods)]
-    }
-    #
-    BNames <- character(length=nrow(Beta))
-    kcon <- 1; if(constant==T){BNames[1] <- "Constant"};if(constant==T){kcon<-2}
-    for(i in 1:p){  
-        for(j in 1:M){
-            BNames[kcon] <- paste("Eq ",j,", lag ",i,sep="")
-            kcon <- kcon + 1
-        }
-    }
-    rownames(Beta) <- BNames
-    if(class(colnames(Y)) == "character"){
-        colnames(Beta) <- colnames(Y)
-    }
-    #
-    ImpSorted <- apply(ImpStore2,c(3,1,2),sort)
-    #
-    ImpSorted <- aperm(ImpSorted,c(2,3,1,4))
-    #
-    return=list(Beta=Beta,Sigma=Sigma,BetaDraws=RepsRun$Beta,SigmaDraws=RepsRun$Sigma,IRFs=ImpSorted)
+    return(cvar_obj)
 }
