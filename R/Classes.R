@@ -22,7 +22,7 @@ CVAR  <- function(mydata,data_ext,constant=TRUE,p=4,n_draws=10000) UseMethod("CV
 BVARTVP <- function(mydata,timelab=NULL,coefprior=NULL,tau=NULL,p=4,irf.periods=20,irf.points=NULL,keep=10000,burnin=5000,XiBeta=1,XiQ=0.01,gammaQ=NULL,XiSigma=1,gammaS=NULL) UseMethod("BVARTVP")
 
 forecast <- function(obj, ...) UseMethod("forecast")
-IRF <- function(obj, ...) UseMethod("IRF")
+# IRF <- function(obj, ...) UseMethod("IRF")
 #
 SDSGE <- function(mats, type=NULL) UseMethod("SDSGE")
 gensys <- function(Gamma0,Gamma1,C,Psi,Pi) UseMethod("gensys")

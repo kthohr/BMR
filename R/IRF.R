@@ -15,78 +15,119 @@
 ##
 ################################################################################
 
-IRF.BVARM <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-    .irfbvarm(obj,periods,percentiles,which_shock,which_response,save,height,width)
+IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13)
+{
+    obj_class <- class(obj)[1]
+
+    if (obj_class == "Rcpp_bvarm_R"){
+        .irfbvarm(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    }
 }
 
-IRF.BVARS <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
-    .irfbvars(obj,percentiles,save,height,width)
-}
+# IRF.Rcpp_bvarm_R <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
+#     .irfbvarm(obj,periods,percentiles,which_shock,which_response,save,height,width)
+# }
 
-IRF.BVARW <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-    .irfbvarw(obj,periods,percentiles,which_shock,which_response,save,height,width)
-}
+# IRF.BVARS <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+#     .irfbvars(obj,percentiles,save,height,width)
+# }
 
-IRF.CVAR <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-    .irfcvar(obj,periods,percentiles,which_shock,which_response,save,height,width)
-}
+# IRF.BVARW <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
+#     .irfbvarw(obj,periods,percentiles,which_shock,which_response,save,height,width)
+# }
 
-IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
-    .irfbvartvp(obj,whichirfs,percentiles,save,height,width)
-}
+# IRF.CVAR <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
+#     .irfcvar(obj,periods,percentiles,which_shock,which_response,save,height,width)
+# }
 
-IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-    .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-}
+# IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
+#     .irfbvartvp(obj,whichirfs,percentiles,save,height,width)
+# }
 
-IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-    .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-}
+# IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
+#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
+# }
 
-IRF.uhlig <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-    .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-}
+# IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
+#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
+# }
 
-IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
-    .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
-}
+# IRF.uhlig <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
+#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
+# }
 
-IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
-    .irfdsgevar(obj,varnames,percentiles,comparison,save,height,width)
-}
+# IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+#     .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
+# }
+
+# IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
+#     .irfdsgevar(obj,varnames,percentiles,comparison,save,height,width)
+# }
 
 
-.irfbvarm <- function(obj, periods=10, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
+.irfbvarm <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
     #
+
     if (periods <= 0) {
         stop("need periods > 0")
     }
+
     #
-    M <- obj$bvar_obj$M
-    n_draws <- dim(obj$bvar_obj$beta_draws)[3]
-    mydata <- obj$data
-    #
-    obj$bvar_obj$IRF(periods)
+
+    M <- obj$M
+    n_draws <- dim(obj$beta_draws)[3]
+    
+    obj$IRF(periods)
+
     # put the IRFs in a tesseract-type format
-    irf_temp <- obj$bvar_obj$irfs
+
+    irf_temp <- obj$irfs
     irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
+
     for(i in 1:n_draws){
         irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
     }
+
     rm("irf_temp")
 
     irf_tess <- apply(irf_tess,c(3,1,2),sort)
     irf_tess <- aperm(irf_tess,c(2,3,1,4))
-    #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    #
+
     irf_upper <- round(percentiles[3]*n_draws)
     irf_mid <- round(percentiles[2]*n_draws)
     irf_lower <- round(percentiles[1]*n_draws)
+
     #
+    # plot IRFs
+
+    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+
+    if(class(dev.list()) != "NULL"){dev.off()}
+    
+    #
+
+    if (is.null(which_shock)) {
+        which_shock <- 1:M
+    }
+
+    if (is.null(which_response)) {
+        which_response <- 1:M
+    }
+
+    n_response <- length(which_response)
+    n_shocks   <- length(which_shock)
+
+    if (class(varnames) != "character") {
+        varnames <- character(length=n_response)
+        for (i in 1:n_response) {  
+            varnames[i] <- paste("VAR",i,sep="")
+        }
+    }
+
+    #
+
     irf_plot <- array(NA,dim=c(periods,4,M,M))
+
     for(i in 1:M){
         for(k in 1:M){
             IRFPData <- data.frame(irf_tess[,k,irf_lower,i],irf_tess[,k,irf_mid,i],irf_tess[,k,irf_upper,i],1:(periods))
@@ -94,18 +135,21 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             irf_plot[,,k,i] <- IRFPData
         }
     }
+
     #
+
     IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
-    #
-    if (is.null(which_shock) && is.null(which_response)) {
+    
+    if (n_response == M && n_shocks == M) {
         if(class(dev.list()) != "NULL"){dev.off()}
         if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
+        
         pushViewport(viewport(layout=grid.layout(M,M)))
         
         for(i in 1:M){
             for(k in 1:M){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
+                NameResponse <- varnames[k]
+                NameImpulse  <- varnames[i]
                 
                 IRFDF <- irf_plot[,,k,i]
                 IRFDF <- data.frame(IRFDF)
@@ -119,79 +163,81 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
                 Sys.sleep(0.3)
             }
         }
-        if(save==TRUE){dev.off()}
+        if (save==TRUE) {dev.off()}
     } else {
-        if (is.null(which_shock)) {
-            which_shock <- 1:M
-        }
-        if (is.null(which_response)) {
-            which_response <- 1:M
-        }
-        #
-        nRespPlot <- length(which_response)
-        nShocks   <- length(which_shock)
         
-        if(nRespPlot < 4){
-            MR <- nRespPlot; MC <- 1
-        }else if(nRespPlot == 4){
+        if (n_response < 4) {
+            MR <- n_response; MC <- 1
+        } else if (n_response == 4) {
             MR <- 2; MC <-2
-        }else if(nRespPlot > 4 && nRespPlot < 7){
+        } else if (n_response > 4 && n_response < 7) {
             MR <- 3; MC <- 2
-        }else if(nRespPlot > 6 && nRespPlot < 10){
+        } else if (n_response > 6 && n_response < 10) {
             MR <- 3; MC <- 3
-        }else if(nRespPlot > 9 && nRespPlot < 13){
+        } else if (n_response > 9 && n_response < 13) {
             MR <- 4; MC <- 3
-        }else if(nRespPlot > 12 && nRespPlot < 17){
+        }else if (n_response > 12 && n_response < 17) {
             MR <- 4; MC <- 4
-        }else if(nRespPlot > 17 && nRespPlot < 21){
+        }else if (n_response > 17 && n_response < 21) {
             MR <- 5; MC <- 4
-        }else if(nRespPlot > 20 && nRespPlot < 26){
+        }else if (n_response > 20 && n_response < 26) {
             MR <- 5; MC <- 5
-        }else if(nRespPlot > 25 && nRespPlot < 31){
+        } else if (n_response > 25 && n_response < 31) {
             MR <- 5; MC <- 6
-        }else if(nRespPlot > 30 && nRespPlot < 37){
+        } else if (n_response > 30 && n_response < 37) {
             MR <- 6; MC <- 6
-        }else{
+        } else {
             stop("You have too many IRFs to plot!")
         }
+
+        #
         
-        for(i in which_shock){
+        for (i in which_shock) {
             plot_ind_r <- 1
             plot_ind_c <- 1
             
-            if(save==TRUE){
-                if(nShocks==1){
+            if (save==TRUE) {
+                if (n_shocks==1) {
                     cairo_ps(filename="IRFs.eps",height=height,width=width)
-                }else{
-                    SaveIRF <- paste(colnames(mydata)[i],"_Shock",".eps",sep="")
+                } else {
+                    SaveIRF <- paste(varnames[i],"_Shock",".eps",sep="")
                     cairo_ps(filename=SaveIRF,height=height,width=width)
                 }
             }
+
             grid.newpage()
             pushViewport(viewport(layout=grid.layout(MR,MC)))
             
             for(k in which_response){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
-                #
+                NameResponse <- varnames[k]
+                NameImpulse  <- varnames[i]
+                
                 IRFDF <- irf_plot[,,k,i]
                 IRFDF <- data.frame(IRFDF)
+
                 colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
+
                 #
+
                 gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ", NameImpulse," to", NameResponse)) 
                 gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
                 gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
+
                 print(gg3,vp = vplayout(plot_ind_r,plot_ind_c))
-                #
+                
                 Sys.sleep(0.3)
+
                 #
+
                 plot_ind_c <- plot_ind_c + 1
+
                 if (plot_ind_c > MC) {
                     plot_ind_c <- 1
                     plot_ind_r <- plot_ind_r + 1
                 }
             }
         }
+
         if(save==TRUE){dev.off()}
     }
     #
@@ -255,13 +301,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         stop("need periods > 0")
     }
     #
-    M <- obj$bvar_obj$M
-    n_draws <- dim(obj$bvar_obj$beta_draws)[3]
+    M <- obj$M
+    n_draws <- dim(obj$beta_draws)[3]
     mydata <- obj$data
     #
-    obj$bvar_obj$IRF(periods)
+    obj$IRF(periods)
     # put the IRFs in a tesseract-type format
-    irf_temp <- obj$bvar_obj$irfs
+    irf_temp <- obj$irfs
     irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
     for(i in 1:n_draws){
         irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
@@ -321,28 +367,28 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             which_response <- 1:M
         }
         #
-        nRespPlot <- length(which_response)
-        nShocks   <- length(which_shock)
+        n_response <- length(which_response)
+        n_shocks   <- length(which_shock)
         
-        if(nRespPlot < 4){
-            MR <- nRespPlot; MC <- 1
-        }else if(nRespPlot == 4){
+        if(n_response < 4){
+            MR <- n_response; MC <- 1
+        }else if(n_response == 4){
             MR <- 2; MC <-2
-        }else if(nRespPlot > 4 && nRespPlot < 7){
+        }else if(n_response > 4 && n_response < 7){
             MR <- 3; MC <- 2
-        }else if(nRespPlot > 6 && nRespPlot < 10){
+        }else if(n_response > 6 && n_response < 10){
             MR <- 3; MC <- 3
-        }else if(nRespPlot > 9 && nRespPlot < 13){
+        }else if(n_response > 9 && n_response < 13){
             MR <- 4; MC <- 3
-        }else if(nRespPlot > 12 && nRespPlot < 17){
+        }else if(n_response > 12 && n_response < 17){
             MR <- 4; MC <- 4
-        }else if(nRespPlot > 17 && nRespPlot < 21){
+        }else if(n_response > 17 && n_response < 21){
             MR <- 5; MC <- 4
-        }else if(nRespPlot > 20 && nRespPlot < 26){
+        }else if(n_response > 20 && n_response < 26){
             MR <- 5; MC <- 5
-        }else if(nRespPlot > 25 && nRespPlot < 31){
+        }else if(n_response > 25 && n_response < 31){
             MR <- 5; MC <- 6
-        }else if(nRespPlot > 30 && nRespPlot < 37){
+        }else if(n_response > 30 && n_response < 37){
             MR <- 6; MC <- 6
         }else{
             stop("You have too many IRFs to plot!")
@@ -353,7 +399,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             plot_ind_c <- 1
             
             if(save==TRUE){
-                if(nShocks==1){
+                if(n_shocks==1){
                     cairo_ps(filename="IRFs.eps",height=height,width=width)
                 }else{
                     SaveIRF <- paste(colnames(mydata)[i],"_Shock",".eps",sep="")
@@ -464,28 +510,28 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             which_response <- 1:M
         }
         #
-        nRespPlot <- length(which_response)
-        nShocks   <- length(which_shock)
+        n_response <- length(which_response)
+        n_shocks   <- length(which_shock)
         
-        if(nRespPlot < 4){
-            MR <- nRespPlot; MC <- 1
-        }else if(nRespPlot == 4){
+        if(n_response < 4){
+            MR <- n_response; MC <- 1
+        }else if(n_response == 4){
             MR <- 2; MC <-2
-        }else if(nRespPlot > 4 && nRespPlot < 7){
+        }else if(n_response > 4 && n_response < 7){
             MR <- 3; MC <- 2
-        }else if(nRespPlot > 6 && nRespPlot < 10){
+        }else if(n_response > 6 && n_response < 10){
             MR <- 3; MC <- 3
-        }else if(nRespPlot > 9 && nRespPlot < 13){
+        }else if(n_response > 9 && n_response < 13){
             MR <- 4; MC <- 3
-        }else if(nRespPlot > 12 && nRespPlot < 17){
+        }else if(n_response > 12 && n_response < 17){
             MR <- 4; MC <- 4
-        }else if(nRespPlot > 17 && nRespPlot < 21){
+        }else if(n_response > 17 && n_response < 21){
             MR <- 5; MC <- 4
-        }else if(nRespPlot > 20 && nRespPlot < 26){
+        }else if(n_response > 20 && n_response < 26){
             MR <- 5; MC <- 5
-        }else if(nRespPlot > 25 && nRespPlot < 31){
+        }else if(n_response > 25 && n_response < 31){
             MR <- 5; MC <- 6
-        }else if(nRespPlot > 30 && nRespPlot < 37){
+        }else if(n_response > 30 && n_response < 37){
             MR <- 6; MC <- 6
         }else{
             stop("You have too many IRFs to plot!")
@@ -496,7 +542,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             plot_ind_c <- 1
             
             if(save==TRUE){
-                if(nShocks==1){
+                if(n_shocks==1){
                     cairo_ps(filename="IRFs.eps",height=height,width=width)
                 }else{
                     SaveIRF <- paste(colnames(mydata)[i],"_Shock",".eps",sep="")
@@ -643,13 +689,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     StateMats <- statespace(obj)
     F <- StateMats$F; G <- StateMats$G
     #
-    nShocks <- ncol(G)
+    n_shocks <- ncol(G)
     #
-    IRFs <- array(0,dim=c(irf.periods,ncol(F),nShocks))
+    IRFs <- array(0,dim=c(irf.periods,ncol(F),n_shocks))
     #
-    for(j in 1:nShocks){
+    for(j in 1:n_shocks){
         shockvec <- rep(0,j-1)
-        shockvec <- matrix( c(shockvec, shocks[j], rep(0,nShocks-j)), ncol=1)
+        shockvec <- matrix( c(shockvec, shocks[j], rep(0,n_shocks-j)), ncol=1)
         #
         # Resp = F*G*1, or Resp' = 1'G'F'
         IRFs[1,,j] <- t(G%*%shockvec)
@@ -669,10 +715,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     colnames(IRFsRet) <- varnames
     #
-    if(nShocks > 1){
-        IRFs <- array(0,dim=c(irf.periods,ncol(F)-nShocks+1,nShocks))
-        DropCount <- (ncol(F)-nShocks+1):ncol(F)
-        for(j in 1:nShocks){
+    if(n_shocks > 1){
+        IRFs <- array(0,dim=c(irf.periods,ncol(F)-n_shocks+1,n_shocks))
+        DropCount <- (ncol(F)-n_shocks+1):ncol(F)
+        for(j in 1:n_shocks){
             IRFs[,,j] <- IRFsRet[,-DropCount[-(j)],j]
         }
     }
@@ -681,28 +727,28 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     IRFM <- Time <- NULL # CRAN check workaround
     #
-    nRespPlot <- nResp - nShocks + 1
+    n_response <- nResp - n_shocks + 1
     MR <- 0; MC <- 0
     if(plot==TRUE){
-        if(nRespPlot < 4){
-            MR <- nRespPlot; MC <- 1
-        }else if(nRespPlot == 4){
+        if(n_response < 4){
+            MR <- n_response; MC <- 1
+        }else if(n_response == 4){
             MR <- 2; MC <-2
-        }else if(nRespPlot > 4 && nRespPlot < 7){
+        }else if(n_response > 4 && n_response < 7){
             MR <- 3; MC <- 2
-        }else if(nRespPlot > 6 && nRespPlot < 10){
+        }else if(n_response > 6 && n_response < 10){
             MR <- 3; MC <- 3
-        }else if(nRespPlot > 9 && nRespPlot < 13){
+        }else if(n_response > 9 && n_response < 13){
             MR <- 4; MC <- 3
-        }else if(nRespPlot > 12 && nRespPlot < 17){
+        }else if(n_response > 12 && n_response < 17){
             MR <- 4; MC <- 4
-        }else if(nRespPlot > 17 && nRespPlot < 21){
+        }else if(n_response > 17 && n_response < 21){
             MR <- 5; MC <- 4
-        }else if(nRespPlot > 20 && nRespPlot < 26){
+        }else if(n_response > 20 && n_response < 26){
             MR <- 5; MC <- 5
-        }else if(nRespPlot > 25 && nRespPlot < 31){
+        }else if(n_response > 25 && n_response < 31){
             MR <- 5; MC <- 6
-        }else if(nRespPlot > 30 && nRespPlot < 37){
+        }else if(n_response > 30 && n_response < 37){
             MR <- 6; MC <- 6
         }else{
             stop("You have too many IRFs to plot!")
@@ -712,13 +758,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         #
         vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
         #
-        for(j in 1:nShocks){
+        for(j in 1:n_shocks){
             #
             if(save==TRUE){
-                if(nShocks==1){
+                if(n_shocks==1){
                     cairo_ps(filename="DSGEIRFs.eps",height=height,width=width)
                 }else{
-                    SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
+                    SaveIRF <- paste(varnames[nResp-n_shocks+j],"_Shock",".eps",sep="")
                     #
                     if(save==TRUE){cairo_ps(filename=SaveIRF,height=height,width=width)}
                 }
@@ -726,7 +772,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             grid.newpage()
             pushViewport(viewport(layout=grid.layout(MR,MC)))
             #
-            if(nShocks > 1){
+            if(n_shocks > 1){
                 varnames2 <- varnames[-DropCount[-(j)]]
             }else{varnames2 <- varnames}
             #
@@ -734,7 +780,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
             for(i in 1:MR){
                 for(k in 1:MC){
                     #
-                    if(IRFCount <= (nResp - nShocks + 1)){
+                    if(IRFCount <= (nResp - n_shocks + 1)){
                         IRFDF <- data.frame(IRFs[,IRFCount,j],1:(irf.periods))
                         colnames(IRFDF) <- c("IRFM","Time")
                         #
@@ -764,22 +810,22 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     IRFs <- round(obj$IRFs,10)
     irf.periods <- as.numeric(dim(IRFs)[1])
     nResp <- as.numeric(dim(IRFs)[2])
-    nShocks <- as.numeric(dim(IRFs)[3])
+    n_shocks <- as.numeric(dim(IRFs)[3])
     keep <- dim(IRFs)[4]
     #
     ObserveMat <- obj$ObserveMat
     #
-    IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),nShocks,keep))
+    IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),n_shocks,keep))
     if(observableIRFs == TRUE){
         if(ncol(ObserveMat)==1){
             for(i in 1:keep){
-                for(j in 1:nShocks){
+                for(j in 1:n_shocks){
                     IRFObservable[,1,j,i] <- IRFs[,,j,i]%*%ObserveMat
                 }
             }
         }else{
             for(i in 1:keep){
-                for(j in 1:nShocks){
+                for(j in 1:n_shocks){
                     IRFObservable[,,j,i] <- IRFs[,,j,i]%*%ObserveMat
                 }
             }
@@ -796,8 +842,8 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     IRFMid <- round(percentiles[2]*keep)
     IRFLower <- round(percentiles[1]*keep)
     #
-    IRFPlot <- array(NA,dim=c(irf.periods,4,nResp,nShocks))
-    for(i in 1:nShocks){
+    IRFPlot <- array(NA,dim=c(irf.periods,4,nResp,n_shocks))
+    for(i in 1:n_shocks){
         for(k in 1:nResp){
             IRFPData <- data.frame(c(IRFs[IRFLower,,k,i]),c(IRFs[IRFMid,,k,i]),c(IRFs[IRFUpper,,k,i]),1:(irf.periods))
             IRFPData <- as.matrix(IRFPData)
@@ -814,35 +860,35 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         }
     }
     #
-    if(nShocks > 1 && observableIRFs!=TRUE){
-        IRFPlot <- array(0,dim=c(irf.periods,4,nResp-nShocks+1,nShocks))
-        DropCount <- (nResp-nShocks+1):nResp
-        for(j in 1:nShocks){
+    if(n_shocks > 1 && observableIRFs!=TRUE){
+        IRFPlot <- array(0,dim=c(irf.periods,4,nResp-n_shocks+1,n_shocks))
+        DropCount <- (nResp-n_shocks+1):nResp
+        for(j in 1:n_shocks){
             IRFPlot[,,,j] <- IRFsRet[,,-DropCount[-(j)],j]
         }
     }
     #
-    nRespPlot <- nResp - nShocks + 1
+    n_response <- nResp - n_shocks + 1
     MR <- 0; MC <- 0
-    if(nRespPlot < 4){
-        MR <- nRespPlot; MC <- 1
-    }else if(nRespPlot == 4){
+    if(n_response < 4){
+        MR <- n_response; MC <- 1
+    }else if(n_response == 4){
         MR <- 2; MC <-2
-    }else if(nRespPlot > 4 && nRespPlot < 7){
+    }else if(n_response > 4 && n_response < 7){
         MR <- 3; MC <- 2
-    }else if(nRespPlot > 6 && nRespPlot < 10){
+    }else if(n_response > 6 && n_response < 10){
         MR <- 3; MC <- 3
-    }else if(nRespPlot > 9 && nRespPlot < 13){
+    }else if(n_response > 9 && n_response < 13){
         MR <- 4; MC <- 3
-    }else if(nRespPlot > 12 && nRespPlot < 17){
+    }else if(n_response > 12 && n_response < 17){
         MR <- 4; MC <- 4
-    }else if(nRespPlot > 17 && nRespPlot < 21){
+    }else if(n_response > 17 && n_response < 21){
         MR <- 5; MC <- 4
-    }else if(nRespPlot > 20 && nRespPlot < 26){
+    }else if(n_response > 20 && n_response < 26){
         MR <- 5; MC <- 5
-    }else if(nRespPlot > 25 && nRespPlot < 31){
+    }else if(n_response > 25 && n_response < 31){
         MR <- 5; MC <- 6
-    }else if(nRespPlot > 30 && nRespPlot < 37){
+    }else if(n_response > 30 && n_response < 37){
         MR <- 6; MC <- 6
     }else{
         stop("You have too many IRFs to plot!")
@@ -852,13 +898,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     #
-    for(j in 1:nShocks){
+    for(j in 1:n_shocks){
         #
         if(save==TRUE){
-            if(nShocks==1){
+            if(n_shocks==1){
                 cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
             }else{
-                SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
+                SaveIRF <- paste(varnames[nResp-n_shocks+j],"_Shock",".eps",sep="")
                 #
                 cairo_ps(filename=SaveIRF,height=height,width=width)
             }
@@ -868,7 +914,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         #
         IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
         #
-        if(nShocks > 1 && observableIRFs!=TRUE){
+        if(n_shocks > 1 && observableIRFs!=TRUE){
             varnames2 <- varnames[-DropCount[-(j)]]
         }else{varnames2 <- varnames}
         #
@@ -879,7 +925,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         for(i in 1:MR){
             for(k in 1:MC){
                 #
-                if(IRFCount <= (nResp - nShocks + IRFO)){
+                if(IRFCount <= (nResp - n_shocks + IRFO)){
                     IRFDF <- data.frame(IRFPlot[,,IRFCount,j])
                     colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
                     #
@@ -911,22 +957,22 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     IRFDs <- round(obj$DSGEIRFs,10)
     irf.periods <- as.numeric(dim(IRFDs)[1])
     nResp <- as.numeric(dim(IRFDs)[2])
-    nShocks <- as.numeric(dim(IRFDs)[3])
+    n_shocks <- as.numeric(dim(IRFDs)[3])
     keep <- dim(IRFDs)[4]
     #
     ObserveMat <- obj$ObserveMat
     #
-    IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),nShocks,keep))
+    IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),n_shocks,keep))
     if(observableIRFs == TRUE){
         if(ncol(ObserveMat)==1){
             for(i in 1:keep){
-                for(j in 1:nShocks){
+                for(j in 1:n_shocks){
                     IRFObservable[,1,j,i] <- IRFDs[,,j,i]%*%ObserveMat
                 }
             }
         }else{
             for(i in 1:keep){
-                for(j in 1:nShocks){
+                for(j in 1:n_shocks){
                     IRFObservable[,,j,i] <- IRFDs[,,j,i]%*%ObserveMat
                 }
             }
@@ -945,9 +991,9 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     IRFMid <- round(percentiles[2]*keep)
     IRFLower <- round(percentiles[1]*keep)
     #
-    IRFDPlot <- array(NA,dim=c(irf.periods,4,nResp,nShocks))
-    IRFDVPlot <- array(NA,dim=c(irf.periods,4,nResp,nShocks))
-    for(i in 1:nShocks){
+    IRFDPlot <- array(NA,dim=c(irf.periods,4,nResp,n_shocks))
+    IRFDVPlot <- array(NA,dim=c(irf.periods,4,nResp,n_shocks))
+    for(i in 1:n_shocks){
         for(k in 1:nResp){
             IRFPData <- data.frame(c(IRFDs[IRFLower,,k,i]),c(IRFDs[IRFMid,,k,i]),c(IRFDs[IRFUpper,,k,i]),1:(irf.periods))
             IRFPData <- as.matrix(IRFPData)
@@ -968,10 +1014,10 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         }
     }
     #
-    if(nShocks > 1 && observableIRFs!=TRUE){
-        IRFDPlot <- array(0,dim=c(irf.periods,4,nResp-nShocks+1,nShocks))
-        DropCount <- (nResp-nShocks+1):nResp
-        for(j in 1:nShocks){
+    if(n_shocks > 1 && observableIRFs!=TRUE){
+        IRFDPlot <- array(0,dim=c(irf.periods,4,nResp-n_shocks+1,n_shocks))
+        DropCount <- (nResp-n_shocks+1):nResp
+        for(j in 1:n_shocks){
             IRFDPlot[,,,j] <- IRFsRet[,,-DropCount[-(j)],j]
         }
     }
@@ -995,13 +1041,13 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     #
-    for(j in 1:nShocks){
+    for(j in 1:n_shocks){
         #
         if(save==TRUE){
-            if(nShocks==1){
+            if(n_shocks==1){
                 cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
             }else{
-                SaveIRF <- paste(varnames[nResp-nShocks+j],"_Shock",".eps",sep="")
+                SaveIRF <- paste(varnames[nResp-n_shocks+j],"_Shock",".eps",sep="")
                 #
                 cairo_ps(filename=SaveIRF,height=height,width=width)
             }
@@ -1012,7 +1058,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
         VARIRFM <- VARIRFL <- VARIRFU <- NULL
         #
-        if(nShocks > 1 && observableIRFs!=TRUE){
+        if(n_shocks > 1 && observableIRFs!=TRUE){
             varnames2 <- varnames[-DropCount[-(j)]]
         }else{varnames2 <- varnames}
         #
@@ -1023,7 +1069,7 @@ IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=
         for(i in 1:MR){
             for(k in 1:MC){
                 #
-                if(IRFCount <= (nResp - nShocks + IRFO)){
+                if(IRFCount <= (nResp - n_shocks + IRFO)){
                     IRFDF <- data.frame(IRFDVPlot[,1:3,IRFCount,j],IRFDPlot[,,IRFCount,j])
                     colnames(IRFDF) <- c("VARIRFL","VARIRFM","VARIRFU","IRFL","IRFM","IRFU","Time")
                     #
