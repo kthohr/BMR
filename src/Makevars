@@ -1,1 +1,49 @@
+
+
+
+CXX_STD = CXX11
+PKG_CPPFLAGS= -std=c++11 -Wall -O2 -DUSE_RCPP_ARMADILLO -I./ -I./bmlib/include -I./bmlib/include/mcmc -I./bmlib/include/optim
+
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+SDIR = .
+BM_DIR = $(SDIR)/bmlib
+BM_SRC_DIR = $(BM_DIR)/src
+BM_HEADER_DIR = $(BM_DIR)/include
+
+OPTIM_SRC_DIR = $(BM_SRC_DIR)/optim
+MCMC_SRC_DIR = $(BM_SRC_DIR)/mcmc
+
+# general flags
+CFLAGS = -Wall $(OPT_FLAGS) -I$(BM_HEADER_DIR)
+CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -DSTATSLIB_GO_INLINE -I$(ARMA_INCLUDE_PATH) -I$(BM_HEADER_DIR)
+FFLAGS = $(OPT_FLAGS)
+LIBS= -lgfortran -framework Accelerate
+
+# Optim and MCMC files
+SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/rwmh.cpp
+OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
+
+SOURCES_OPTIM= $(OPTIM_SRC_DIR)/line_search/more_thuente.cpp $(OPTIM_SRC_DIR)/unconstrained/bfgs.cpp $(OPTIM_SRC_DIR)/unconstrained/cg.cpp $(OPTIM_SRC_DIR)/unconstrained/de.cpp $(OPTIM_SRC_DIR)/unconstrained/de_prmm.cpp $(OPTIM_SRC_DIR)/unconstrained/nm.cpp $(OPTIM_SRC_DIR)/unconstrained/pso.cpp $(OPTIM_SRC_DIR)/unconstrained/pso_dv.cpp
+OBJECTS_OPTIM= $(SOURCES_OPTIM:.cpp=.o)
+
+# core BM files
+SOURCES_BM_VAR= $(BM_SRC_DIR)/var/bvarm.cpp $(BM_SRC_DIR)/var/bvars.cpp $(BM_SRC_DIR)/var/bvarw.cpp $(BM_SRC_DIR)/var/bvartvp.cpp $(BM_SRC_DIR)/var/cvar.cpp
+OBJECTS_BM_VAR= $(SOURCES_BM_VAR:.cpp=.o)
+
+SOURCES_BM_FILT= $(BM_SRC_DIR)/filter/kalman.cpp $(BM_SRC_DIR)/filter/chandrasekhar.cpp
+OBJECTS_BM_FILT= $(SOURCES_BM_FILT:.cpp=.o)
+
+SOURCES_BM_LRES= $(BM_SRC_DIR)/lres/gensys_solver.cpp $(BM_SRC_DIR)/lres/uhlig_solver.cpp
+OBJECTS_BM_LRES= $(SOURCES_BM_LRES:.cpp=.o)
+
+OBJECTS_BM= $(OBJECTS_OPTIM) $(OBJECTS_MCMC) $(OBJECTS_BM_VAR) $(OBJECTS_BM_FILT) $(OBJECTS_BM_LRES)
+
+SOURCES_MODULES= ./modules/bvarm_R.cpp
+OBJECTS_MODULES= $(SOURCES_MODULES:.cpp=.o)
+
+OBJECTS=$(OBJECTS_BM) $(OBJECTS_MODULES)
+
+all: $(SHLIB)
+
+$(SHLIB): $(OBJECTS)

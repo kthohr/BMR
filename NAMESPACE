@@ -1,4 +1,4 @@
-useDynLib(BMR)
+useDynLib(BMR.Rcpp)
 
 importFrom(Rcpp, evalCpp)
 import(doParallel)
@@ -45,17 +45,6 @@ S3method(plot, BVARW)
 S3method(plot, BVARTVP)
 S3method(plot, EDSGE)
 S3method(plot, DSGEVAR)
-
-S3method(IRF, BVARM)
-S3method(IRF, BVARS)
-S3method(IRF, BVARW)
-S3method(IRF, BVARTVP)
-S3method(IRF, CVAR)
-S3method(IRF, gensys)
-S3method(IRF, uhlig)
-S3method(IRF, SDSGE)
-S3method(IRF, EDSGE)
-S3method(IRF, DSGEVAR)
 
 S3method(forecast, BVARM)
 S3method(forecast, BVARS)
