@@ -19,8 +19,8 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
 {
     obj_class <- class(obj)[1]
 
-    if (obj_class == "Rcpp_bvarm_R"){
-        .irfbvarm(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    if (obj_class == "Rcpp_bvarm_R" || obj_class == "Rcpp_bvars_R" || obj_class == "Rcpp_bvarw_R" || obj_class == "Rcpp_cvar_R") {
+        .irfbvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
     }
 }
 
@@ -65,7 +65,7 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
 # }
 
 
-.irfbvarm <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
+.irfbvar <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
     #
 
     if (periods <= 0) {
@@ -77,18 +77,21 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
     M <- obj$M
     n_draws <- dim(obj$beta_draws)[3]
     
-    obj$IRF(periods)
+    if (sum(dim(obj$irfs)) == 0) {
+        obj$IRF(periods)
+    }
 
     # put the IRFs in a tesseract-type format
 
-    irf_temp <- obj$irfs
+    #irf_temp <- obj$irfs
     irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
 
     for(i in 1:n_draws){
-        irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
+        #irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
+        irf_tess[,,,i] <- obj$irfs[,,((i-1)*periods+1):(i*periods)]
     }
 
-    rm("irf_temp")
+    #rm("irf_temp")
 
     irf_tess <- apply(irf_tess,c(3,1,2),sort)
     irf_tess <- aperm(irf_tess,c(2,3,1,4))
@@ -238,342 +241,6 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
             }
         }
 
-        if(save==TRUE){dev.off()}
-    }
-    #
-    return=list(IRFs=irf_plot)
-}
-
-.irfbvars <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-    irf.periods <- dim(obj$IRFs)[1]
-    M <- dim(obj$IRFs)[4]
-    mydata <- obj$data
-    IRFs <- obj$IRFs
-    #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    #
-    total <- dim(IRFs)[3]
-    IRFUpper <- round(percentiles[3]*total)
-    IRFMid <- round(percentiles[2]*total)
-    IRFLower <- round(percentiles[1]*total)
-    #
-    IRFPlot <- array(NA,dim=c(irf.periods,4,M,M))
-    for(i in 1:M){
-        for(k in 1:M){
-            IRFPData <- data.frame(IRFs[,k,IRFLower,i],IRFs[,k,IRFMid,i],IRFs[,k,IRFUpper,i],1:(irf.periods))
-            IRFPData <- as.matrix(IRFPData)
-            IRFPlot[,,k,i] <- IRFPData
-        }
-    }
-    if(class(dev.list()) != "NULL"){dev.off()}
-    if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
-    pushViewport(viewport(layout=grid.layout(M,M)))
-    #
-    IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
-    #
-    for(i in 1:M){
-        for(k in 1:M){
-            NameResponse <- colnames(mydata)[k]
-            NameImpulse <- colnames(mydata)[i]
-            #
-            IRFDF <- IRFPlot[,,k,i]
-            IRFDF <- data.frame(IRFDF)
-            colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
-            #
-            gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameImpulse," to", NameResponse)) 
-            gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
-            gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
-            print(gg3,vp = vplayout(i,k))
-            #
-            Sys.sleep(0.3)
-        }
-    }
-    if(save==TRUE){dev.off()}
-    #
-    return=list(IRFs=IRFPlot)
-}
-
-.irfbvarw <- function(obj, periods=10, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
-    #
-    if (periods <= 0) {
-        stop("need periods > 0")
-    }
-    #
-    M <- obj$M
-    n_draws <- dim(obj$beta_draws)[3]
-    mydata <- obj$data
-    #
-    obj$IRF(periods)
-    # put the IRFs in a tesseract-type format
-    irf_temp <- obj$irfs
-    irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
-    for(i in 1:n_draws){
-        irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
-    }
-    rm("irf_temp")
-
-    irf_tess <- apply(irf_tess,c(3,1,2),sort)
-    irf_tess <- aperm(irf_tess,c(2,3,1,4))
-    #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    #
-    irf_upper <- round(percentiles[3]*n_draws)
-    irf_mid <- round(percentiles[2]*n_draws)
-    irf_lower <- round(percentiles[1]*n_draws)
-    #
-    irf_plot <- array(NA,dim=c(periods,4,M,M))
-    for(i in 1:M){
-        for(k in 1:M){
-            IRFPData <- data.frame(irf_tess[,k,irf_lower,i],irf_tess[,k,irf_mid,i],irf_tess[,k,irf_upper,i],1:(periods))
-            IRFPData <- as.matrix(IRFPData)
-            irf_plot[,,k,i] <- IRFPData
-        }
-    }
-    #
-    IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
-    #
-    if (is.null(which_shock) && is.null(which_response)) {
-        if(class(dev.list()) != "NULL"){dev.off()}
-        if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
-        pushViewport(viewport(layout=grid.layout(M,M)))
-        
-        for(i in 1:M){
-            for(k in 1:M){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
-                
-                IRFDF <- irf_plot[,,k,i]
-                IRFDF <- data.frame(IRFDF)
-                colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
-                #
-                gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameImpulse," to", NameResponse)) 
-                gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
-                gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
-                print(gg3,vp = vplayout(i,k))
-                #
-                Sys.sleep(0.3)
-            }
-        }
-        if(save==TRUE){dev.off()}
-    } else {
-        if (is.null(which_shock)) {
-            which_shock <- 1:M
-        }
-        if (is.null(which_response)) {
-            which_response <- 1:M
-        }
-        #
-        n_response <- length(which_response)
-        n_shocks   <- length(which_shock)
-        
-        if(n_response < 4){
-            MR <- n_response; MC <- 1
-        }else if(n_response == 4){
-            MR <- 2; MC <-2
-        }else if(n_response > 4 && n_response < 7){
-            MR <- 3; MC <- 2
-        }else if(n_response > 6 && n_response < 10){
-            MR <- 3; MC <- 3
-        }else if(n_response > 9 && n_response < 13){
-            MR <- 4; MC <- 3
-        }else if(n_response > 12 && n_response < 17){
-            MR <- 4; MC <- 4
-        }else if(n_response > 17 && n_response < 21){
-            MR <- 5; MC <- 4
-        }else if(n_response > 20 && n_response < 26){
-            MR <- 5; MC <- 5
-        }else if(n_response > 25 && n_response < 31){
-            MR <- 5; MC <- 6
-        }else if(n_response > 30 && n_response < 37){
-            MR <- 6; MC <- 6
-        }else{
-            stop("You have too many IRFs to plot!")
-        }
-        
-        for(i in which_shock){
-            plot_ind_r <- 1
-            plot_ind_c <- 1
-            
-            if(save==TRUE){
-                if(n_shocks==1){
-                    cairo_ps(filename="IRFs.eps",height=height,width=width)
-                }else{
-                    SaveIRF <- paste(colnames(mydata)[i],"_Shock",".eps",sep="")
-                    cairo_ps(filename=SaveIRF,height=height,width=width)
-                }
-            }
-            grid.newpage()
-            pushViewport(viewport(layout=grid.layout(MR,MC)))
-            
-            for(k in which_response){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
-                #
-                IRFDF <- irf_plot[,,k,i]
-                IRFDF <- data.frame(IRFDF)
-                colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
-                #
-                gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ", NameImpulse," to", NameResponse)) 
-                gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
-                gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
-                print(gg3,vp = vplayout(plot_ind_r,plot_ind_c))
-                #
-                Sys.sleep(0.3)
-                #
-                plot_ind_c <- plot_ind_c + 1
-                if (plot_ind_c > MC) {
-                    plot_ind_c <- 1
-                    plot_ind_r <- plot_ind_r + 1
-                }
-            }
-        }
-        if(save==TRUE){dev.off()}
-    }
-    #
-    return=list(IRFs=irf_plot)
-}
-
-.irfcvar <- function(obj, periods=10, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
-{
-    #
-    if (periods <= 0) {
-        stop("need periods > 0")
-    }
-    #
-    M <- obj$cvar_obj$M
-    n_draws <- dim(obj$cvar_obj$beta_draws)[3]
-    mydata <- obj$data
-    #
-    obj$cvar_obj$IRF(periods)
-    # put the IRFs in a tesseract-type format
-    irf_temp <- obj$cvar_obj$irfs
-    irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
-    for (i in 1:n_draws) {
-        irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
-    }
-    rm("irf_temp")
-
-    irf_tess <- apply(irf_tess,c(3,1,2),sort)
-    irf_tess <- aperm(irf_tess,c(2,3,1,4))
-    #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    #
-    irf_upper <- round(percentiles[3]*n_draws)
-    irf_mid <- round(percentiles[2]*n_draws)
-    irf_lower <- round(percentiles[1]*n_draws)
-    #
-    irf_plot <- array(NA,dim=c(periods,4,M,M))
-    for(i in 1:M){
-        for(k in 1:M){
-            IRFPData <- data.frame(irf_tess[,k,irf_lower,i],irf_tess[,k,irf_mid,i],irf_tess[,k,irf_upper,i],1:(periods))
-            IRFPData <- as.matrix(IRFPData)
-            irf_plot[,,k,i] <- IRFPData
-        }
-    }
-    #
-    IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
-    #
-    if (is.null(which_shock) && is.null(which_response)) {
-        if(class(dev.list()) != "NULL"){dev.off()}
-        if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
-        pushViewport(viewport(layout=grid.layout(M,M)))
-        
-        for(i in 1:M){
-            for(k in 1:M){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
-                #
-                IRFDF <- irf_plot[,,k,i]
-                IRFDF <- data.frame(IRFDF)
-                colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
-                #
-                gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ",NameImpulse," to", NameResponse)) 
-                gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
-                gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
-                print(gg3,vp = vplayout(i,k))
-                #
-                Sys.sleep(0.3)
-            }
-        }
-        if(save==TRUE){dev.off()}
-    } else {
-        if (is.null(which_shock)) {
-            which_shock <- 1:M
-        }
-        if (is.null(which_response)) {
-            which_response <- 1:M
-        }
-        #
-        n_response <- length(which_response)
-        n_shocks   <- length(which_shock)
-        
-        if(n_response < 4){
-            MR <- n_response; MC <- 1
-        }else if(n_response == 4){
-            MR <- 2; MC <-2
-        }else if(n_response > 4 && n_response < 7){
-            MR <- 3; MC <- 2
-        }else if(n_response > 6 && n_response < 10){
-            MR <- 3; MC <- 3
-        }else if(n_response > 9 && n_response < 13){
-            MR <- 4; MC <- 3
-        }else if(n_response > 12 && n_response < 17){
-            MR <- 4; MC <- 4
-        }else if(n_response > 17 && n_response < 21){
-            MR <- 5; MC <- 4
-        }else if(n_response > 20 && n_response < 26){
-            MR <- 5; MC <- 5
-        }else if(n_response > 25 && n_response < 31){
-            MR <- 5; MC <- 6
-        }else if(n_response > 30 && n_response < 37){
-            MR <- 6; MC <- 6
-        }else{
-            stop("You have too many IRFs to plot!")
-        }
-        
-        for(i in which_shock){
-            plot_ind_r <- 1
-            plot_ind_c <- 1
-            
-            if(save==TRUE){
-                if(n_shocks==1){
-                    cairo_ps(filename="IRFs.eps",height=height,width=width)
-                }else{
-                    SaveIRF <- paste(colnames(mydata)[i],"_Shock",".eps",sep="")
-                    cairo_ps(filename=SaveIRF,height=height,width=width)
-                }
-            }
-            grid.newpage()
-            pushViewport(viewport(layout=grid.layout(MR,MC)))
-            
-            for(k in which_response){
-                NameResponse <- colnames(mydata)[k]
-                NameImpulse  <- colnames(mydata)[i]
-                #
-                IRFDF <- irf_plot[,,k,i]
-                IRFDF <- data.frame(IRFDF)
-                colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
-                #
-                gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste("Shock from ", NameImpulse," to", NameResponse)) 
-                gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="red",size=2) 
-                gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
-                print(gg3,vp = vplayout(plot_ind_r,plot_ind_c))
-                #
-                Sys.sleep(0.3)
-                #
-                plot_ind_c <- plot_ind_c + 1
-                if (plot_ind_c > MC) {
-                    plot_ind_c <- 1
-                    plot_ind_r <- plot_ind_r + 1
-                }
-            }
-        }
         if(save==TRUE){dev.off()}
     }
     #

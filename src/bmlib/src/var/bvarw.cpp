@@ -54,7 +54,9 @@ bm::bvarw::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
     n_ext_vars = (data_ext) ? data_ext->n_cols : 0;
 
     K = c_int + M*p + n_ext_vars;
+
     //
+
     arma::mat data_lagged = embed(data_raw,p);
 
     Y = data_lagged.cols(0,M-1);
@@ -64,25 +66,26 @@ bm::bvarw::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
     } else {
         X = data_lagged.cols(M,data_lagged.n_cols-1);
     }
+
     //
+
     if (data_ext && (n_ext_vars > 0)) {
         arma::mat X_ext = *data_ext;
         X_ext.shed_rows(0,p-1);
 
         X = arma::join_rows(X,X_ext);
     }
-    //
+    
     // Z = arma::kron(arma::eye(M,M),X);
-    //
 }
 
 //
 // prior
 
 void
-bm::bvarw::prior(const arma::vec& coef_prior, const double Xi_beta, const arma::mat& Xi_Sigma, const int gamma)
+bm::bvarw::prior(const arma::vec& coef_prior, const double Xi_beta, const double Xi_Sigma, const int gamma)
 {
-    this->prior(coef_prior,arma::eye(K*M,K*M) * Xi_beta,Xi_Sigma,gamma);
+    this->prior(coef_prior,Xi_beta*arma::eye(K*M,K*M),Xi_Sigma*arma::eye(M,M),gamma);
 }
 
 void

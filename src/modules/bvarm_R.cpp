@@ -31,15 +31,13 @@ RCPP_MODULE(bvarm_module)
 
     void (bvarm_R::*prior_3)(arma::vec,int,int,double,double,double,double) = &bvarm_R::prior_R;
 
-    void (bvarm_R::*gibbs_1)(int) = &bvarm_R::gibbs_R;
-
     void (bvarm_R::*IRF_1)(int) = &bvarm_R::IRF_R;
 
     SEXP (bvarm_R::*forecast_1)(int, bool) = &bvarm_R::forecast_R;
     SEXP (bvarm_R::*forecast_2)(arma::mat, int, bool) = &bvarm_R::forecast_R;
   
     // now we can declare the class
-    class_<bm::bvarm>( "bvarm" )
+    class_<bm::bvarm>( "bvarm_cpp" )
         .default_constructor()
 
         // basic objects
@@ -51,6 +49,7 @@ RCPP_MODULE(bvarm_module)
         // .field( "hyper_pars", &bvarm::hyper_pars )
 
         // read only objects
+        .field_readonly( "c_int", &bm::bvarm::c_int )
         .field_readonly( "n", &bm::bvarm::n )
         .field_readonly( "M", &bm::bvarm::M )
         .field_readonly( "K", &bm::bvarm::K )
@@ -69,8 +68,8 @@ RCPP_MODULE(bvarm_module)
         .field_readonly( "irfs", &bm::bvarm::irfs )
     ;
 
-    class_<bvarm_R>( "bvarm_R" )
-        .derives<bm::bvarm>( "bvarm" )
+    class_<bvarm_R>( "bvarm" )
+        .derives<bm::bvarm>( "bvarm_cpp" )
         .default_constructor()
 
         .method( "build", build_1 )

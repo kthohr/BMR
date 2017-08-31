@@ -46,8 +46,8 @@ class bvars
 
         // ML-type estimates
 
-        arma::mat Psi_hat;
-        arma::mat beta_hat;       // OLS estimate of beta
+        arma::mat psi_hat;
+        arma::mat alpha_hat;       // OLS estimate of beta
         arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
 
         // prior data
@@ -85,7 +85,7 @@ class bvars
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
-        void prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& psi_prior, const arma::mat& Xi_psi, const int gamma);
+        void prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& Psi_prior, const double Xi_psi, const int gamma);
 
         void gibbs(const int n_draws, const int n_burnin);
 
