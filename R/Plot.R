@@ -17,19 +17,19 @@
 
 # 07/20/2015
 
-plot.BVARM <- function(x,type=1,save=FALSE,height=13,width=13,...){
-    .plotbvarm(x,type,save,height,width)
+plot.Rcpp_bvarm_R <- function(x,type=1,save=FALSE,height=13,width=13,...){
+    .plotbvar(x,type,save,height,width)
 }
 
-plot.BVARS <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
+plot.Rcpp_bvars_R <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
     .plotbvars(x,type,plotSigma,save,height,width)
 }
 
-plot.BVARW <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
-    .plotbvarw(x,type,plotSigma,save,height,width)
+plot.Rcpp_bvarw_R <- function(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...){
+    .plotbvar(x,type,plotSigma,save,height,width)
 }
 
-plot.BVARTVP <- function(x,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
+plot.Rcpp_bvartvp_R <- function(x,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
     .plotbvartvp(x,percentiles,save,height,width)
 }
 
@@ -41,18 +41,18 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
     .plotdsgevar(x,parnames,BinDenom,MCMCplot,save,height,width)
 }
 
-.plotbvarm <- function(obj,type=1,save=FALSE,height=13,width=13){
-    Betas <- obj$BDraws
+.plotbvar <- function(obj,type=1,varnames=NULL,save=FALSE,height=13,width=13){    
+    constant <- obj$cons_term
+    p <- obj$p
+    
+    K <- dim(obj$beta_draws)[1]
+    M <- dim(obj$beta_draws)[2]
+    n_draws <- dim(obj$beta_draws)[3]
+
     #
-    mydata <- obj$data
-    constant <- obj$constant
-    p <- floor(dim(Betas)[1]/dim(Betas)[2])
-    M <- as.numeric(dim(Betas)[2])
-    K <- as.numeric(dim(Betas)[1])
-    keep <- as.numeric(dim(Betas)[3])
-    # 
-    BetaPerm <- aperm(Betas,c(3,1,2))
-    #
+    
+    BetaPerm <- aperm(obj$beta_draws,c(3,1,2))
+    
     CoefLabels<-character(p*M)
     jj <- 1
     for(i in 1:p){
@@ -61,38 +61,49 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             jj = jj + 1
         }
     }
+
+    if (class(varnames) != "character") {
+        varnames <- character(length=M)
+        for (i in 1:M) {  
+            varnames[i] <- paste("VAR",i,sep="")
+        }
+    }
+
     #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
+
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+    
+    if(class(dev.list()) != "NULL"){dev.off()}
+    
     #
+
     CoefCount <- 1
     BinDenom <- 40
     ParamBin <- 1
-    #
-    if(constant==TRUE){
+    
+    if (constant==TRUE) {
         for(i in 1:1){
             if(save==TRUE){cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)}
             pushViewport(viewport(layout=grid.layout(1,M)))
             #
             for(j in 1:M){
-                VarName <- colnames(mydata)[j]
-                #
+                VarName <- varnames[j]
+                
                 CFDF <- data.frame(BetaPerm[,i,j])
                 colnames(CFDF) <- "CFDF"
-                #
+                
                 if(j==1){
-                    if(type==1){
+                    if (type==1) {
                         ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
                         print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
-                    }else{
+                    } else {
                         print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab("Constant") + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
                     }
-                }else{
-                    if(type==1){
+                } else {
+                    if (type==1) {
                         ParamBin <- (max(CFDF) - min(CFDF))/BinDenom
                         print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + geom_histogram(colour="darkred",fill="black",binwidth=ParamBin) + labs(title=paste(VarName)) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(1,j))
-                    }else{
+                    } else {
                         print(ggplot(CFDF,aes(x=CFDF)) + xlab(NULL) + ylab(NULL) + labs(title=paste(VarName)) + geom_density(colour="darkred",fill="red",alpha=0.25),vp = vplayout(1,j))
                     }
                 }
@@ -100,6 +111,9 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             }
             if(save==TRUE){dev.off()}
         }
+
+        #
+
         for(i in 1:p){
             SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
             #
@@ -109,7 +123,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[,((i-1)*M+j+1),l])
                     colnames(CFDF) <- "CFDF"
@@ -157,7 +171,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             }
             if(save==TRUE){dev.off()}
         }
-    }else{
+    } else {
         for(i in 1:p){
             SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
             #
@@ -167,7 +181,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
                     colnames(CFDF) <- "CFDF"
@@ -254,7 +268,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
         pushViewport(viewport(layout=grid.layout(1,M)))
         #
         for(j in 1:M){
-            VarName <- colnames(mydata)[j]
+            VarName <- varnames[j]
             #
             CFDF <- data.frame(PsiPerm[,1,j])
             colnames(CFDF) <- "CFDF"
@@ -288,7 +302,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
         #
         for(j in 1:M){
             for(l in 1:M){
-                VarName <- colnames(mydata)[l]
+                VarName <- varnames[l]
                 #
                 CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
                 colnames(CFDF) <- "CFDF"
@@ -348,8 +362,8 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
         #
         for(j in 1:M){
             for(l in 1:M){
-                VarNameY <- colnames(mydata)[j]
-                VarNameX <- colnames(mydata)[l]
+                VarNameY <- varnames[j]
+                VarNameX <- varnames[l]
                 #
                 SDF <- data.frame(SigmaPerm[,j,l])
                 colnames(SDF) <- "SDF"
@@ -431,7 +445,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             pushViewport(viewport(layout=grid.layout(1,M)))
             #
             for(j in 1:M){
-                VarName <- colnames(mydata)[j]
+                VarName <- varnames[j]
                 #
                 CFDF <- data.frame(BetaPerm[,i,j])
                 colnames(CFDF) <- "CFDF"
@@ -464,7 +478,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[,((i-1)*M+j+1),l])
                     colnames(CFDF) <- "CFDF"
@@ -522,7 +536,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
                     colnames(CFDF) <- "CFDF"
@@ -583,8 +597,8 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
         #
         for(j in 1:M){
             for(l in 1:M){
-                VarNameY <- colnames(mydata)[j]
-                VarNameX <- colnames(mydata)[l]
+                VarNameY <- varnames[j]
+                VarNameX <- varnames[l]
                 #
                 SDF <- data.frame(SigmaPerm[,j,l])
                 colnames(SDF) <- "SDF"
@@ -676,7 +690,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             pushViewport(viewport(layout=grid.layout(1,M)))
             #
             for(j in 1:M){
-                VarName <- colnames(mydata)[j]
+                VarName <- varnames[j]
                 #
                 CFDF <- data.frame(BetaPerm[CTPLower,,i,j],BetaPerm[CTPMid,,i,j],BetaPerm[CTPUpper,,i,j],tau:(kT+tau-1))
                 colnames(CFDF) <- c("CTPL","CTPM","CTPU","Time")
@@ -699,7 +713,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[CTPLower,,((i-1)*M+j+1),l],BetaPerm[CTPMid,,((i-1)*M+j+1),l],BetaPerm[CTPUpper,,((i-1)*M+j+1),l],tau:(kT+tau-1))
                     colnames(CFDF) <- c("CTPL","CTPM","CTPU","Time")
@@ -735,7 +749,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             #
             for(j in 1:M){
                 for(l in 1:M){
-                    VarName <- colnames(mydata)[l]
+                    VarName <- varnames[l]
                     #
                     CFDF <- data.frame(BetaPerm[,((i-1)*M+j),l])
                     colnames(CFDF) <- "CFDF"

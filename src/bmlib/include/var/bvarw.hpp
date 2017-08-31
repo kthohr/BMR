@@ -32,7 +32,7 @@ class bvarw
         int n;          // sample length (aka, 'T')
         int p;          // number of lags
         int M;          // number of endogenous variables
-        int K;          // number of coefficients in each 
+        int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
         arma::mat Y; // Y = X beta + e
@@ -40,7 +40,7 @@ class bvarw
         // arma::mat Z; // vec(Y) = Z alpha + vec(e)
 
         // ML-type estimates
-        
+
         arma::mat alpha_hat;      // OLS estimate of alpha
         arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
 
@@ -62,17 +62,17 @@ class bvarw
 
         arma::cube beta_draws;    // posterior draws of beta
         arma::cube Sigma_draws;   // posterior draws of Sigma
-        
+
         arma::cube irfs;          // irfs based on the posterior draws
 
         // member functions
         ~bvarw(){};
          bvarw(){};
-        
+
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
-        void prior(const arma::vec& coef_prior, const double Xi_beta, const arma::mat& Xi_Sigma, const int gamma);
+        void prior(const arma::vec& coef_prior, const double Xi_beta, const double Xi_Sigma, const int gamma);
         void prior(const arma::vec& coef_prior, const arma::mat& Xi_beta, const arma::mat& Xi_Sigma, const int gamma);
 
         void gibbs(const int n_draws, const int n_burnin);

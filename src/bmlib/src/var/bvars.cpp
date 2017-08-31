@@ -92,13 +92,13 @@ bm::bvars::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
 // prior
 
 void
-bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& psi_prior, const arma::mat& Xi_psi, const int gamma)
+bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& Psi_prior, const double Xi_psi, const int gamma)
 {
     arma::mat Z = arma::join_rows(X,d);
 
     arma::mat var_coefs = arma::solve(Z.t()*Z,Z.t()*Y);
 
-    beta_hat = var_coefs.rows(0,K-1);
+    arma::mat beta_hat = var_coefs.rows(0,K-1);
     arma::mat Phi_hat = var_coefs.rows(K,K+q-1);
 
     arma::mat poly_mat = arma::eye(M,M);
@@ -106,15 +106,16 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
         poly_mat -= beta_hat.rows(M*(i-1),M*i-1);
     }
 
-    Psi_hat = Phi_hat*arma::inv(poly_mat);
+    alpha_hat = arma::vectorise(beta_hat);
+    psi_hat = arma::vectorise(Phi_hat*arma::inv(poly_mat));
 
     arma::mat epsilon = Y - Z*var_coefs;
     Sigma_hat = (epsilon.t() * epsilon) / ((double) (n - p));
 
     //
 
-    psi_pr_mean = arma::vectorise(psi_prior);
-    psi_pr_var = Xi_psi;
+    psi_pr_mean = arma::vectorise(Psi_prior.t());
+    psi_pr_var = Xi_psi*arma::eye(q*M,q*M);
 
     //
 
@@ -157,7 +158,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
     arma::mat inv_psi_pr_var = arma::inv(psi_pr_var);
 
     arma::mat inv_alpha_pr_var = arma::inv(alpha_pr_var);
-    arma::mat beta_b = beta_hat;
+    arma::mat beta_b = arma::reshape(alpha_hat,K,M);
 
     arma::mat Sigma_b = Sigma_hat;
     arma::mat inv_Sigma_b = arma::inv_sympd(Sigma_b);
@@ -180,10 +181,9 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
     arma::mat xi = Y - X*beta_b; // xi = PI(L) x_t
 
     arma::mat psi_pt_var_b  = arma::inv(U.t()*arma::kron(D.t()*D,inv_Sigma_b)*U + inv_psi_pr_var);
-    arma::mat psi_pt_mean_b = psi_pt_var_b*(U.t()*arma::vectorise(D.t()*xi*inv_Sigma_b) + inv_psi_pr_var*psi_pr_mean);
+    arma::mat psi_pt_mean_b = psi_pt_var_b*(U.t()*arma::vectorise(inv_Sigma_b*xi.t()*D) + inv_psi_pr_var*psi_pr_mean);
 
-    arma::mat psi_b = stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b);
-    arma::mat Psi_b = arma::trans(arma::reshape(psi_b,M,q));
+    arma::mat Psi_b = arma::trans(arma::reshape( stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b), M,q));
 
     //
     // beta
@@ -226,8 +226,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
         psi_pt_var_b  = arma::inv(U.t()*arma::kron(D.t()*D,inv_Sigma_b)*U + inv_psi_pr_var);
         psi_pt_mean_b = psi_pt_var_b*(U.t()*arma::vectorise(inv_Sigma_b*xi.t()*D) + inv_psi_pr_var*psi_pr_mean);
 
-        psi_b = stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b);
-        Psi_b = arma::trans(arma::reshape(psi_b,M,q));
+        Psi_b = arma::trans(arma::reshape( stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b), M,q));
 
         //
 

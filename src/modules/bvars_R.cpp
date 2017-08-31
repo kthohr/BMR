@@ -21,65 +21,73 @@
 
 #include "bmr.hpp"
 
-RCPP_MODULE(bvarw_module)
+RCPP_MODULE(bvars_module)
 {
     using namespace Rcpp ;
 
     // function overloading requires some trickery
-    void (bvarw_R::*build_1)(arma::mat,bool,int) = &bvarw_R::build_R;
-    void (bvarw_R::*build_2)(arma::mat,arma::mat,bool,int) = &bvarw_R::build_R;
+    void (bvars_R::*build_1)(arma::mat,bool,int) = &bvars_R::build_R;
+    void (bvars_R::*build_2)(arma::mat,arma::mat,bool,int) = &bvars_R::build_R;
 
-    void (bvarw_R::*prior_3)(arma::vec,double,double,int) = &bvarw_R::prior_R;
+    void (bvars_R::*prior_3)(arma::vec,double,double,arma::mat,double,int) = &bvars_R::prior_R;
 
-    void (bvarw_R::*IRF_1)(int) = &bvarw_R::IRF_R;
+    void (bvars_R::*IRF_1)(int) = &bvars_R::IRF_R;
 
-    SEXP (bvarw_R::*forecast_1)(int, bool) = &bvarw_R::forecast_R;
-    SEXP (bvarw_R::*forecast_2)(arma::mat, int, bool) = &bvarw_R::forecast_R;
+    SEXP (bvars_R::*forecast_1)(int, bool) = &bvars_R::forecast_R;
+    SEXP (bvars_R::*forecast_2)(arma::mat, int, bool) = &bvars_R::forecast_R;
   
     // now we can declare the class
-    class_<bm::bvarw>( "bvarw_cpp" )
+    class_<bm::bvars>( "bvars_cpp" )
         .default_constructor()
 
         // basic objects
-        .field( "cons_term", &bm::bvarw::cons_term )
-        .field( "p", &bm::bvarw::p )
+        .field( "cons_term", &bm::bvars::cons_term )
+        .field( "p", &bm::bvars::p )
 
         // read only objects
-        .field_readonly( "c_int", &bm::bvarw::c_int )
-        .field_readonly( "n", &bm::bvarw::n )
-        .field_readonly( "M", &bm::bvarw::M )
-        .field_readonly( "K", &bm::bvarw::K )
-        .field_readonly( "n_ext_vars", &bm::bvarw::n_ext_vars )
+        .field_readonly( "c_int", &bm::bvars::c_int )
+        .field_readonly( "n", &bm::bvars::n )
+        .field_readonly( "M", &bm::bvars::M )
+        .field_readonly( "K", &bm::bvars::K )
+        .field_readonly( "n_ext_vars", &bm::bvars::n_ext_vars )
 
-        .field_readonly( "alpha_hat", &bm::bvarw::alpha_hat )
-        .field_readonly( "Sigma_hat", &bm::bvarw::Sigma_hat )
+        .field_readonly( "psi_hat", &bm::bvars::alpha_hat )
+        .field_readonly( "alpha_hat", &bm::bvars::alpha_hat )
+        .field_readonly( "Sigma_hat", &bm::bvars::Sigma_hat )
 
-        .field_readonly( "alpha_pr_mean", &bm::bvarw::alpha_pr_mean )
-        .field_readonly( "alpha_pr_var", &bm::bvarw::alpha_pr_var )
+        .field_readonly( "psi_pr_mean", &bm::bvars::psi_pr_mean )
+        .field_readonly( "psi_pr_var", &bm::bvars::psi_pr_var )
 
-        .field_readonly( "Sigma_pr_scale", &bm::bvarw::Sigma_pr_scale )
-        .field_readonly( "Sigma_pr_dof", &bm::bvarw::Sigma_pr_dof )
+        .field_readonly( "alpha_pr_mean", &bm::bvars::alpha_pr_mean )
+        .field_readonly( "alpha_pr_var", &bm::bvars::alpha_pr_var )
 
-        .field_readonly( "alpha_pt_mean", &bm::bvarw::alpha_pt_mean )
-        .field_readonly( "alpha_pt_var", &bm::bvarw::alpha_pt_var )
+        .field_readonly( "Sigma_pr_scale", &bm::bvars::Sigma_pr_scale )
+        .field_readonly( "Sigma_pr_dof", &bm::bvars::Sigma_pr_dof )
 
-        .field_readonly( "Sigma_pt_mean", &bm::bvarw::Sigma_pt_mean )
-        .field_readonly( "Sigma_pt_dof", &bm::bvarw::Sigma_pt_dof )
+        .field_readonly( "psi_pt_mean", &bm::bvars::psi_pt_mean )
+        .field_readonly( "psi_pt_var", &bm::bvars::psi_pt_var )
 
-        .field_readonly( "beta_draws", &bm::bvarw::beta_draws )
-        .field_readonly( "Sigma_draws", &bm::bvarw::Sigma_draws )
+        .field_readonly( "alpha_pt_mean", &bm::bvars::alpha_pt_mean )
+        .field_readonly( "alpha_pt_var", &bm::bvars::alpha_pt_var )
 
-        .field_readonly( "irfs", &bm::bvarw::irfs )
+        .field_readonly( "Sigma_pt_mean", &bm::bvars::Sigma_pt_mean )
+        .field_readonly( "Sigma_pt_dof", &bm::bvars::Sigma_pt_dof )
+
+        .field_readonly( "Psi_draws", &bm::bvars::Psi_draws )
+        .field_readonly( "beta_draws", &bm::bvars::beta_draws )
+        .field_readonly( "Sigma_draws", &bm::bvars::Sigma_draws )
+
+        .field_readonly( "irfs", &bm::bvars::irfs )
     ;
 
-    class_<bvarw_R>( "bvarw" )
-        .derives<bm::bvarw>( "bvarw_cpp" )
+    class_<bvars_R>( "bvars" )
+        .derives<bm::bvars>( "bvars_cpp" )
         .default_constructor()
 
         .method( "build", build_1 )
         .method( "build", build_2 )
         .method( "prior", prior_3 )
-        .method( "gibbs", &bvarw_R::gibbs_R )
+        .method( "gibbs", &bvars_R::gibbs_R )
         .method( "IRF", IRF_1 )
         .method( "forecast", forecast_1 )
         .method( "forecast", forecast_2 )
@@ -89,7 +97,7 @@ RCPP_MODULE(bvarw_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void bvarw_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
+void bvars_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,cons_term_inp,p_inp);
@@ -100,7 +108,7 @@ void bvarw_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
     }
 }
 
-void bvarw_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp)
+void bvars_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
@@ -111,10 +119,10 @@ void bvarw_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp
     }
 }
 
-void bvarw_R::prior_R(arma::vec coef_prior, double Xi_beta, double Xi_Sigma, int gamma)
+void bvars_R::prior_R(arma::vec coef_prior, double HP_1, double HP_2, arma::mat Psi_prior, double Xi_psi, int gamma)
 {
     try {
-        this->prior(coef_prior,Xi_beta,Xi_Sigma,gamma);
+        this->prior(coef_prior,HP_1,HP_2,Psi_prior,Xi_psi,gamma);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
@@ -122,7 +130,7 @@ void bvarw_R::prior_R(arma::vec coef_prior, double Xi_beta, double Xi_Sigma, int
     }
 }
 
-void bvarw_R::gibbs_R(int n_draws, int n_burnin)
+void bvars_R::gibbs_R(int n_draws, int n_burnin)
 {
     try {
         this->gibbs(n_draws,n_burnin);
@@ -133,7 +141,7 @@ void bvarw_R::gibbs_R(int n_draws, int n_burnin)
     }
 }
 
-void bvarw_R::IRF_R(int n_irf_periods)
+void bvars_R::IRF_R(int n_irf_periods)
 {
     try {
         this->IRF(n_irf_periods);
@@ -144,7 +152,7 @@ void bvarw_R::IRF_R(int n_irf_periods)
     }
 }
 
-SEXP bvarw_R::forecast_R(int n_horizon, bool incl_shocks)
+SEXP bvars_R::forecast_R(int n_horizon, bool incl_shocks)
 {
     try {
         arma::cube fcast_res = this->forecast(n_horizon,incl_shocks);
@@ -158,7 +166,7 @@ SEXP bvarw_R::forecast_R(int n_horizon, bool incl_shocks)
     return R_NilValue;
 }
 
-SEXP bvarw_R::forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks)
+SEXP bvars_R::forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks)
 {
     try {
         arma::cube fcast_res = this->forecast(Y_T,n_horizon,incl_shocks);
