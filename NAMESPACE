@@ -1,9 +1,6 @@
 useDynLib(BMR.Rcpp)
 
 importFrom(Rcpp, evalCpp)
-import(doParallel)
-import(foreach)
-importFrom(parallel, makeCluster, stopCluster)
 import(ggplot2)
 importFrom(grid, grid.newpage, viewport, pushViewport, grid.layout)
 importFrom("grDevices", "cairo_ps", "dev.list", "dev.off")
@@ -11,58 +8,27 @@ importFrom("stats", "acf", "dbeta", "dgamma", "dnorm", "dunif",
            "embed", "optim", "pacf", "qnorm", "rnorm", "runif", "sd",
            "var")
 
-exportClasses("BVARM")
-exportClasses("BVARS")
-exportClasses("BVARW")
-exportClasses("CVAR")
-exportClasses("BVARTVP")
+exportClasses("Rcpp_bvarm")
+exportClasses("Rcpp_bvars")
+exportClasses("Rcpp_bvars")
+exportClasses("Rcpp_cvar")
+exportClasses("Rcpp_bvartvp")
 
-exportClasses("SDSGE")
-exportClasses("gensys")
-exportClasses("uhlig")
-
-exportClasses("EDSGE")
-exportClasses("DSGEVAR")
-
-export(BVARM,BVARS,BVARW,CVAR,BVARTVP,gensys,uhlig,SDSGE,DSGESim,EDSGE,DSGEVAR,IRF,forecast,statespace,modecheck,states,prior,stationarity,gtsplot,gacf,gpacf)
+export(IRF,forecast,modecheck,prior,stationarity,gtsplot,gacf,gpacf)
 
 exportPattern("^[[:alpha:]]+")
 
-S3method(BVARM,default)
-S3method(BVARS,default)
-S3method(BVARW,default)
-S3method(BVARTVP,default)
-S3method(CVAR,default)
-S3method(gensys,default)
-S3method(uhlig,default)
-S3method(SDSGE,default)
-S3method(EDSGE,default)
-S3method(DSGEVAR,default)
-
-S3method(plot, BVARM)
-S3method(plot, BVARS)
-S3method(plot, BVARW)
-S3method(plot, BVARTVP)
+S3method(plot, Rcpp_bvarm)
+S3method(plot, Rcpp_bvars)
+S3method(plot, Rcpp_bvarw)
+S3method(plot, Rcpp_bvartvp)
 S3method(plot, EDSGE)
 S3method(plot, DSGEVAR)
 
-S3method(forecast, BVARM)
-S3method(forecast, BVARS)
-S3method(forecast, BVARW)
-S3method(forecast, CVAR)
-S3method(forecast, EDSGE)
-S3method(forecast, DSGEVAR)
+S3method(forecast, Rcpp_bvarm)
+S3method(forecast, Rcpp_bvars)
+S3method(forecast, Rcpp_bvarw)
+S3method(forecast, Rcpp_cvar)
 
 S3method(modecheck, EDSGE)
 S3method(modecheck, DSGEVAR)
-
-S3method(states, EDSGE)
-S3method(states, DSGEVAR)
-
-S3method(statespace, gensys)
-S3method(statespace, uhlig)
-S3method(statespace, SDSGE)
-
-S3method(DSGESim, gensys)
-S3method(DSGESim, uhlig)
-S3method(DSGESim, SDSGE)

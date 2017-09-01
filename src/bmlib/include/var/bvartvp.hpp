@@ -32,7 +32,7 @@ class bvartvp
         int n;          // sample length (aka, 'T')
         int p;          // number of lags
         int M;          // number of endogenous variables
-        int K;          // number of coefficients in each 
+        int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
         int tau;        // training sample length
@@ -41,12 +41,12 @@ class bvartvp
         arma::mat Z;
 
         // ML-type estimates
-        arma::mat beta_hat;       // OLS estimate of beta
+        arma::mat alpha_hat;      // OLS estimate of alpha
         arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
 
         // prior data
-        arma::mat beta_pr_mean;   // prior mean
-        arma::mat beta_pr_var;    // prior variance
+        arma::mat alpha_pr_mean;  // prior mean
+        arma::mat alpha_pr_var;   // prior variance
 
         arma::mat Q_pr_scale;     // prior scale matrix
         int Q_pr_dof;             // prior degrees of freedom
@@ -55,38 +55,40 @@ class bvartvp
         int Sigma_pr_dof;         // prior degrees of freedom
 
         // posterior data
-        arma::mat beta_pt_mean;   // posterior mean
-
-        int Sigma_pt_dof;         // posterior degrees of freedom
-        arma::mat Sigma_pt_mean;  // posterior mean
+        arma::mat alpha_pt_mean;  // posterior mean
 
         int Q_pt_dof;             // posterior degrees of freedom
         arma::mat Q_pt_mean;      // posterior mean
 
-        arma::cube beta_draws;    // posterior draws of beta
+        int Sigma_pt_dof;         // posterior degrees of freedom
+        arma::mat Sigma_pt_mean;  // posterior mean
+
+        arma::cube alpha_draws;   // posterior draws of alpha
         arma::cube Q_draws;       // posterior draws of Q
         arma::cube Sigma_draws;   // posterior draws of Sigma
-        
+
         arma::cube irfs;          // irfs based on the posterior draws
 
         // member functions
         ~bvartvp(){};
          bvartvp(){};
-        
-        void build(const arma::mat& data_raw);
+
+        void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         // void build(const arma::mat& data_raw, const arma::mat& data_ext);
+
+        void reset_draws();
 
         void prior(const int tau_inp, const double Xi_beta, const double Xi_Q, const int gamma_Q, const double Xi_Sigma, const int gamma_S);
 
         void gibbs(const int n_draws, const int n_burnin);
 
-        void IRF(const int n_irf_periods);
+        void IRF(const int n_irf_periods, const int time_ind);
 
         arma::cube forecast(const int horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);
 
     private:
-        void build_int(const arma::mat& data_raw);
+        void build_int(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
 };
 

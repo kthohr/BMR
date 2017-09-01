@@ -1,43 +1,70 @@
 #
 # BVAR with normal-inverse-Wishart prior
 # 
+
 rm(list=ls())
-library(BMR)
+library(BMR.Rcpp)
+
 #
+
 data(BMRVARData)
-USMacroData<-USMacroData[,2:4]
+USMacroData <- USMacroData[,2:4]
+bvar_data <- matrix(c(as.matrix(USMacroData)),ncol=3)
+
 #
-mycfp <- c(0.9,0.9,0.9)
+
+coef_prior <- c(0.9,0.9,0.9)
+XiBeta <- 4
+XiSigma <- 1
+gamma = 4
+
+bvar_obj = new(bvarw)
+
 #
 # Different p
-#
-testbvarw <- BVARW(USMacroData,1,mycfp,p=1,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL)
-testbvarw <- suppressMessages(BVARW(USMacroData,1,mycfp,p=1,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL))
-plot(testbvarw,save=F)
-IRF(testbvarw,save=F)
-forecast(testbvarw,periods=10,shocks=T,backdata=10,save=F)
-#
-testbvarw <- BVARW(USMacroData,1,mycfp,p=2,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL)
-plot(testbvarw,save=F)
-IRF(testbvarw,save=F)
-forecast(testbvarw,periods=10,shocks=T,backdata=10,save=F)
-#
-testbvarw <- BVARW(USMacroData,1,mycfp,p=3,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL)
-plot(testbvarw,save=F)
-IRF(testbvarw,save=F)
-forecast(testbvarw,periods=10,shocks=T,backdata=10,save=F)
-#
-testbvarw <- BVARW(USMacroData,1,mycfp,p=4,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL)
-plot(testbvarw,save=F)
-IRF(testbvarw,save=F)
-forecast(testbvarw,periods=10,shocks=T,backdata=10,save=F)
-#
-# 2 cores
-#
-testbvarw <- BVARW(USMacroData,cores=2,mycfp,p=4,constant=T,irf.periods=20,keep=10000,burnin=5000,XiBeta=4,XiSigma=1,gamma=NULL)
-plot(testbvarw,save=F)
-IRF(testbvarw,save=F)
-forecast(testbvarw,periods=10,shocks=T,backdata=10,save=F)
-#
+
+# p = 1
+
+bvar_obj$build(bvar_data,TRUE,1)
+bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 2
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,2)
+bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 3
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,3)
+bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 4
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,4)
+bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
 #
 #END

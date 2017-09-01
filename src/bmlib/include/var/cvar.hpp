@@ -32,23 +32,25 @@ class cvar
         int K;          // number of coefficients in each 
         int n_ext_vars; // number of 'external' variables
 
-        arma::mat Y; // Y = X beta + e
+        arma::mat Y;    // Y = X beta + e
         arma::mat X;
 
-        arma::mat beta_hat;       // OLS estimate of beta
-        arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
+        arma::mat beta_hat;      // OLS estimate of beta
+        arma::mat Sigma_hat;     // OLS-based estimation of covariance matrix of 'e'
 
-        arma::cube beta_draws;    // bootstrap draws of beta
-        arma::cube Sigma_draws;   // bootstrap draws of beta
+        arma::cube beta_draws;   // bootstrap draws of beta
+        arma::cube Sigma_draws;  // bootstrap draws of beta
         
-        arma::cube irfs;          // irfs based on the bootstrap draws
+        arma::cube irfs;         // irfs based on the bootstrap draws
 
         // member functions
         ~cvar(){};
          cvar(){};
         
-        void build(const arma::mat& data_raw);
-        void build(const arma::mat& data_raw, const arma::mat& data_ext);
+        void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
+        void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
+
+        void reset_draws();
 
         void estim();
 
@@ -60,6 +62,6 @@ class cvar
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);
 
     private:
-        void build_int(const arma::mat& data_raw, const arma::mat* data_ext);
+        void build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp);
         arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
 };

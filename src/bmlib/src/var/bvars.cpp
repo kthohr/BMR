@@ -89,10 +89,31 @@ bm::bvars::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
 }
 
 //
+// reset
+
+void
+bm::bvars::reset_draws()
+{
+    psi_pt_mean.reset();
+    psi_pt_var.reset();
+
+    alpha_pt_mean.reset();
+    alpha_pt_var.reset();
+
+    Sigma_pt_mean.reset();
+
+    Psi_draws.reset();
+    beta_draws.reset();
+    Sigma_draws.reset();
+
+    irfs.reset();
+}
+
+//
 // prior
 
 void
-bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& Psi_prior, const double Xi_psi, const int gamma)
+bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_2, const arma::mat& Psi_prior, const double Xi_psi, const int gamma)
 {
     arma::mat Z = arma::join_rows(X,d);
 
@@ -127,13 +148,18 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
 
     alpha_pr_mean = arma::vectorise(beta_pr_mean);
 
-    arma::mat beta_pr_var = arma::zeros(K,K);
+    arma::mat beta_pr_var = arma::zeros(K,M);
 
-    for (int i=1; i<=p; i++) {
-        beta_pr_var(arma::span(M*(i-1),M*i-1),arma::span(M*(i-1),M*i-1)) = HP_1 * std::pow(i,-HP_4) * arma::eye(M,M);
+    for (int i=0; i < p; i++) {
+        for (int j=0; j < M; j++) {
+            for (int k=0; k < M; k++) {
+                beta_pr_var(i*M + k,j) = HP_2*Sigma_hat(j,j) / (std::pow(i+1,2)*Sigma_hat(k,k));
+            }
+            beta_pr_var(i*M + j,j) = HP_1 / std::pow(i+1,2);
+        }
     }
 
-    alpha_pr_var = arma::kron(Sigma_hat,beta_pr_var);
+    alpha_pr_var = arma::diagmat(arma::vectorise(beta_pr_var));
 
     //
 
@@ -277,7 +303,9 @@ bm::bvars::IRF(const int n_irf_periods)
     arma::mat Sigma_b, impact_mat;
 
     irfs.set_size(M, M, n_irf_periods*n_draws);
+
     //
+    
     arma::mat impact_mat_b(K_adj,M);
     arma::mat impact_mat_h(M,M);
 
@@ -285,8 +313,10 @@ bm::bvars::IRF(const int n_irf_periods)
         arma::mat beta_b = beta_draws(arma::span(0,K_adj-1),arma::span(),arma::span(j-1,j-1));
 
         Sigma_b = Sigma_draws.slice(j-1);
-        impact_mat = arma::trans(arma::chol(Sigma_b));
+        impact_mat = arma::chol(Sigma_b,"lower");
+
         //
+
         impact_mat_b.zeros();
         impact_mat_b.rows(0,M-1) = impact_mat;
 
@@ -316,46 +346,61 @@ bm::bvars::forecast(const int horizon, const bool incl_shocks)
 }
 
 arma::cube
-bm::bvars::forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks)
+bm::bvars::forecast(const arma::mat& X_T, const int horizon, const bool incl_shocks)
 {
-    return this->forecast_int(&Y_T,horizon,incl_shocks);
+    return this->forecast_int(&X_T,horizon,incl_shocks);
 }
 
 arma::cube
-bm::bvars::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks)
+bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K;
 
     arma::mat Psi_b(q,M), beta_b(K_adj,M), Sigma_b(M,M);       // bth draw
 
-    arma::mat Y_T = (Y_T_inp) ? *Y_T_inp : arma::join_rows(Y.row(Y.n_rows-1),X(X.n_rows-1,arma::span(0,K_adj-M-1)));
-    arma::mat Y_Th = Y_T;
+    arma::mat X_T;
+    if (X_T_inp) {
+        X_T = *X_T_inp;
+    } else {
+        X_T = X.row(X.n_rows-1);
+
+        if (K_adj > M) {
+            X_T.cols(M,K_adj-1) = X_T.cols(0,K_adj-M-1);
+        }
+
+        X_T.cols(0,M-1) = Y.row(Y.n_rows-1);
+    }
+    
+    arma::mat X_Th = X_T;
 
     arma::mat D_T = D.row(D.n_rows-1);
 
     arma::mat Y_forecast(horizon,M);
     arma::cube forecast_mat(horizon, M, n_draws);
+
     //
+
     if (incl_shocks) {
         for (int i=0; i<n_draws; i++) {
             Psi_b   = Psi_draws.slice(i);
             beta_b  = beta_draws.slice(i);
             Sigma_b = Sigma_draws.slice(i);
 
-            arma::mat D_term = D_T*arma::kron(arma::eye(p+1,p+1),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b);
+            // arma::mat D_term = D_T*arma::kron(arma::eye(q*(p+1),q*(p+1)),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b); // Keith: check this
+            arma::mat D_term = D_T*arma::kron(arma::eye(p+1,p+1),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b); // Keith: check this
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
+            X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b + D_term + arma::trans(stats::rmvnorm(Sigma_b));
+                Y_forecast.row(j-1) = X_Th*beta_b + D_term + arma::trans(stats::rmvnorm(Sigma_b));
 
                 if (K_adj > M) {
-                    Y_Th(0,arma::span(M,K_adj-1)) = Y_Th(0,arma::span(0,K_adj-M-1));
+                    X_Th(0,arma::span(M,K_adj-1)) = X_Th(0,arma::span(0,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
             }
             //
             forecast_mat.slice(i) = Y_forecast;
@@ -368,16 +413,16 @@ bm::bvars::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool 
             arma::mat D_term = D_T*arma::kron(arma::eye(p+1,p+1),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b);
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
+            X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b + D_term;
+                Y_forecast.row(j-1) = X_Th*beta_b + D_term;
 
                 if (K_adj > M) {
-                    Y_Th(0,arma::span(M,K_adj-1)) = Y_Th(0,arma::span(0,K_adj-M-1));
+                    X_Th(0,arma::span(M,K_adj-1)) = X_Th(0,arma::span(0,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
             }
             //
             forecast_mat.slice(i) = Y_forecast;

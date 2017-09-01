@@ -58,7 +58,7 @@ bm::bvarm::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
     //
 
     arma::mat data_lagged = embed(data_raw,p);
-    
+
     Y = data_lagged.cols(0,M-1);
 
     if (cons_term) {
@@ -80,7 +80,20 @@ bm::bvarm::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
 }
 
 //
-// prior 
+// reset
+
+void
+bm::bvarm::reset_draws()
+{
+    alpha_pt_mean.reset();
+    alpha_pt_var.reset();
+
+    beta_draws.reset();
+    irfs.reset();
+}
+
+//
+// prior
 
 void
 bm::bvarm::prior(const arma::vec& coef_prior, double HP_1_inp, double HP_2_inp, double HP_3_inp)
@@ -116,13 +129,13 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
 
     var_type   = (var_type_inp) ? *var_type_inp : 1;
     decay_type = (decay_type_inp) ? *decay_type_inp : 1;
-    
+
     //
     // OLS
 
     arma::mat beta_hat = arma::solve(X.t()*X,X.t()*Y);
     alpha_hat = arma::vectorise(beta_hat);
-    
+
     arma::mat beta_pr_mean = arma::zeros(K,M);
 
     for (int i=0; i<M; i++) {
@@ -149,7 +162,7 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
         for (int j=0; j < p; j++) {
             X_AR.col(c_int + j) = X.col(c_int + i + j*M);
         }
-        
+
         alpha_AR = arma::solve(X_AR.t()*X_AR,X_AR.t()*Y_AR);
 
         // ML estimate of the variance (no bias adjustment)
@@ -159,17 +172,17 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
 
     //
     // prior variance setup
-    
+
     arma::mat beta_pr_var = arma::zeros(K,M);
 
     if (var_type==1) { // variance type 1
         if (cons_term) {
             beta_pr_var.row(0) = sigma.t() * HP_3;
         }
-        
-        for (int i=0; i<p; i++) {
-            for (int j=0; j<M; j++) {
-                for (int k=0; k<M; k++) {
+
+        for (int i=0; i < p; i++) {
+            for (int j=0; j < M; j++) {
+                for (int k=0; k < M; k++) {
                     beta_pr_var(i*M + k + c_int,j) = HP_2*sigma(j) / (std::pow(i+1,2)*sigma(k));
                 }
                 beta_pr_var(i*M + j + c_int,j) = HP_1 / std::pow(i+1,2);
@@ -185,8 +198,8 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
         }
 
         double decay_i;
-        
-        for (int i=0; i<p; i++) {
+
+        for (int i=0; i < p; i++) {
             if (decay_type==1) {
                 decay_i = decay_geo((double) i, HP_4);
             } else if (decay_type==2) {
@@ -229,7 +242,7 @@ bm::bvarm::gibbs(const int n_draws)
     arma::mat inv_Sigma_hat = arma::inv(Sigma_hat);
     //
     arma::mat inv_alpha_pr_var = arma::inv(alpha_pr_var);
-    
+
     alpha_pt_var = arma::inv_sympd(inv_alpha_pr_var + arma::kron(inv_Sigma_hat,X.t()*X));
     alpha_pt_mean = alpha_pt_var * (inv_alpha_pr_var*alpha_pr_mean + arma::vectorise(X.t() * Y * inv_Sigma_hat));
     //
@@ -266,11 +279,11 @@ bm::bvarm::IRF_int(const int n_irf_periods, const arma::mat* impact_mat_inp)
     /*
      * impact_mat should be lower triangular
      */
-    
+
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
 
-    arma::mat impact_mat = (impact_mat_inp) ? *impact_mat_inp : arma::trans(arma::chol(Sigma_hat));
+    arma::mat impact_mat = (impact_mat_inp) ? *impact_mat_inp : arma::chol(Sigma_hat,"lower");
 
     //
 
@@ -313,21 +326,33 @@ bm::bvarm::forecast(const int horizon, const bool incl_shocks)
 }
 
 arma::cube
-bm::bvarm::forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks)
+bm::bvarm::forecast(const arma::mat& X_T, const int horizon, const bool incl_shocks)
 {
-    return this->forecast_int(&Y_T,horizon,incl_shocks);
+    return this->forecast_int(&X_T,horizon,incl_shocks);
 }
 
 arma::cube
-bm::bvarm::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks)
+bm::bvarm::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
-    
+
     arma::mat beta_b(K_adj,M); // bth draw
 
-    arma::mat Y_T = (Y_T_inp) ? *Y_T_inp : arma::join_rows(Y.row(Y.n_rows-1),X(X.n_rows-1,arma::span(0,K_adj-M-1)));
-    arma::mat Y_Th = Y_T;
+    arma::mat X_T;
+    if (X_T_inp) {
+        X_T = *X_T_inp;
+    } else {
+        X_T = X.row(X.n_rows-1);
+
+        if (K_adj > M + c_int) {
+            X_T.cols(c_int+M,K_adj-1) = X_T.cols(c_int,K_adj-M-1);
+        }
+
+        X_T.cols(c_int,c_int+M-1) = Y.row(Y.n_rows-1);
+    }
+    
+    arma::mat X_Th = X_T;
 
     arma::mat Y_forecast(horizon,M);
     arma::cube forecast_cube(horizon, M, n_draws);
@@ -339,16 +364,16 @@ bm::bvarm::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool 
             beta_b = beta_draws.slice(i);
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
-            
+            X_Th = X_T;
+
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b + arma::trans(stats::rmvnorm(chol_shock_cov,true));
+                Y_forecast.row(j-1) = X_Th*beta_b + arma::trans(stats::rmvnorm(chol_shock_cov,true));
 
                 if (K_adj > M + c_int) {
-                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                    X_Th(0,arma::span(M+c_int,K_adj-1)) = X_Th(0,arma::span(c_int,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
             }
             //
             forecast_cube.slice(i) = Y_forecast;
@@ -358,16 +383,16 @@ bm::bvarm::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool 
             beta_b = beta_draws.slice(i);
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
+            X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b;
+                Y_forecast.row(j-1) = X_Th*beta_b;
 
                 if (K_adj > M + c_int) {
-                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                    X_Th(0,arma::span(M+c_int,K_adj-1)) = X_Th(0,arma::span(c_int,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
             }
             //
             forecast_cube.slice(i) = Y_forecast;

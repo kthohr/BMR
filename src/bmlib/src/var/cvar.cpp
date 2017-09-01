@@ -26,22 +26,25 @@
 // data and basic setup
 
 void
-bm::cvar::build(const arma::mat& data_raw)
+bm::cvar::build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp)
 {
-    this->build_int(data_raw,nullptr);
+    this->build_int(data_raw,nullptr,cons_term_inp,p_inp);
 }
 
 void
-bm::cvar::build(const arma::mat& data_raw, const arma::mat& data_ext)
+bm::cvar::build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp)
 {
-    this->build_int(data_raw,&data_ext);
+    this->build_int(data_raw,&data_ext,cons_term_inp,p_inp);
 }
 
 void
-bm::cvar::build_int(const arma::mat& data_raw, const arma::mat* data_ext)
+bm::cvar::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp)
 {
     // data_raw is a n x M matrix with 'endogenous' variables
     // data_ext is a n x n_ext_vars matrix with 'exogenous' variables
+
+    cons_term = cons_term_inp;
+    p = p_inp;
 
     c_int = !!cons_term;
 
@@ -51,7 +54,9 @@ bm::cvar::build_int(const arma::mat& data_raw, const arma::mat* data_ext)
     n_ext_vars = (data_ext) ? data_ext->n_cols : 0;
 
     K = c_int + M*p + n_ext_vars;
+
     //
+
     arma::mat data_lagged = embed(data_raw,p);
     
     Y = data_lagged.cols(0,M-1);
@@ -61,14 +66,27 @@ bm::cvar::build_int(const arma::mat& data_raw, const arma::mat* data_ext)
     } else {
         X = data_lagged.cols(M,data_lagged.n_cols-1);
     }
+
     //
+
     if (data_ext && (n_ext_vars > 0)) {
         arma::mat X_ext = *data_ext;
         X_ext.shed_rows(0,p-1);
 
         X = arma::join_rows(X,X_ext);
     }
-    //
+}
+
+//
+// reset
+
+void
+bm::cvar::reset_draws()
+{
+    beta_draws.reset();
+    Sigma_draws.reset();
+
+    irfs.reset();
 }
 
 //
@@ -81,7 +99,7 @@ bm::cvar::estim()
     beta_hat = arma::solve(X.t()*X,X.t()*Y);
     
     const arma::mat epsilon = Y - X*beta_hat;
-    Sigma_hat = epsilon.t() * epsilon / ((double) n - p); // MLE (not bias-corrected)
+    Sigma_hat = epsilon.t() * epsilon / ((double) (n - p)); // MLE (not bias-corrected)
     //
 }
 
@@ -116,18 +134,25 @@ bm::cvar::boot(const int n_draws)
     arma::mat X_b = X;
 
     arma::mat X_t_block;
+
     //
+    // begin loop
+
     for (int i=0; i < n_draws; i++) {
         sampling_vec = arma::randi(n - p, arma::distr_param(0,n-p-1));
         eps_sample = arma::conv_to<arma::uvec>::from(sampling_vec);
         epsilon_b = epsilon_hat.rows(eps_sample);
         
         X_t_block = X.row(0);
+
         //
-        for (int j=0; j < n-p; j++) {
+
+        for (int j=0; j < (n - p); j++) {
             X_b.row(j) = X_t_block;
             Y_b.row(j) = X_t_block * beta_hat + epsilon_b.row(j);
+
             //
+
             if (K_adj > M + c_int) {
                 X_t_block(0,arma::span(M+c_int,K_adj-1)) = X_t_block(0,arma::span(c_int,K_adj-M-1));
             }
@@ -138,12 +163,16 @@ bm::cvar::boot(const int n_draws)
 
             X_t_block(0,arma::span(c_int,M-1+c_int)) = Y_b.row(j);
         }
+
         //
+
         beta_b = arma::solve(X_b.t()*X_b,X_b.t()*Y_b);
         
         epsilon_b = Y_b - X_b * beta_b;
         Sigma_b = epsilon_b.t()*epsilon_b / ((double) n-p); // MLE (not bias-corrected)
+
         //
+
         beta_draws.slice(i)  = beta_b;
         Sigma_draws.slice(i) = Sigma_b;
     }
@@ -162,20 +191,26 @@ bm::cvar::IRF(const int n_irf_periods)
     arma::mat Sigma_b, impact_mat;
     
     irfs.set_size(M, M, n_irf_periods*n_draws);
+
     //
+    
     arma::mat beta_b(K_adj-c_int,M);        // b'th draw, minus coefficients on any external variables 
     arma::mat beta_b_trans(K_adj-c_int,M); 
 
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
+
     //
+
     for (int j=1; j<=n_draws; j++) {
         beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1));
         beta_b_trans = beta_b.t();
 
         Sigma_b = Sigma_draws.slice(j-1);
-        impact_mat = arma::trans(arma::chol(Sigma_b));
+        impact_mat = arma::chol(Sigma_b,"lower");
+
         //
+
         impact_mat_b.zeros();
         impact_mat_b.rows(0,M-1) = impact_mat;
 

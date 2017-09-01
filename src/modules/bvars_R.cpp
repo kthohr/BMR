@@ -51,6 +51,9 @@ RCPP_MODULE(bvars_module)
         .field_readonly( "K", &bm::bvars::K )
         .field_readonly( "n_ext_vars", &bm::bvars::n_ext_vars )
 
+        .field_readonly( "Y", &bm::bvars::Y )
+        .field_readonly( "X", &bm::bvars::X )
+
         .field_readonly( "psi_hat", &bm::bvars::alpha_hat )
         .field_readonly( "alpha_hat", &bm::bvars::alpha_hat )
         .field_readonly( "Sigma_hat", &bm::bvars::Sigma_hat )
@@ -86,6 +89,7 @@ RCPP_MODULE(bvars_module)
 
         .method( "build", build_1 )
         .method( "build", build_2 )
+        .method( "reset_draws", &bvars_R::reset_draws_R )
         .method( "prior", prior_3 )
         .method( "gibbs", &bvars_R::gibbs_R )
         .method( "IRF", IRF_1 )
@@ -112,6 +116,17 @@ void bvars_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+void bvars_R::reset_draws_R()
+{
+    try {
+        this->reset_draws();
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

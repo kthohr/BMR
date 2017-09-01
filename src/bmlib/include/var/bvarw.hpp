@@ -72,6 +72,8 @@ class bvarw
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
+        void reset_draws();
+
         void prior(const arma::vec& coef_prior, const double Xi_beta, const double Xi_Sigma, const int gamma);
         void prior(const arma::vec& coef_prior, const arma::mat& Xi_beta, const arma::mat& Xi_Sigma, const int gamma);
 

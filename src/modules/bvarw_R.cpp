@@ -51,6 +51,9 @@ RCPP_MODULE(bvarw_module)
         .field_readonly( "K", &bm::bvarw::K )
         .field_readonly( "n_ext_vars", &bm::bvarw::n_ext_vars )
 
+        .field_readonly( "Y", &bm::bvarw::Y )
+        .field_readonly( "X", &bm::bvarw::X )
+
         .field_readonly( "alpha_hat", &bm::bvarw::alpha_hat )
         .field_readonly( "Sigma_hat", &bm::bvarw::Sigma_hat )
 
@@ -78,6 +81,7 @@ RCPP_MODULE(bvarw_module)
 
         .method( "build", build_1 )
         .method( "build", build_2 )
+        .method( "reset_draws", &bvarw_R::reset_draws_R )
         .method( "prior", prior_3 )
         .method( "gibbs", &bvarw_R::gibbs_R )
         .method( "IRF", IRF_1 )
@@ -104,6 +108,17 @@ void bvarw_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+void bvarw_R::reset_draws_R()
+{
+    try {
+        this->reset_draws();
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

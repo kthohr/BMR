@@ -440,7 +440,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
         arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables 
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
-        arma::mat impact_mat = arma::trans(arma::chol(Sigma_b));
+        arma::mat impact_mat = arma::chol(Sigma_b,"lower");
 
         // adjust the impact matrix
 
@@ -451,7 +451,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
 
         dsge_obj_copy.state_space(dsge_obj_copy.kalman_mat_F,G_state);
 
-        arma::mat dsge_obs_impact = dsge_obj_copy.kalman_mat_H.t() * G_state*arma::trans(arma::chol(shocks_cov));
+        arma::mat dsge_obs_impact = dsge_obj_copy.kalman_mat_H.t() * G_state*arma::chol(shocks_cov,"lower");
 
         arma::mat Q_dcm, R_dcm;
         arma::qr(Q_dcm,R_dcm,dsge_obs_impact);
