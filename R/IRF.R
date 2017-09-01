@@ -1,6 +1,7 @@
 ################################################################################
 ##
-##   R package BMR by Keith O'Hara Copyright (C) 2011-2016
+##   Copyright (C) 2011-2017 Keith O'Hara
+##
 ##   This file is part of the R package BMR.
 ##
 ##   The R package BMR is free software: you can redistribute it and/or modify
@@ -15,30 +16,25 @@
 ##
 ################################################################################
 
-IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13)
+IRF.Rcpp_bvarm <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    obj_class <- class(obj)[1]
-
-    if (obj_class == "Rcpp_bvarm_R" || obj_class == "Rcpp_bvars_R" || obj_class == "Rcpp_bvarw_R" || obj_class == "Rcpp_cvar_R") {
-        .irfbvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
-    }
+    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
 }
 
-# IRF.Rcpp_bvarm_R <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-#     .irfbvarm(obj,periods,percentiles,which_shock,which_response,save,height,width)
-# }
+IRF.Rcpp_bvars <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+{
+    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+}
 
-# IRF.BVARS <- function(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
-#     .irfbvars(obj,percentiles,save,height,width)
-# }
+IRF.Rcpp_bvarw <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+{
+    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+}
 
-# IRF.BVARW <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-#     .irfbvarw(obj,periods,percentiles,which_shock,which_response,save,height,width)
-# }
-
-# IRF.CVAR <- function(obj,periods=10,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...){
-#     .irfcvar(obj,periods,percentiles,which_shock,which_response,save,height,width)
-# }
+IRF.Rcpp_cvar <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+{
+    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+}
 
 # IRF.BVARTVP <- function(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
 #     .irfbvartvp(obj,whichirfs,percentiles,save,height,width)
@@ -65,11 +61,11 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
 # }
 
 
-.irfbvar <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
+.irfvar <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13){
     #
-
+    
     if (periods <= 0) {
-        stop("need periods > 0")
+        stop("error: need periods > 0")
     }
 
     #
@@ -83,15 +79,15 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
 
     # put the IRFs in a tesseract-type format
 
-    #irf_temp <- obj$irfs
+    irf_temp <- obj$irfs # make a copy; much faster than accessing IRFs slice-by-slice in the loop below
     irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
 
     for(i in 1:n_draws){
-        #irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
-        irf_tess[,,,i] <- obj$irfs[,,((i-1)*periods+1):(i*periods)]
+        # irf_tess[,,,i] <- obj$irfs[,,((i-1)*periods+1):(i*periods)]
+        irf_tess[,,,i] <- irf_temp[,,((i-1)*periods+1):(i*periods)]
     }
 
-    #rm("irf_temp")
+    rm("irf_temp")
 
     irf_tess <- apply(irf_tess,c(3,1,2),sort)
     irf_tess <- aperm(irf_tess,c(2,3,1,4))
@@ -144,6 +140,7 @@ IRF <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_sh
     IRFL <- IRFM <- IRFU <- Time <- NULL # CRAN check workaround
     
     if (n_response == M && n_shocks == M) {
+
         if(class(dev.list()) != "NULL"){dev.off()}
         if(save==TRUE){cairo_ps(filename="IRFs.eps",height=height,width=width)}
         

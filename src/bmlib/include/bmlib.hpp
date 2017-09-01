@@ -28,8 +28,10 @@
 namespace bm
 {
     #include "misc/bind.hpp"
+    #include "misc/byrow.hpp"
     #include "misc/cube_to_mat.hpp"
     #include "misc/embed.hpp"
+    #include "misc/inside_trans.hpp"
     #include "misc/log_GPR.hpp"
     #include "misc/lyapunov_dbl.hpp"
     #include "misc/uvec_linspace.hpp"

@@ -80,6 +80,23 @@ bm::bvarw::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
 }
 
 //
+// reset
+
+void
+bm::bvarw::reset_draws()
+{
+    alpha_pt_mean.reset();
+    alpha_pt_var.reset();
+
+    Sigma_pt_mean.reset();
+
+    beta_draws.reset();
+    Sigma_draws.reset();
+
+    irfs.reset();
+}
+
+//
 // prior
 
 void
@@ -192,7 +209,9 @@ bm::bvarw::IRF(const int n_irf_periods)
     const int K_adj = K - n_ext_vars;
 
     irfs.set_size(M, M, n_irf_periods*n_draws);
+
     //
+    
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
 
@@ -200,8 +219,10 @@ bm::bvarw::IRF(const int n_irf_periods)
         arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
-        arma::mat impact_mat = arma::trans(arma::chol(Sigma_b));
+        arma::mat impact_mat = arma::chol(Sigma_b,"lower");
+
         //
+
         impact_mat_b.zeros();
         impact_mat_b.rows(0,M-1) = impact_mat;
 
@@ -231,21 +252,33 @@ bm::bvarw::forecast(const int horizon, const bool incl_shocks)
 }
 
 arma::cube
-bm::bvarw::forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks)
+bm::bvarw::forecast(const arma::mat& X_T, const int horizon, const bool incl_shocks)
 {
-    return this->forecast_int(&Y_T,horizon,incl_shocks);
+    return this->forecast_int(&X_T,horizon,incl_shocks);
 }
 
 arma::cube
-bm::bvarw::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks)
+bm::bvarw::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
 
     arma::mat beta_b(K_adj,M), Sigma_b(M,M);       // bth draw
 
-    arma::mat Y_T = (Y_T_inp) ? *Y_T_inp : arma::join_rows(Y.row(Y.n_rows-1),X(X.n_rows-1,arma::span(0,K_adj-M-1)));
-    arma::mat Y_Th = Y_T;
+    arma::mat X_T;
+    if (X_T_inp) {
+        X_T = *X_T_inp;
+    } else {
+        X_T = X.row(X.n_rows-1);
+
+        if (K_adj > M + c_int) {
+            X_T.cols(c_int+M,K_adj-1) = X_T.cols(c_int,K_adj-M-1);
+        }
+
+        X_T.cols(c_int,c_int+M-1) = Y.row(Y.n_rows-1);
+    }
+    
+    arma::mat X_Th = X_T;
 
     arma::mat Y_forecast(horizon,M);
     arma::cube forecast_mat(horizon, M, n_draws);
@@ -260,16 +293,16 @@ bm::bvarw::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool 
             chol_shock_cov = arma::chol(Sigma_b);
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
+            X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b + arma::trans(stats::rmvnorm(chol_shock_cov,true));
+                Y_forecast.row(j-1) = X_Th*beta_b + arma::trans(stats::rmvnorm(chol_shock_cov,true));
 
                 if (K_adj > M + c_int) {
-                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                    X_Th(0,arma::span(M+c_int,K_adj-1)) = X_Th(0,arma::span(c_int,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
             }
             //
             forecast_mat.slice(i) = Y_forecast;
@@ -279,16 +312,16 @@ bm::bvarw::forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool 
             beta_b = beta_draws.slice(i);
 
             Y_forecast.zeros();
-            Y_Th = Y_T;
+            X_Th = X_T;
 
             for (int j=1; j <= horizon; j++) {
-                Y_forecast.row(j-1) = Y_Th*beta_b;
+                Y_forecast.row(j-1) = X_Th*beta_b;
 
                 if (K_adj > M + c_int) {
-                    Y_Th(0,arma::span(M+c_int,K_adj-1)) = Y_Th(0,arma::span(c_int,K_adj-M-1));
+                    X_Th(0,arma::span(M+c_int,K_adj-1)) = X_Th(0,arma::span(c_int,K_adj-M-1));
                 }
 
-                Y_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
+                X_Th(0,arma::span(c_int,M-1+c_int)) = Y_forecast.row(j-1);
             }
             //
             forecast_mat.slice(i) = Y_forecast;

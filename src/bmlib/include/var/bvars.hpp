@@ -85,6 +85,8 @@ class bvars
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
+        void reset_draws();
+
         void prior(const arma::vec& coef_prior, const double HP_1, const double HP_4, const arma::mat& Psi_prior, const double Xi_psi, const int gamma);
 
         void gibbs(const int n_draws, const int n_burnin);

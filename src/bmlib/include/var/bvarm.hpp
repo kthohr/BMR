@@ -74,6 +74,8 @@ class bvarm
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
+        void reset_draws();
+
         void prior(const arma::vec& coef_prior, const double HP_1_inp, const double HP_2_inp, const double HP_3_inp);
         void prior(const arma::vec& coef_prior, const double HP_1_inp, const double HP_2_inp, const double HP_3_inp, const double HP_4_inp);
         void prior(const arma::vec& coef_prior, const int var_type_inp, const int decay_type_inp, const double HP_1_inp, const double HP_2_inp, const double HP_3_inp, const double HP_4_inp);
@@ -84,7 +86,7 @@ class bvarm
         void IRF(const int n_irf_periods, const arma::mat& impact_mat);
 
         arma::cube forecast(const int n_horizon, const bool incl_shocks);
-        arma::cube forecast(const arma::mat& Y_T, const int n_horizon, const bool incl_shocks);
+        arma::cube forecast(const arma::mat& X_T, const int n_horizon, const bool incl_shocks);
 
     private:
         void build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp);
@@ -93,7 +95,7 @@ class bvarm
 
         void IRF_int(const int n_irf_periods, const arma::mat* impact_mat);
 
-        arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
+        arma::cube forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks);
 
         static double decay_geo(const double x, const double HP_4);
         static double decay_harm(const double x, const double HP_4);

@@ -29,10 +29,6 @@ RCPP_MODULE(bvarm_module)
     void (bvarm_R::*build_1)(arma::mat,bool,int) = &bvarm_R::build_R;
     void (bvarm_R::*build_2)(arma::mat,arma::mat,bool,int) = &bvarm_R::build_R;
 
-    void (bvarm_R::*prior_3)(arma::vec,int,int,double,double,double,double) = &bvarm_R::prior_R;
-
-    void (bvarm_R::*IRF_1)(int) = &bvarm_R::IRF_R;
-
     SEXP (bvarm_R::*forecast_1)(int, bool) = &bvarm_R::forecast_R;
     SEXP (bvarm_R::*forecast_2)(arma::mat, int, bool) = &bvarm_R::forecast_R;
   
@@ -55,6 +51,9 @@ RCPP_MODULE(bvarm_module)
         .field_readonly( "K", &bm::bvarm::K )
         .field_readonly( "n_ext_vars", &bm::bvarm::n_ext_vars )
 
+        .field_readonly( "Y", &bm::bvarm::Y )
+        .field_readonly( "X", &bm::bvarm::X )
+
         .field_readonly( "alpha_hat", &bm::bvarm::alpha_hat )
         .field_readonly( "Sigma_hat", &bm::bvarm::Sigma_hat )
 
@@ -74,9 +73,10 @@ RCPP_MODULE(bvarm_module)
 
         .method( "build", build_1 )
         .method( "build", build_2 )
-        .method( "prior", prior_3 )
+        .method( "reset_draws", &bvarm_R::reset_draws_R )
+        .method( "prior", &bvarm_R::prior_R )
         .method( "gibbs", &bvarm_R::gibbs_R )
-        .method( "IRF", IRF_1 )
+        .method( "IRF", &bvarm_R::IRF_R )
         .method( "forecast", forecast_1 )
         .method( "forecast", forecast_2 )
     ;
@@ -100,6 +100,17 @@ void bvarm_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+void bvarm_R::reset_draws_R()
+{
+    try {
+        this->reset_draws();
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

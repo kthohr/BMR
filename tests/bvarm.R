@@ -15,38 +15,53 @@ bvar_data <- matrix(c(as.matrix(USMacroData)),ncol=3)
 
 coef_prior <- c(0.9,0.9,0.9)
 
+bvar_obj = new(bvarm)
+
 #
 # Different p
 
-bvar_obj = new(bvarm_R)
-bvar_obj$build(bvar_data,TRUE,4)
+# p = 1
+
+bvar_obj$build(bvar_data,TRUE,1)
 bvar_obj$prior(coef_prior,1,1,0.5,0.5,100.0,1.0)
 bvar_obj$gibbs(10000)
-bvar_obj$IRF(20)
 
 IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
 plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
 
+# p = 2
 
-testbvarm <- BVARM(USMacroData,prior,p=1,constant=T,keep=10000,burnin=5000,VType=1,HP1=0.5,HP2=0.5,HP3=100)
-plot(testbvarm,save=F)
-IRF(testbvarm,save=F)
-forecast(testbvarm,shocks=T,backdata=10,save=F)
-#
-testbvarm <- BVARM(USMacroData,prior,p=2,constant=T,keep=10000,burnin=5000,VType=1,HP1=0.5,HP2=0.5,HP3=100)
-plot(testbvarm,save=F)
-IRF(testbvarm,save=F)
-forecast(testbvarm,shocks=T,backdata=10,save=F)
-#
-testbvarm <- BVARM(USMacroData,prior,p=3,constant=T,keep=10000,burnin=5000,VType=1,HP1=0.5,HP2=0.5,HP3=100)
-plot(testbvarm,save=F)
-IRF(testbvarm,save=F)
-forecast(testbvarm,shocks=T,backdata=10,save=F)
-#
-testbvarm <- BVARM(USMacroData,prior,p=4,constant=T,keep=10000,burnin=5000,VType=1,HP1=0.5,HP2=0.5,HP3=100)
-plot(testbvarm,save=F)
-IRF(testbvarm,save=F)
-forecast(testbvarm,shocks=T,backdata=10,save=F)
-#
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,2)
+bvar_obj$prior(coef_prior,1,1,0.5,0.5,100.0,1.0)
+bvar_obj$gibbs(10000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 3
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,3)
+bvar_obj$prior(coef_prior,1,1,0.5,0.5,100.0,1.0)
+bvar_obj$gibbs(10000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 4
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,4)
+bvar_obj$prior(coef_prior,1,1,0.5,0.5,100.0,1.0)
+bvar_obj$gibbs(10000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
 #
 #END
