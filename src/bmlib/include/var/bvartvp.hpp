@@ -80,7 +80,7 @@ class bvartvp
 
         void reset_draws();
 
-        void prior(const int tau_inp, const double Xi_beta, const double Xi_Q, const int gamma_Q, const double Xi_Sigma, const int gamma_S);
+        void prior(const int tau_inp, const double Xi_beta, const double Xi_Q_inp, const int gamma_Q, const double Xi_Sigma, const int gamma_S);
 
         void gibbs(const int n_draws, const int n_burnin);
 

@@ -372,6 +372,10 @@ bm::bvartvp::IRF(const int n_irf_periods, const int time_ind)
         arma::vec alpha_bt = alpha_draws(arma::span(),arma::span(time_ind,time_ind),arma::span(j-1,j-1));
         arma::mat beta_b = inside_trans(byrow(alpha_bt,c_int + p*M,M), cons_term); // put into standard BVAR 'beta' matrix format
 
+        if (cons_term) {
+            beta_b.shed_row(0);
+        }
+
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
         arma::mat impact_mat = arma::chol(Sigma_b,"lower");
         //
