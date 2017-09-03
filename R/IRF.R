@@ -45,6 +45,10 @@ IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FA
     .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
 }
 
+IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...){
+    .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
+}
+
 # IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
 #     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
 # }
@@ -556,12 +560,8 @@ IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FA
 
     irfs[abs(irfs) < 1e-14] <- 0
 
-    #
-
-    n_shocks <- dim(irfs)[3]
     M <- dim(irfs)[2]
-    
-    #
+    n_shocks <- dim(irfs)[3]
 
     if (class(varnames) != "character") {
         varnames <- character(length=M)
@@ -655,9 +655,11 @@ IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FA
                 if (irf_plot_count <= (M - n_shocks + 1)) {
                     IRFDF <- data.frame(irfs_plot[,irf_plot_count,j],1:periods)
                     colnames(IRFDF) <- c("IRFM","Time")
-                    #
+                    
                     print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    
                     #
+
                     irf_plot_count <- irf_plot_count + 1
                     
                     Sys.sleep(0.3)
@@ -669,7 +671,7 @@ IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FA
         if(save==TRUE){dev.off()}
     }
     #
-    return=list(IRFs=irfs)
+    return=list(irfs=irfs)
 }
 
 .irfedsge <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){

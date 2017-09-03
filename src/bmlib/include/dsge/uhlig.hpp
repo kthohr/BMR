@@ -31,34 +31,35 @@ class uhlig
         arma::mat B;
         arma::mat C;
         arma::mat D;
-        
+
         arma::mat F;
         arma::mat G;
         arma::mat H;
-        
+
         arma::mat J;
         arma::mat K;
         arma::mat L;
         arma::mat M;
         arma::mat N;
-        
+
         // solution matrices
         arma::mat P_sol;
         arma::mat Q_sol;
         arma::mat R_sol;
         arma::mat S_sol;
-        
+
         // state-space form
         arma::mat F_state;
         arma::mat G_state;
-        
+
         // covariance matrix of shocks
         arma::mat shocks_cov;
-        
+
         // member functions
-        void build_block_pre(const arma::mat* A_inp, const arma::mat* B_inp, const arma::mat* C_inp, const arma::mat* D_inp);
-        void build_block_exp(const arma::mat* F_inp, const arma::mat* G_inp, const arma::mat* H_inp, const arma::mat* J_inp, const arma::mat* K_inp, const arma::mat* L_inp, const arma::mat* M_inp);
-        void build_block_exog(const arma::mat* N_inp);
+        void build(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp, const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp, const arma::mat& N_inp);
+        void build_pre(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp);
+        void build_exp(const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp);
+        void build_exog(const arma::mat& N_inp);
 
         void solve();
 
