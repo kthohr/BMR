@@ -72,6 +72,8 @@ gammaQ <- tau
 XiSigma <- 1
 gammaS = 4
 
+which_irfs = c(17,53,89,125)
+
 bvar_obj = new(bvartvp)
 
 #
