@@ -80,7 +80,7 @@ class bvartvp_R : public bm::bvartvp
 
         void reset_draws_R();
 
-        void prior_R(int tau_inp, double Xi_beta, double Xi_Q, int gamma_Q, double Xi_Sigma, int gamma_S);
+        void prior_R(int tau_inp, double Xi_beta, double Xi_Q_inp, int gamma_Q, double Xi_Sigma, int gamma_S);
 
         void gibbs_R(int n_draws, int n_burnin);
 

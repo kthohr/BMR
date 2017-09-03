@@ -48,4 +48,73 @@ plot(bvartvptest,percentiles=c(.16,.50,.84),save=F)
 IRF(bvartvptest,percentiles=c(.16,.50,.84),save=F)
 #
 #
+
+#
+# BVAR with normal-inverse-Wishart prior
+# 
+
+rm(list=ls())
+library(BMR.Rcpp)
+
+#
+
+data(BMRVARData)
+USMacroData <- USMacroData[,2:4]
+bvar_data <- matrix(c(as.matrix(USMacroData)),ncol=3)
+
+#
+
+tau <- 80
+
+XiBeta <- 4
+XiQ <- 0.005
+gammaQ <- tau
+XiSigma <- 1
+gammaS = 4
+
+bvar_obj = new(bvartvp)
+
+#
+# Different p
+
+# p = 1
+
+bvar_obj$build(bvar_data,TRUE,1)
+bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+
+# p = 2
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,2)
+bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+
+# p = 3
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,3)
+bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+
+# p = 4
+
+bvar_obj$reset_draws()
+bvar_obj$build(bvar_data,TRUE,4)
+bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
+bvar_obj$gibbs(10000,5000)
+
+IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+
+#
 #END
