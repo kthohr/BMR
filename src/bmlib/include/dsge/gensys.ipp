@@ -17,33 +17,25 @@
   ################################################################################*/
 
 /*
- * Gensys
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
+ * gensys class
  */
 
 inline
 void
-gensys::build(const arma::mat& Gamma0_inp, const arma::mat& Gamma1_inp, const arma::mat& GammaC_inp, const arma::mat& Psi_inp, const arma::mat& Pi_inp)
-{   
-    Gamma0 = Gamma0_inp;
-    Gamma1 = Gamma1_inp;
-    GammaC = GammaC_inp;
-    Psi    = Psi_inp;
-    Pi     = Pi_inp;
+gensys::build(const arma::mat& Gamma_0_inp, const arma::mat& Gamma_1_inp, const arma::mat& Gamma_C_inp, const arma::mat& Psi_inp, const arma::mat& Pi_inp)
+{
+    Gamma_0 = Gamma_0_inp;
+    Gamma_1 = Gamma_1_inp;
+    Gamma_C = Gamma_C_inp;
+    Psi = Psi_inp;
+    Pi  = Pi_inp;
 }
 
 inline
 void
 gensys::solve()
 {
-    gensys_solver(Gamma0, Gamma1, GammaC, Psi, Pi, G1, Cons, Impact);
-    //
-    MODEL_IS_SOLVED = true;
+    gensys_solver(Gamma_0, Gamma_1, Gamma_C, Psi, Pi, G_sol, cons_sol, impact_sol);
 }
 
 inline
@@ -51,36 +43,46 @@ void
 gensys::state_space()
 {
     this->state_space(F_state,G_state);
-
-    if (F_state.n_cols > 0) {
-        MODEL_HAS_STATE_FORM = true;
-    }
 }
 
 inline
 void
 gensys::state_space(arma::mat &F_state_out, arma::mat &G_state_out)
 {
-    if (MODEL_IS_SOLVED) {
+    if (impact_sol.n_elem > 0) {
         arma::uvec non_expect_ind = zero_rows(Pi);
         //
-        F_state_out = G1.rows(non_expect_ind);
+        F_state_out = G_sol.rows(non_expect_ind);
         F_state_out = F_state_out.cols(non_expect_ind);
-        
-        G_state_out = Impact.rows(non_expect_ind);
+
+        G_state_out = impact_sol.rows(non_expect_ind);
     }
 }
 
 inline
 arma::mat
-gensys::simulate(const int sim_periods, const int burnin)
-{   
+gensys::simulate(const int n_sim_periods, const int n_burnin)
+{
     this->state_space();
     arma::mat ret_mat;
 
     if (shocks_cov.n_rows > 0) {
-        ret_mat = dsge_simulate(F_state, G_state, shocks_cov, sim_periods, burnin);
+        ret_mat = dsge_simulate(F_state, G_state, shocks_cov, n_sim_periods, n_burnin);
     }
 
     return ret_mat;
+}
+
+inline
+arma::cube
+gensys::IRF(const int n_irf_periods)
+{
+    this->state_space();
+    arma::cube ret_cube;
+
+    if (shocks_cov.n_rows > 0) {
+        ret_cube = dsge_irf(F_state, G_state, shocks_cov, n_irf_periods);
+    }
+
+    return ret_cube;
 }

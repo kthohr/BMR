@@ -41,9 +41,9 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
     .irfbvartvp(obj,periods,which_irfs,varnames,percentiles,which_shock,which_response,save,height,width)
 }
 
-# IRF.SDSGE <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-# }
+IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...){
+    .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
+}
 
 # IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
 #     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
@@ -119,7 +119,7 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
 
     if (class(varnames) != "character") {
         varnames <- character(length=M)
-        for (i in 1:n_response) {  
+        for (i in 1:M) {  
             varnames[i] <- paste("VAR",i,sep="")
         }
     }
@@ -284,7 +284,7 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
 
     if (class(varnames) != "character") {
         varnames <- character(length=M)
-        for (i in 1:n_response) {  
+        for (i in 1:M) {  
             varnames[i] <- paste("VAR",i,sep="")
         }
     }
@@ -541,121 +541,135 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
 #     #
 # }
 
-.irfsdsge <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13){
-    #
-    StateMats <- statespace(obj)
-    F <- StateMats$F; G <- StateMats$G
-    #
-    n_shocks <- ncol(G)
-    #
-    IRFs <- array(0,dim=c(irf.periods,ncol(F),n_shocks))
-    #
-    for(j in 1:n_shocks){
-        shockvec <- rep(0,j-1)
-        shockvec <- matrix( c(shockvec, shocks[j], rep(0,n_shocks-j)), ncol=1)
-        #
-        # Resp = F*G*1, or Resp' = 1'G'F'
-        IRFs[1,,j] <- t(G%*%shockvec)
-        for(i in 2:irf.periods){
-            IRFs[i,,j] <- IRFs[i-1,,j]%*%t(F)
-        }
+.irfdsge <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13)
+{
+    
+    if (periods <= 0) {
+        stop("error: need periods > 0")
     }
-    IRFsRet <- IRFs
+    
+    if (!is.null(shocks_cov)) {
+        obj$shocks_cov <- shocks_cov
+    }
+
+    irfs <- obj$IRF(periods)$irf_vals
+
+    irfs[abs(irfs) < 1e-14] <- 0
+
     #
-    nResp <- as.numeric(ncol(IRFs))
-    if(class(varnames) != "character"){
-        varnames <- character(length=nResp)
-        for(i in 1:nResp){  
+
+    n_shocks <- dim(irfs)[3]
+    M <- dim(irfs)[2]
+    
+    #
+
+    if (class(varnames) != "character") {
+        varnames <- character(length=M)
+        for (i in 1:M) {  
             varnames[i] <- paste("VAR",i,sep="")
         }
     }
+    
     #
-    colnames(IRFsRet) <- varnames
-    #
-    if(n_shocks > 1){
-        IRFs <- array(0,dim=c(irf.periods,ncol(F)-n_shocks+1,n_shocks))
-        DropCount <- (ncol(F)-n_shocks+1):ncol(F)
-        for(j in 1:n_shocks){
-            IRFs[,,j] <- IRFsRet[,-DropCount[-(j)],j]
+    
+    irfs_plot <- irfs
+    drop_ind <- (M - n_shocks + 1):M
+    
+    if (n_shocks > 1) { # drop other shocks
+        irfs_plot <- array(0, dim=c(periods, M - n_shocks + 1, n_shocks))
+        
+        for (j in 1:n_shocks) {
+            irfs_plot[,,j] <- irfs[,-drop_ind[-(j)],j]
         }
     }
+    
     #
     # Plot
-    #
+    
     IRFM <- Time <- NULL # CRAN check workaround
-    #
-    n_response <- nResp - n_shocks + 1
+    
+    n_response <- M - n_shocks + 1
     MR <- 0; MC <- 0
-    if(plot==TRUE){
-        if(n_response < 4){
-            MR <- n_response; MC <- 1
-        }else if(n_response == 4){
-            MR <- 2; MC <-2
-        }else if(n_response > 4 && n_response < 7){
-            MR <- 3; MC <- 2
-        }else if(n_response > 6 && n_response < 10){
-            MR <- 3; MC <- 3
-        }else if(n_response > 9 && n_response < 13){
-            MR <- 4; MC <- 3
-        }else if(n_response > 12 && n_response < 17){
-            MR <- 4; MC <- 4
-        }else if(n_response > 17 && n_response < 21){
-            MR <- 5; MC <- 4
-        }else if(n_response > 20 && n_response < 26){
-            MR <- 5; MC <- 5
-        }else if(n_response > 25 && n_response < 31){
-            MR <- 5; MC <- 6
-        }else if(n_response > 30 && n_response < 37){
-            MR <- 6; MC <- 6
-        }else{
-            stop("You have too many IRFs to plot!")
+    
+    if (n_response < 4) {
+        MR <- n_response; MC <- 1
+    } else if (n_response == 4) {
+        MR <- 2; MC <-2
+    } else if (n_response > 4 && n_response < 7) {
+        MR <- 3; MC <- 2
+    } else if (n_response > 6 && n_response < 10) {
+        MR <- 3; MC <- 3
+    } else if (n_response > 9 && n_response < 13) {
+        MR <- 4; MC <- 3
+    } else if (n_response > 12 && n_response < 17) {
+        MR <- 4; MC <- 4
+    } else if (n_response > 17 && n_response < 21) {
+        MR <- 5; MC <- 4
+    } else if (n_response > 20 && n_response < 26) {
+        MR <- 5; MC <- 5
+    } else if (n_response > 25 && n_response < 31) {
+        MR <- 5; MC <- 6
+    } else if (n_response > 30 && n_response < 37) {
+        MR <- 6; MC <- 6
+    } else {
+        stop("You have too many IRFs to plot!")
+    }
+    
+    #
+
+    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+
+    if(class(dev.list()) != "NULL"){dev.off()}
+    
+    #
+
+    varnames2 <- varnames
+
+    for (j in 1:n_shocks) {
+        
+        if (save==TRUE) {
+            if (n_shocks==1) {
+                cairo_ps(filename="DSGEIRFs.eps",height=height,width=width)
+            } else {
+                SaveIRF <- paste(varnames[M-n_shocks+j],"_Shock",".eps",sep="")
+                cairo_ps(filename=SaveIRF,height=height,width=width)
+            }
         }
+
+        grid.newpage()
+        pushViewport(viewport(layout=grid.layout(MR,MC)))
+
+        if (n_shocks > 1) {
+            varnames2 <- varnames[-drop_ind[-(j)]]
+        } else {
+            varnames2 <- varnames
+        }
+
         #
-        if(class(dev.list()) != "NULL"){dev.off()}
-        #
-        vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-        #
-        for(j in 1:n_shocks){
-            #
-            if(save==TRUE){
-                if(n_shocks==1){
-                    cairo_ps(filename="DSGEIRFs.eps",height=height,width=width)
-                }else{
-                    SaveIRF <- paste(varnames[nResp-n_shocks+j],"_Shock",".eps",sep="")
+
+        irf_plot_count <- 1
+
+        for (i in 1:MR) {
+            for (k in 1:MC) {
+                
+                if (irf_plot_count <= (M - n_shocks + 1)) {
+                    IRFDF <- data.frame(irfs_plot[,irf_plot_count,j],1:periods)
+                    colnames(IRFDF) <- c("IRFM","Time")
                     #
-                    if(save==TRUE){cairo_ps(filename=SaveIRF,height=height,width=width)}
+                    print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    #
+                    irf_plot_count <- irf_plot_count + 1
+                    
+                    Sys.sleep(0.3)
+                } else {
+                    irf_plot_count <- irf_plot_count + 1
                 }
             }
-            grid.newpage()
-            pushViewport(viewport(layout=grid.layout(MR,MC)))
-            #
-            if(n_shocks > 1){
-                varnames2 <- varnames[-DropCount[-(j)]]
-            }else{varnames2 <- varnames}
-            #
-            IRFCount <- 1
-            for(i in 1:MR){
-                for(k in 1:MC){
-                    #
-                    if(IRFCount <= (nResp - n_shocks + 1)){
-                        IRFDF <- data.frame(IRFs[,IRFCount,j],1:(irf.periods))
-                        colnames(IRFDF) <- c("IRFM","Time")
-                        #
-                        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
-                        #
-                        IRFCount <- IRFCount + 1
-                        #
-                        Sys.sleep(0.3)
-                    }else{IRFCount <- IRFCount + 1}
-                }
-            }
-            if(save==TRUE){dev.off()}
         }
+        if(save==TRUE){dev.off()}
     }
     #
-    #colnames(IRFs) <- varnames
-    #
-    return=list(IRFs=IRFsRet)
+    return=list(IRFs=irfs)
 }
 
 .irfedsge <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
@@ -775,26 +789,26 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
             varnames2 <- varnames[-DropCount[-(j)]]
         }else{varnames2 <- varnames}
         #
-        IRFCount <- 1
+        irf_plot_count <- 1
         IRFO <- 1
         if(observableIRFs==TRUE){IRFO <- nResp}
         #
         for(i in 1:MR){
             for(k in 1:MC){
                 #
-                if(IRFCount <= (nResp - n_shocks + IRFO)){
-                    IRFDF <- data.frame(IRFPlot[,,IRFCount,j])
+                if(irf_plot_count <= (nResp - n_shocks + IRFO)){
+                    IRFDF <- data.frame(IRFPlot[,,irf_plot_count,j])
                     colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
                     #
-                    gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) 
+                    gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) 
                     gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) 
                     gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
                     print(gg3,vp = vplayout(i,k))
                     #
-                    IRFCount <- IRFCount + 1
+                    irf_plot_count <- irf_plot_count + 1
                     #
                     Sys.sleep(0.3)
-                }else{IRFCount <- IRFCount + 1}
+                }else{irf_plot_count <- irf_plot_count + 1}
             }
         }
         if(save==TRUE){dev.off()}
@@ -919,27 +933,27 @@ IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percen
             varnames2 <- varnames[-DropCount[-(j)]]
         }else{varnames2 <- varnames}
         #
-        IRFCount <- 1
+        irf_plot_count <- 1
         IRFO <- 1
         if(observableIRFs==TRUE){IRFO <- nResp}
         #
         for(i in 1:MR){
             for(k in 1:MC){
                 #
-                if(IRFCount <= (nResp - n_shocks + IRFO)){
-                    IRFDF <- data.frame(IRFDVPlot[,1:3,IRFCount,j],IRFDPlot[,,IRFCount,j])
+                if(irf_plot_count <= (nResp - n_shocks + IRFO)){
+                    IRFDF <- data.frame(IRFDVPlot[,1:3,irf_plot_count,j],IRFDPlot[,,irf_plot_count,j])
                     colnames(IRFDF) <- c("VARIRFL","VARIRFM","VARIRFU","IRFL","IRFM","IRFU","Time")
                     #
                     if(comparison==TRUE){
-                        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                     }else{
-                        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[IRFCount])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                        print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                     }
                     #
-                    IRFCount <- IRFCount + 1
+                    irf_plot_count <- irf_plot_count + 1
                     #
                     Sys.sleep(0.3)
-                }else{IRFCount <- IRFCount + 1}
+                }else{irf_plot_count <- irf_plot_count + 1}
             }
         }
         if(save==TRUE){dev.off()}

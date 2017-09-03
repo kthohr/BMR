@@ -28,8 +28,7 @@ class dsge
 {
     public:
 
-        //
-        // a LREM object (gensys or uhlig)
+        // a LREM object (e.g., gensys or uhlig)
 
         T lrem_obj;
 

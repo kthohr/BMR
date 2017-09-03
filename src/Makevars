@@ -39,7 +39,7 @@ OBJECTS_BM_LRES= $(SOURCES_BM_LRES:.cpp=.o)
 
 OBJECTS_BM= $(OBJECTS_OPTIM) $(OBJECTS_MCMC) $(OBJECTS_BM_VAR) $(OBJECTS_BM_FILT) $(OBJECTS_BM_LRES)
 
-SOURCES_MODULES= ./modules/bvarm_R.cpp ./modules/bvars_R.cpp ./modules/bvarw_R.cpp ./modules/bvartvp_R.cpp ./modules/cvar_R.cpp
+SOURCES_MODULES= ./modules/bvarm_R.cpp ./modules/bvars_R.cpp ./modules/bvarw_R.cpp ./modules/bvartvp_R.cpp ./modules/cvar_R.cpp ./modules/gensys.cpp
 OBJECTS_MODULES= $(SOURCES_MODULES:.cpp=.o)
 
 OBJECTS=$(OBJECTS_BM) $(OBJECTS_MODULES)

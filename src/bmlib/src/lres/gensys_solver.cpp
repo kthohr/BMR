@@ -30,7 +30,7 @@
  *
  *  In a lot of cases z is iid, and so the final term drops out.
  *
- * Original code by Chris Sims
+ * Original Matlab code by Chris Sims
  *
  * Ported and adapted to C++ by
  * Keith O'Hara

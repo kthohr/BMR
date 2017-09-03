@@ -27,7 +27,7 @@ template<class T>
 class dsgevar
 {
     public:
-        //
+
         // objects
 
         bool cons_term; // if there is a constant (intercept) in the model
