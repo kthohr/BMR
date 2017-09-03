@@ -28,3 +28,16 @@ class gensys_R : public bm::gensys
         SEXP simulate_R(int n_sim_periods, int n_burnin);
         SEXP IRF_R(int n_irf_periods);
 };
+
+class uhlig_R : public bm::uhlig
+{
+    public:
+        void build_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arma::mat D_inp, arma::mat F_inp, arma::mat G_inp, arma::mat H_inp, arma::mat J_inp, arma::mat K_inp, arma::mat L_inp, arma::mat M_inp, arma::mat N_inp);
+        void build_pre_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arma::mat D_inp);
+        void build_exp_R(arma::mat F_inp, arma::mat G_inp, arma::mat H_inp, arma::mat J_inp, arma::mat K_inp, arma::mat L_inp, arma::mat M_inp);
+        void build_exog_R(arma::mat N_inp);
+        void solve_R();
+        void state_space_R();
+        SEXP simulate_R(int n_sim_periods, int n_burnin);
+        SEXP IRF_R(int n_irf_periods);
+};

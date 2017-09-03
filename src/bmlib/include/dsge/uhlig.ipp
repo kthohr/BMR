@@ -20,8 +20,66 @@
  * uhlig class
  */
 
+//
+// build
+
 inline
-void uhlig::solve()
+void
+uhlig::build(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp, const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp, const arma::mat& N_inp)
+{
+    A = A_inp;
+    B = B_inp;
+    C = C_inp;
+    D = D_inp;
+
+    F = F_inp;
+    G = G_inp;
+    H = H_inp;
+
+    J = J_inp;
+    K = K_inp;
+    L = L_inp;
+    M = M_inp;
+    N = N_inp;
+}
+
+inline
+void
+uhlig::build_pre(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp)
+{
+    A = A_inp;
+    B = B_inp;
+    C = C_inp;
+    D = D_inp;
+}
+
+inline
+void
+uhlig::build_exp(const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp)
+{
+    F = F_inp;
+    G = G_inp;
+    H = H_inp;
+
+    J = J_inp;
+    K = K_inp;
+    L = L_inp;
+    M = M_inp;
+}
+
+inline
+void
+uhlig::build_exog(const arma::mat& N_inp)
+{
+    N = N_inp;
+}
+
+//
+// solve and state space methods
+
+inline
+void
+uhlig::solve()
 {
     uhlig_solver(A,B,C,D,F,G,H,J,K,L,M,N,P_sol,Q_sol,R_sol,S_sol);
 }
@@ -34,7 +92,7 @@ uhlig::state_space()
 }
 
 inline
-void 
+void
 uhlig::state_space(arma::mat &F_state_out, arma::mat &G_state_out)
 {
     const int dim_k = N.n_rows;
@@ -48,7 +106,7 @@ uhlig::state_space(arma::mat &F_state_out, arma::mat &G_state_out)
 inline
 arma::mat
 uhlig::simulate(const int sim_periods, const int burnin)
-{   
+{
     this->state_space();
     arma::mat ret_mat;
 
