@@ -21,22 +21,35 @@
  */
 
 inline
-arma::mat
-dsge_simulate(const arma::mat& F_state, const arma::mat& G_state, const arma::mat& shocks_cov, const int sim_periods, const int burnin)
+arma::cube
+dsge_irf(const arma::mat& F_state, const arma::mat& G_state, const arma::mat& shocks_cov, const int n_irf_periods)
 {
-    // const int n_shocks = G_state.n_cols;
+    const int n_shocks = G_state.n_cols;
+    const int n_vars = F_state.n_cols;
 
-    arma::mat dsge_sim_mat(sim_periods+burnin,F_state.n_cols);
+    arma::cube dsge_irf_out(n_irf_periods,n_vars,n_shocks);
 
-    arma::mat shocks = stats::rmvnorm(sim_periods + burnin, shocks_cov);
     //
-    dsge_sim_mat.row(0) = shocks.row(0) * G_state.t();
 
-    for (int i = 1; i < (sim_periods + burnin); i++) {
-        dsge_sim_mat.row(i) = dsge_sim_mat.row(i-1) * F_state.t() + shocks.row(i) * G_state.t();
+    for (int j=0; j < n_shocks; j++) {
+        
+        arma::rowvec shock_vec = arma::zeros(1,n_shocks);
+        shock_vec(j) = std::sqrt(shocks_cov(j,j)); // 1 std. dev. shock
+
+        arma::mat irf_mat = arma::zeros(n_irf_periods,n_vars);
+
+        irf_mat.row(0) = shock_vec*G_state.t();
+
+        if (n_irf_periods > 1) {
+            for (int i=1; i < n_irf_periods; i++) {
+                irf_mat.row(i) = irf_mat.row(i-1)*F_state.t();
+            }
+        }
+
+        dsge_irf_out.slice(j) = irf_mat;
     }
 
-    dsge_sim_mat.shed_rows(0,burnin-1);
     //
-    return dsge_sim_mat;
+
+    return dsge_irf_out;
 }

@@ -25,20 +25,11 @@
 //
 // data and basic setup
 
-//
-// prior
-
 void
 bm::bvartvp::build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp)
 {
     this->build_int(data_raw,cons_term_inp,p_inp);
 }
-
-// void
-// bm::bvartvp::build(const arma::mat& data_raw, const arma::mat& data_ext)
-// {
-//     this->build_int(data_raw,&data_ext);
-// }
 
 void
 bm::bvartvp::build_int(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp)

@@ -58,6 +58,7 @@ namespace bm
     #include "lres/uhlig_solver.hpp"
 
     // DSGE
+    #include "dsge/dsge_irf.hpp"
     #include "dsge/dsge_simulate.hpp"
 
     #include "dsge/gensys.hpp"

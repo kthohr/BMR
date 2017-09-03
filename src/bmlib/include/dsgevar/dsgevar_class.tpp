@@ -230,6 +230,7 @@ dsgevar<T>::log_posterior_kernel(const arma::vec& pars_inp)
     const double log_prior_val = dsge_obj.log_prior(pars_inp);
 
     //
+    
     return log_likelihood_val + log_prior_val;
 }
 

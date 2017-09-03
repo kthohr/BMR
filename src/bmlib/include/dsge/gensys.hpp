@@ -17,13 +17,7 @@
   ################################################################################*/
 
 /*
- * Gensys
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
+ * gensys class
  */
 
 #ifndef _bmlib_gensys_HPP
@@ -32,38 +26,36 @@
 class gensys
 {
     public:
-        // solution input matrices
-        arma::mat Gamma0;
-        arma::mat Gamma1;
-        arma::mat GammaC;
+        // input matrices: Gamma0*X_t = GammaC + Gamma1*X_{t-1} + Psi*z_t + Pi*eta_t
+        arma::mat Gamma_0;
+        arma::mat Gamma_1;
+        arma::mat Gamma_C;
         arma::mat Psi;
         arma::mat Pi;
-         
-        // solution matrices
-        arma::mat G1;
-        arma::mat Impact;
-        arma::mat Cons;
-         
+
+        // solution matrices: X_t = C + G*X_{t-1} + imp*z_t
+        arma::mat G_sol;
+        arma::mat impact_sol;
+        arma::mat cons_sol;
+
         // state-space form
         arma::mat F_state;
         arma::mat G_state;
-         
+
         // covariance matrix of shocks
         arma::mat shocks_cov;
-         
+
         // member functions
-        void build(const arma::mat& Gamma0_inp, const arma::mat& Gamma1_inp, const arma::mat& GammaC_inp, const arma::mat& Psi_inp, const arma::mat& Pi_inp);
+        void build(const arma::mat& Gamma_0_inp, const arma::mat& Gamma_1_inp, const arma::mat& Gamma_C_inp, const arma::mat& Psi_inp, const arma::mat& Pi_inp);
 
         void solve();
 
-        arma::mat simulate(const int sim_periods, const int burnin);
-
         void state_space();
         void state_space(arma::mat& F_state_out, arma::mat& G_state_out);
-         
-    protected:
-        bool MODEL_IS_SOLVED      = false;
-        bool MODEL_HAS_STATE_FORM = false;
+
+        arma::mat simulate(const int n_sim_periods, const int n_burnin);
+
+        arma::cube IRF(const int n_irf_periods);
 };
 
 #include "gensys.ipp"

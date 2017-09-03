@@ -1,7 +1,7 @@
 Package: BMR.Rcpp
 Type: Package
 Title: Bayesian Macroeconometrics in R
-Version: 0.1.0
+Version: 0.9.0
 Date: 2017-08-30
 Author: Keith O'Hara <keith.ohara@nyu.edu>
 Maintainer: Keith O'Hara <keith.ohara@nyu.edu>
@@ -17,4 +17,4 @@ Imports:
     Rcpp,
     grid
 NeedsCompilation: yes
-RcppModules: bvarm_module, bvars_module, bvarw_module, bvartvp_module, cvar_module
+RcppModules: bvarm_module, bvars_module, bvarw_module, bvartvp_module, cvar_module, gensys_module

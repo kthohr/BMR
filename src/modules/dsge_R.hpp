@@ -19,8 +19,12 @@
   ##
   ################################################################################*/
 
-
-#include "bmlib.hpp"
-
-#include "modules/vars_R.hpp"
-#include "modules/dsge_R.hpp"
+class gensys_R : public bm::gensys
+{
+    public:
+        void build_R(arma::mat Gamma_0_inp, arma::mat Gamma_1_inp, arma::mat Gamma_C_inp, arma::mat Psi_inp, arma::mat Pi_inp);
+        void solve_R();
+        void state_space_R();
+        SEXP simulate_R(int n_sim_periods, int n_burnin);
+        SEXP IRF_R(int n_irf_periods);
+};

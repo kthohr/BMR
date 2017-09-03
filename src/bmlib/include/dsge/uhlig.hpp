@@ -17,13 +17,7 @@
   ################################################################################*/
 
 /*
- * Uhlig
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
+ * uhlig class
  */
 
 #ifndef _bmlib_uhlig_HPP
@@ -32,7 +26,7 @@
 class uhlig
 {
     public:
-        // solution input matrices
+        // input matrices
         arma::mat A;
         arma::mat B;
         arma::mat C;
@@ -49,10 +43,10 @@ class uhlig
         arma::mat N;
         
         // solution matrices
-        arma::mat P;
-        arma::mat Q;
-        arma::mat R;
-        arma::mat S;
+        arma::mat P_sol;
+        arma::mat Q_sol;
+        arma::mat R_sol;
+        arma::mat S_sol;
         
         // state-space form
         arma::mat F_state;
@@ -68,14 +62,12 @@ class uhlig
 
         void solve();
 
-        arma::mat simulate(const int sim_periods, const int burnin);
-
         void state_space();
         void state_space(arma::mat& F_state, arma::mat& G_state);
-        
-    private:
-        bool MODEL_IS_SOLVED      = false;
-        bool MODEL_HAS_STATE_FORM = false;
+
+        arma::mat simulate(const int sim_periods, const int burnin);
+
+        arma::cube IRF(const int n_irf_periods);
 };
 
 #include "uhlig.ipp"
