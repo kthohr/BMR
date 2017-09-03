@@ -85,7 +85,7 @@ bm::bvartvp::reset_draws()
 // prior
 
 void
-bm::bvartvp::prior(const int tau_inp, const double Xi_beta, const double Xi_Q, const int gamma_Q, const double Xi_Sigma, const int gamma_S)
+bm::bvartvp::prior(const int tau_inp, const double Xi_beta, const double Xi_Q_inp, const int gamma_Q, const double Xi_Sigma, const int gamma_S)
 {
     tau = tau_inp;
 
@@ -152,7 +152,9 @@ bm::bvartvp::prior(const int tau_inp, const double Xi_beta, const double Xi_Q, c
 
     //
 
-    Q_pr_scale = Xi_Q*tau*arma::inv(inv_alpha_pr_var);
+    Xi_Q = Xi_Q_inp;
+
+    Q_pr_scale = Xi_Q_inp*tau*arma::inv(inv_alpha_pr_var);
     Q_pr_dof = gamma_Q;
 
     Sigma_pr_scale = arma::eye(M,M)*Xi_Sigma;
@@ -175,17 +177,13 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
     // arma::mat Q_draw = Q_pr_scale / (double) Q_pr_dof;
     // arma::mat Q_chol = arma::chol(Q_draw,"lower");
 
-    // arma::mat Sigma_draw = Sigma_hat;
-    // arma::mat Sigma_chol = arma::chol(Sigma_draw,"lower");
-    // arma::mat inv_Sigma_draw = arma::inv(Sigma_draw);
-
     Q_pt_dof = n_adj + Q_pr_dof;
     Sigma_pt_dof = n_adj + Sigma_pr_dof;
 
-    double consQ = 0.0001;
-    arma::mat Q_draw = consQ*arma::eye(K*M,K*M);
-    arma::mat Q_chol = std::sqrt(consQ)*arma::eye(K*M,K*M);
-    arma::mat Sigma_draw = 0.1*arma::eye(M,M);
+    arma::mat Q_draw = Xi_Q*arma::eye(K*M,K*M);
+    arma::mat Q_chol = std::sqrt(Xi_Q)*arma::eye(K*M,K*M);
+
+    arma::mat Sigma_draw = Sigma_hat;
     arma::mat Sigma_chol = arma::chol(Sigma_draw,"lower");
     arma::mat inv_Sigma_draw = arma::inv(Sigma_draw);
 
@@ -261,7 +259,7 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
     scale_val = arma::abs(arma::diagvec(SSE_S + Sigma_pr_scale)).min();
 
     Sigma_draw = stats::rinvwish((SSE_S + Sigma_pr_scale) / scale_val, Sigma_pt_dof);
-    
+
     Sigma_chol = std::sqrt(scale_val)*arma::chol(Sigma_draw,"lower");
     Sigma_draw = scale_val*Sigma_draw;
 
@@ -364,15 +362,15 @@ bm::bvartvp::IRF(const int n_irf_periods, const int time_ind)
 {
     const int n_draws = alpha_draws.n_slices;
     const int K_adj = K - n_ext_vars;
-    
+
     irfs.set_size(M, M, n_irf_periods*n_draws);
     //
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
-    
+
     for (int j=1; j <= n_draws; j++) {
         arma::vec alpha_bt = alpha_draws(arma::span(),arma::span(time_ind,time_ind),arma::span(j-1,j-1));
-        arma::mat beta_b = inside_trans(byrow(alpha_bt,c_int + p*M,M), cons_term); // put into standard BVAR 'beta' matrix format 
+        arma::mat beta_b = inside_trans(byrow(alpha_bt,c_int + p*M,M), cons_term); // put into standard BVAR 'beta' matrix format
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
         arma::mat impact_mat = arma::chol(Sigma_b,"lower");

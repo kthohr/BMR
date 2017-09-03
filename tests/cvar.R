@@ -1,30 +1,63 @@
 #
 # Estimate a VAR with BMR
 # 
+
 rm(list=ls())
-library(BMR)
+library(BMR.Rcpp)
+
 #
+
 data(BMRVARData)
-USMacroData<-USMacroData[,2:4]
+USMacroData <- USMacroData[,2:4]
+var_data <- matrix(c(as.matrix(USMacroData)),ncol=3)
+
+var_obj = new(cvar)
+
 #
 # Different p
-#
-testcvar <- CVAR(USMacroData,p=1,constant=T,boot=10000)
-testcvar <- suppressMessages(CVAR(USMacroData,p=1,constant=T,boot=10000))
-IRF(testcvar,save=F)
-forecast(testcvar,confint=0.99,backdata=10,save=F)
-#
-testcvar <- CVAR(USMacroData,p=2,constant=T,boot=10000)
-IRF(testcvar,save=F)
-forecast(testcvar,confint=0.99,backdata=10,save=F)
-#
-testcvar <- CVAR(USMacroData,p=3,constant=T,boot=10000)
-IRF(testcvar,save=F)
-forecast(testcvar,confint=0.99,backdata=10,save=F)
-#
-testcvar <- CVAR(USMacroData,p=4,constant=T,boot=10000)
-IRF(testcvar,save=F)
-forecast(testcvar,confint=0.99,backdata=10,save=F)
-#
+
+# p = 1
+
+var_obj$build(var_data,TRUE,1)
+var_obj$estim()
+var_obj$boot(10000)
+
+IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 2
+
+var_obj$reset_draws()
+var_obj$build(var_data,TRUE,2)
+var_obj$estim()
+var_obj$boot(10000)
+
+IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 3
+
+var_obj$reset_draws()
+var_obj$build(var_data,TRUE,3)
+var_obj$estim()
+var_obj$boot(10000)
+
+IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
+# p = 4
+
+var_obj$reset_draws()
+var_obj$build(var_data,TRUE,4)
+var_obj$estim()
+var_obj$boot(10000)
+
+IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
+plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+
 #
 #END

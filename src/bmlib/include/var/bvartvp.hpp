@@ -45,6 +45,8 @@ class bvartvp
         arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
 
         // prior data
+        double Xi_Q;
+
         arma::mat alpha_pr_mean;  // prior mean
         arma::mat alpha_pr_var;   // prior variance
 

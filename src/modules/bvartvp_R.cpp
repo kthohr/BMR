@@ -75,7 +75,7 @@ RCPP_MODULE(bvartvp_module)
         .default_constructor()
 
         .method( "build", &bvartvp_R::build_R )
-        .method( "prior", &bvartvp_R::build_R )
+        .method( "prior", &bvartvp_R::prior_R )
         .method( "reset_draws", &bvartvp_R::reset_draws_R )
         .method( "gibbs", &bvartvp_R::gibbs_R )
         .method( "IRF", &bvartvp_R::IRF_R )
@@ -109,10 +109,10 @@ void bvartvp_R::reset_draws_R()
     }
 }
 
-void bvartvp_R::prior_R(int tau_inp, double Xi_beta, double Xi_Q, int gamma_Q, double Xi_Sigma, int gamma_S)
+void bvartvp_R::prior_R(int tau_inp, double Xi_beta, double Xi_Q_inp, int gamma_Q, double Xi_Sigma, int gamma_S)
 {
     try {
-        this->prior(tau_inp,Xi_beta,Xi_Q,gamma_Q,Xi_Sigma,gamma_S);
+        this->prior(tau_inp,Xi_beta,Xi_Q_inp,gamma_Q,Xi_Sigma,gamma_S);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
