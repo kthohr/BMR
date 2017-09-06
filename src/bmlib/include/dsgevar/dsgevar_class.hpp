@@ -56,15 +56,15 @@ class dsgevar
 
         // posterior data
 
-        arma::vec beta_pt_mean;  // posterior mean
-        arma::mat beta_pt_var;   // posterior variance
+        arma::vec alpha_pt_mean;   // posterior mean
+        arma::mat alpha_pt_var;    // posterior variance
 
         int Sigma_pt_dof;         // posterior degrees of freedom
         arma::mat Sigma_pt_mean;  // posterior mean
 
         arma::cube beta_draws;    // posterior draws of beta
         arma::cube Sigma_draws;   // posterior draws of Sigma
-        
+
         arma::cube irfs;          // irfs based on the posterior draws
 
         //

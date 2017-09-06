@@ -68,7 +68,7 @@ void
 dsge<T>::solve_to_state_space(const arma::vec& pars_inp)
 {
     arma::mat shocks_cov;
-    pars_to_mats(pars_inp,lrem_obj,shocks_cov,kalman_mat_C,kalman_mat_R);
+    model_fn(pars_inp,lrem_obj,shocks_cov,kalman_mat_C,kalman_mat_H,kalman_mat_R);
 
     solve();
 
@@ -76,6 +76,8 @@ dsge<T>::solve_to_state_space(const arma::vec& pars_inp)
     state_space(kalman_mat_F,G_state);
 
     kalman_mat_Q = G_state*shocks_cov*G_state.t();
+
+    lrem_obj.shocks_cov = std::move(shocks_cov);
 }
 
 //
@@ -86,8 +88,9 @@ double
 dsge<T>::log_prior(const arma::vec& pars_inp)
 {
     const int n_param = pars_inp.n_elem;
+
     //
-    
+
     double log_prior_val = 0;
 
     for (int i = 0; i < n_param; i++) {
@@ -99,18 +102,15 @@ dsge<T>::log_prior(const arma::vec& pars_inp)
             case 2: // gamma prior
                 log_prior_val += stats::dgamma(pars_inp(i),prior_pars(i,0),prior_pars(i,1),true);
                 break;
-        
+
             case 3: // inverse gamma prior
                 log_prior_val += stats::dinvgamma(pars_inp(i),prior_pars(i,0),prior_pars(i,1),true);
                 break;
-        
-            case 4: // beta prior
-                // double pars_inp_temp = (pars_inp(i)-pars_inp_bounds(i,0))/(pars_inp_bounds(i,1)-pars_inp_bounds(i,0));
 
-                // log_prior_val += std::log(dbeta(pars_inp_temp,prior_pars(i,0),prior_pars(i,1)));
+            case 4: // beta prior
                 log_prior_val += stats::dbeta(pars_inp(i),prior_pars(i,0),prior_pars(i,1),true);
                 break;
-        
+
             case 5: // uniform prior
                 log_prior_val += stats::dunif(pars_inp(i),prior_pars(i,0),prior_pars(i,1),true);
                 break;
@@ -118,7 +118,7 @@ dsge<T>::log_prior(const arma::vec& pars_inp)
             default:
                 printf("unrecognized prior form.\n");
                 break;
-            
+
         }
     }
     //
@@ -137,7 +137,7 @@ dsge<T>::log_posterior_kernel(const arma::vec& pars_inp)
     solve_to_state_space(pars_inp);
 
     // run filter
-    
+
     const double log_likelihood_val = kalman_filter(estim_data, kalman_mat_F,kalman_mat_Q, kalman_mat_C,kalman_mat_H,kalman_mat_R);
 
     // compute the prior
@@ -219,7 +219,7 @@ template<typename T>
 void
 dsge<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp)
 {
-    
+
     dsge_estim_data<T> mcmc_data;
     mcmc_data.dsge_obj = *this;
 
@@ -245,5 +245,5 @@ dsge<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings
 
     mcmc::de(initial_vals,res_cube,mcmc_objfn,&mcmc_data,settings);
 
-    mcmc_dsge_pars = cube_to_mat(res_cube);
+    dsge_draws = std::move(cube_to_mat(res_cube));
 }

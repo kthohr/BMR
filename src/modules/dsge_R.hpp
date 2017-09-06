@@ -41,3 +41,70 @@ class uhlig_R : public bm::uhlig
         SEXP simulate_R(int n_sim_periods, int n_burnin);
         SEXP IRF_R(int n_irf_periods);
 };
+
+//
+
+class dsge_gensys_R : public bm::dsge<bm::gensys>
+{
+    public:
+        SEXP model_fn_SEXP;
+        // Rcpp::Function model_fn_Rcpp = nullptr;
+        void* model_fn_Rcpp;
+
+        arma::vec opt_initial_lb;
+        arma::vec opt_initial_ub;
+        arma::vec mcmc_initial_lb;
+        arma::vec mcmc_initial_ub;
+
+        void model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
+
+        void set_model_fn(SEXP model_fn_inp);
+        void eval_model(Rcpp::NumericVector pars_inp);
+
+        void set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp);
+        void set_prior_R(arma::uvec prior_form_inp, arma::mat prior_pars_inp);
+
+        gensys_R get_lrem_R();
+        void set_lrem_R(gensys_R lrem_obj_inp);
+
+        SEXP estim_mode_R(arma::vec initial_vals);
+        void estim_mcmc_R(arma::vec initial_vals);
+};
+
+//
+
+class dsgevar_gensys_R : public bm::dsgevar<bm::gensys>
+{
+    public:
+        SEXP model_fn_SEXP;
+        // Rcpp::Function model_fn_Rcpp = nullptr;
+        void* model_fn_Rcpp;
+
+        arma::vec opt_initial_lb;
+        arma::vec opt_initial_ub;
+        arma::vec mcmc_initial_lb;
+        arma::vec mcmc_initial_ub;
+
+        // member functions
+
+        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp, double lambda_inp);
+
+        arma::mat get_dsge_draws();
+
+        void model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
+
+        void set_model_fn(SEXP model_fn_inp);
+        void eval_model(Rcpp::NumericVector pars_inp);
+
+        void set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp);
+        void set_prior_R(arma::uvec prior_form_inp, arma::mat prior_pars_inp);
+
+        gensys_R get_lrem_R();
+        void set_lrem_R(gensys_R lrem_obj_inp);
+
+        dsge_gensys_R get_dsge_R();
+        void set_dsge_R(dsge_gensys_R dsge_obj_inp);
+
+        SEXP estim_mode_R(arma::vec initial_vals);
+        void estim_mcmc_R(arma::vec initial_vals);
+};
