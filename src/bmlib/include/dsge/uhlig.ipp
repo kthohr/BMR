@@ -112,6 +112,8 @@ uhlig::simulate(const int sim_periods, const int burnin)
 
     if (shocks_cov.n_rows > 0) {
         ret_mat = dsge_simulate(F_state, G_state, shocks_cov, sim_periods, burnin);
+    } else {
+        printf("dsge simulate: error: shocks_cov not found\n");
     }
 
     return ret_mat;
@@ -126,6 +128,8 @@ uhlig::IRF(const int n_irf_periods)
 
     if (shocks_cov.n_rows > 0) {
         ret_cube = dsge_irf(F_state, G_state, shocks_cov, n_irf_periods);
+    } else {
+        printf("dsge irf: error: shocks_cov not found\n");
     }
 
     return ret_cube;

@@ -18,4 +18,4 @@ Imports:
     grid
 NeedsCompilation: yes
 RcppModules: bvarm_module, bvars_module, bvarw_module, bvartvp_module, cvar_module,
-             gensys_module, uhlig_module
+             gensys_module, uhlig_module, dsge_gensys_module, dsgevar_gensys_module

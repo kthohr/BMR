@@ -16,9 +16,24 @@
   ##
   ################################################################################*/
 
-#include "determine_bounds_type.hpp"
-#include "error_reporting.hpp"
-#include "jacobian_adjust.hpp"
-#include "numerical_hessian.hpp"
-#include "transform_vals.hpp"
-#include "unit_vec.hpp"
+/*
+ * L-BFGS method for quasi-Newton-based non-linear optimization
+ *
+ * Keith O'Hara
+ * 12/23/2016
+ *
+ * This version:
+ * 08/20/2017
+ */
+
+#ifndef _optim_lbfgs_HPP
+#define _optim_lbfgs_HPP
+
+bool lbfgs_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings* settings_inp);
+
+bool lbfgs(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data);
+bool lbfgs(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings& settings);
+
+arma::vec lbfgs_recur(arma::vec q, const arma::mat& s_mat, const arma::mat& y_mat, const int M);
+
+#endif

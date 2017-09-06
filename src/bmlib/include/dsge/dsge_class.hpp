@@ -56,11 +56,11 @@ class dsge
 
         // MCMC results
 
-        arma::mat mcmc_dsge_pars;
+        arma::mat dsge_draws;
 
         // a function mapping the 'deep' parameters to the structural matrices
 
-        std::function<void (const arma::vec& pars_inp, T& lrem_obj, arma::mat& Q_out, arma::mat& C_out, arma::mat& R_out)> pars_to_mats;
+        std::function<void (const arma::vec& pars_inp, T& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out)> model_fn;
 
         //
         // member functions

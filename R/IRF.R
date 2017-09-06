@@ -49,14 +49,6 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
     .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
 }
 
-# IRF.gensys <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-# }
-
-# IRF.uhlig <- function(obj,shocks,irf.periods=20,varnames=NULL,plot=TRUE,save=FALSE,height=13,width=13,...){
-#     .irfsdsge(obj,shocks,irf.periods,varnames,plot,save,height,width)
-# }
-
 # IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
 #     .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
 # }

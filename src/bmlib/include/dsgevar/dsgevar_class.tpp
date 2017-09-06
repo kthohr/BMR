@@ -170,7 +170,8 @@ dsgevar<T>::log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX,
     const double cons_val = - M*(n-p)*std::log(lambdaT*arma::datum::pi)/2.0 + log_GPR(M, (1.0+lambda)*(n-p) - M*p - c_int, lambda*(n-p) - M*p - c_int);
 
     const double term_1 = M * ( - std::log(arma::det(Gamma_XX + lambda_recip*XX)) + std::log(arma::det(Gamma_XX)) ) / 2.0;
-    const double term_2 = - (n - p + lambdaT - M*p - c_int)*std::log(arma::det((1.0 + lambda_recip)*Sigma_hat_eps)) / 2.0;
+    // const double term_2 = - (n - p + lambdaT - M*p - c_int)*std::log(arma::det((1.0 + lambda_recip)*Sigma_hat_eps)) / 2.0;
+    const double term_2 = - (n - p + lambdaT - M*p - c_int)*( M*std::log(1.0 + lambda_recip) + std::log(arma::det(Sigma_hat_eps)) ) / 2.0;
     const double term_3 = (lambdaT - M*p - c_int) * std::log(arma::det(Sigma_eps)) / 2.0;
 
     return cons_val + term_1 + term_2 + term_3;
@@ -230,7 +231,7 @@ dsgevar<T>::log_posterior_kernel(const arma::vec& pars_inp)
     const double log_prior_val = dsge_obj.log_prior(pars_inp);
 
     //
-    
+
     return log_likelihood_val + log_prior_val;
 }
 
@@ -305,7 +306,7 @@ template<typename T>
 void
 dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp)
 {
-    
+
     dsgevar_estim_data<T> mcmc_data;
     mcmc_data.dsgevar_obj = *this;
 
@@ -331,7 +332,7 @@ dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* setti
 
     mcmc::de(initial_vals,res_cube,mcmc_objfn,&mcmc_data,settings);
 
-    dsge_obj.mcmc_dsge_pars = cube_to_mat(res_cube);
+    dsge_obj.dsge_draws = std::move(cube_to_mat(res_cube));
 
     gibbs();
 }
@@ -340,24 +341,23 @@ template<typename T>
 void
 dsgevar<T>::gibbs()
 {
-    printf("begin gibbs\n");
-    const int n_draws = dsge_obj.mcmc_dsge_pars.n_rows;
+
+    const int n_draws = dsge_obj.dsge_draws.n_rows;
 
     beta_draws.set_size(K, M, n_draws);
     Sigma_draws.set_size(M, M, n_draws);
-    
+
     const double tau = lambda / (1.0 + lambda); // will be NaN in the case of lambda = Inf
 
     Sigma_pt_dof = (1+lambda)*(n-p) - M*p - c_int;
-    
+
     //
     // begin loop
 
     dsge<T> dsge_obj_copy = dsge_obj; // thread safety
 
     dsge_obj_copy.estim_data.reset();
-    dsge_obj_copy.mcmc_dsge_pars.reset();
-
+    dsge_obj_copy.dsge_draws.reset();
 
 #ifdef BM_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
@@ -366,7 +366,7 @@ dsgevar<T>::gibbs()
 
         // access saved DSGE parameters and solve the model
 
-        dsge_obj_copy.solve_to_state_space(dsge_obj.mcmc_dsge_pars.row(i).t());
+        dsge_obj_copy.solve_to_state_space(dsge_obj.dsge_draws.row(i).t());
 
         // get the model-implied moments
 
@@ -395,22 +395,24 @@ dsgevar<T>::gibbs()
             arma::mat alpha_pt_var_b  = arma::kron(Sigma_eps,arma::inv_sympd(lambda*Gamma_XX + XX) / (double) (n-p));
 
             beta_draw = arma::reshape( stats::rmvnorm(arma::vectorise(beta_hat), alpha_pt_var_b), K,M);
-        
+
         } else {
 
             beta_draw = arma::inv_sympd(Gamma_XX)*Gamma_YX.t();
             Sigma_draw = Gamma_YY - Gamma_YX*beta_draw;
 
         }
-        
+
         // save draws
 
-        beta_draws.slice(i)  = beta_draw;
-        Sigma_draws.slice(i) = Sigma_draw;
+        beta_draws.slice(i)  = std::move(beta_draw);
+        Sigma_draws.slice(i) = std::move(Sigma_draw);
     }
     //
-    beta_pt_mean = arma::vectorise(arma::mean(beta_draws,2));
+    alpha_pt_mean = arma::vectorise(arma::mean(beta_draws,2));
     Sigma_pt_mean = arma::mean(Sigma_draws,2);
+
+    alpha_pt_var = arma::cov( cube_to_mat(beta_draws,true) );
     //
 }
 
@@ -424,7 +426,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
     const int n_draws = beta_draws.n_slices;
     // const int K_adj = K - n_ext_vars;
     const int K_adj = K;
-    
+
     irfs.set_size(M, M, n_irf_periods*n_draws);
 
     //
@@ -432,13 +434,13 @@ dsgevar<T>::IRF(const int n_irf_periods)
     dsge<T> dsge_obj_copy = dsge_obj; // thread safety
 
     dsge_obj_copy.estim_data.reset();
-    dsge_obj_copy.mcmc_dsge_pars.reset();
+    dsge_obj_copy.dsge_draws.reset();
 
 #ifdef BM_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=1; j <= n_draws; j++) {
-        arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables 
+        arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
         arma::mat impact_mat = arma::chol(Sigma_b,"lower");
@@ -446,7 +448,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
         // adjust the impact matrix
 
         arma::mat shocks_cov, G_state;
-        dsge_obj_copy.pars_to_mats(dsge_obj.mcmc_dsge_pars.row(j-1).t(),dsge_obj_copy.lrem_obj,shocks_cov,dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_R);
+        dsge_obj_copy.model_fn(dsge_obj.dsge_draws.row(j-1).t(),dsge_obj_copy.lrem_obj,shocks_cov,dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_R);
 
         dsge_obj_copy.solve();
 
