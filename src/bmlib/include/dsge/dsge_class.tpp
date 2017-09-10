@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -246,4 +249,41 @@ dsge<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings
     mcmc::de(initial_vals,res_cube,mcmc_objfn,&mcmc_data,settings);
 
     dsge_draws = std::move(cube_to_mat(res_cube));
+}
+
+//
+// IRFs
+
+template<typename T>
+void
+dsge<T>::IRF(const int n_irf_periods)
+{
+    const int n_draws = dsge_draws.n_rows;
+
+    solve_to_state_space(dsge_draws.row(0).t());
+
+    arma::cube test_cube = lrem_obj.IRF(n_irf_periods);
+
+    const int n_shocks = test_cube.n_slices;
+
+    irfs.set_size(test_cube.n_rows, test_cube.n_cols, n_shocks*n_draws);
+
+    //
+
+    dsge<T> dsge_obj_copy = *this; // thread safety
+
+    dsge_obj_copy.estim_data.reset();
+    dsge_obj_copy.dsge_draws.reset();
+
+#ifdef BM_OMP
+    #pragma omp parallel for firstprivate(dsge_obj_copy)
+#endif
+    for (int j=0; j < n_draws; j++) {
+        
+        dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
+
+        irfs.slices(j*n_shocks,(j+1)*n_shocks-1) = dsge_obj_copy.lrem_obj.IRF(n_irf_periods);
+
+    }
+    //
 }

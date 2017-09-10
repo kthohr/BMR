@@ -550,7 +550,7 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
 
     irfs <- obj$IRF(periods)$irf_vals
 
-    irfs[abs(irfs) < 1e-14] <- 0
+    irfs <- round(irfs,10)
 
     M <- dim(irfs)[2]
     n_shocks <- dim(irfs)[3]

@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -54,7 +57,9 @@ bm::bvars::build_int(const arma::mat& data_raw, const arma::mat* data_ext, const
     n_ext_vars = (data_ext) ? data_ext->n_cols : 0;
 
     K = M*p; // NOTE: K is defined differently to other BVAR models
+
     //
+
     arma::mat data_lagged = embed(data_raw,p);
 
     Y = data_lagged.cols(0,M-1);

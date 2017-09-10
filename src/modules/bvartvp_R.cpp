@@ -28,7 +28,7 @@ RCPP_MODULE(bvartvp_module)
     // function overloading requires some trickery
 
     // SEXP (bvartvp_R::*forecast_1)(int, bool) = &bvartvp_R::forecast_R;
-    // SEXP (bvartvp_R::*forecast_2)(arma::mat, int, bool) = &bvartvp_R::forecast_R;
+    // SEXP (bvartvp_R::*forecast_2)(const arma::mat&, int, bool) = &bvartvp_R::forecast_R;
   
     // now we can declare the class
     class_<bm::bvartvp>( "bvartvp_cpp" )
@@ -87,7 +87,7 @@ RCPP_MODULE(bvartvp_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void bvartvp_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
+void bvartvp_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,cons_term_inp,p_inp);

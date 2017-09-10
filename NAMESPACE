@@ -1,4 +1,4 @@
-useDynLib(BMR.Rcpp)
+useDynLib(BMR)
 
 importFrom(Rcpp, evalCpp)
 import(ggplot2)

@@ -20,26 +20,20 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * a linear space of (unsigned) integers
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+arma::uvec
+uvec_linspace(const int a, const int b)
+{
+    const int n_points = b - a + 1;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
-
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
-
-#include "lyapunov_dbl.ipp"
-
-#endif
+    arma::uvec ret(n_points);
+    //
+    for (int i=0; i < n_points; i++) {
+        ret(i) = a + i;
+    }
+    //
+    return ret;
+}

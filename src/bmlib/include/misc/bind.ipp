@@ -20,26 +20,33 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * bind methods; mimics R's rbind and cbind
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+arma::mat
+cbind(const arma::mat& mat_1, const arma::mat& mat_2)
+{
+    return arma::join_rows(mat_1,mat_2);
+}
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
+inline
+arma::mat
+cbind(const arma::mat& mat_1, const arma::mat& mat_2, const arma::mat& mat_3)
+{
+    return cbind(cbind(mat_1,mat_2),mat_3);
+}
 
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
+inline
+arma::mat
+rbind(const arma::mat& mat_1, const arma::mat& mat_2)
+{
+    return arma::join_cols(mat_1,mat_2);
+}
 
-#include "lyapunov_dbl.ipp"
-
-#endif
+inline
+arma::mat
+rbind(const arma::mat& mat_1, const arma::mat& mat_2, const arma::mat& mat_3)
+{
+    return rbind(rbind(mat_1,mat_2),mat_3);
+}

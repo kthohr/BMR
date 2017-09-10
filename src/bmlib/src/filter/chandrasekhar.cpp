@@ -14,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * Chandrasekhar recursions
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
  */
 
 #include "bmlib.hpp"
@@ -81,7 +78,9 @@ bm::chand_recur(const arma::mat& data_inp, const arma::mat& F, const arma::mat& 
         
         Sigma_p = Sigma + tHSt*MSpZp;     
         inv_Sigma_p = arma::inv_sympd(Sigma_p);
+
         //
+
         Kt = (Kt*Sigma + FSt*MSpZp)*inv_Sigma_p;
         St = FSt - Kt*tHSt;
         Mt += MSpZp * inv_Sigma * MSpZp.t();
@@ -93,7 +92,5 @@ bm::chand_recur(const arma::mat& data_inp, const arma::mat& F, const arma::mat& 
     }
     
     // Returns the loglikelihood value
-    loglikelihood = -0.5*loglikelihood;
-    
-    return loglikelihood;
+    return -0.5*loglikelihood;
 }

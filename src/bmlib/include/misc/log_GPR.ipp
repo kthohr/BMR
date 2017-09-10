@@ -19,27 +19,17 @@
   ##
   ################################################################################*/
 
-/*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
- */
+// used in DSGE-VAR
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+double
+log_GPR(const int n, const double a, const double b)
+{
+    double ret_val = 0.0;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
-
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
-
-#include "lyapunov_dbl.ipp"
-
-#endif
+    for (int i=1; i <= n; i++) {
+        ret_val += std::lgamma((a-i+1)/2.0) - std::lgamma((b-i+1)/2.0);
+    }
+    
+    return ret_val;
+}

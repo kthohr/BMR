@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 #ifndef _bmlib_HPP
@@ -36,6 +39,8 @@ namespace bm
     #include "misc/lyapunov_dbl.hpp"
     #include "misc/uvec_linspace.hpp"
     #include "misc/zero_rows.hpp"
+
+    #include "misc/tictoc.hpp"
 
     // VARs
     #include "var/var_sim.hpp"

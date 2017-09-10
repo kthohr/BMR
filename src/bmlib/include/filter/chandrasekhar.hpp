@@ -14,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * Chandrasekhar recursions
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
  */
 
 #ifndef _bmlib_chandrasekhar_HPP

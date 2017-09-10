@@ -14,28 +14,20 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
-// transposes square blocks
+/*
+ * transpose square blocks
+ */
 
-inline
-arma::mat
-inside_trans(const arma::mat& mat_inp, const bool skip_first_row)
-{
-    const int c_int = !!skip_first_row;
+#ifndef _bmlib_inside_trans_HPP
+#define _bmlib_inside_trans_HPP
 
-    const int K = mat_inp.n_rows;
-    const int M = mat_inp.n_cols;
+arma::mat inside_trans(const arma::mat& mat_inp, const bool skip_first_row);
 
-    const int p = (K-c_int) / M;
+#include "inside_trans.ipp"
 
-    //
-
-    arma::mat ret_mat = mat_inp;
-
-    for (int i=0; i < p; i++) {
-        ret_mat.rows(c_int+i*M,(i+1)*M) = ret_mat.rows(c_int+i*M,(i+1)*M).t();
-    }
-
-    return ret_mat;
-}
+#endif

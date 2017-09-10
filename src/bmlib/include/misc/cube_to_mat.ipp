@@ -14,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * cube to matrix
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/28/2017
  */
 
 inline
@@ -41,6 +38,8 @@ cube_to_mat(const arma::cube& cube_inp, const bool vec_op)
     const int cube_cols   = cube_inp.n_cols;
     const int cube_slices = cube_inp.n_slices;
 
+    //
+
     int mat_rows = 0;
     int mat_cols = 0;
 
@@ -52,6 +51,8 @@ cube_to_mat(const arma::cube& cube_inp, const bool vec_op)
         mat_cols = cube_cols;
     }
 
+    //
+
     arma::mat ret_mat(mat_rows,mat_cols);
 
     for (int i=0; i < cube_slices; i++) {
@@ -61,6 +62,8 @@ cube_to_mat(const arma::cube& cube_inp, const bool vec_op)
             ret_mat.rows(i*cube_rows,(i+1)*cube_rows - 1) = cube_inp.slice(i);
         }
     }
+
+    //
 
     return ret_mat;
 }

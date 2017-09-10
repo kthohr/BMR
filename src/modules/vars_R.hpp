@@ -22,61 +22,61 @@
 class bvarm_R : public bm::bvarm
 {
     public:
-        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp);
-        void build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp);
 
         void reset_draws_R();
 
-        void prior_R(arma::vec coef_prior, int var_type_inp, int decay_type_inp, double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp);
+        void prior_R(const arma::vec& coef_prior, int var_type_inp, int decay_type_inp, double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp);
 
         void gibbs_R(int n_draws);
 
         void IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
-        SEXP forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks);
+        SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };
 
 class bvars_R : public bm::bvars
 {
     public:
-        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp);
-        void build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp);
 
         void reset_draws_R();
 
-        void prior_R(arma::vec coef_prior, double HP_1, double HP_2, arma::mat Psi_prior, double Xi_Psi, int gamma);
+        void prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, const arma::mat& Psi_prior, double Xi_Psi, int gamma);
 
         void gibbs_R(int n_draws, int n_burnin);
 
         void IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
-        SEXP forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks);
+        SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };
 
 class bvarw_R : public bm::bvarw
 {
     public:
-        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp);
-        void build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp);
 
         void reset_draws_R();
 
-        void prior_R(arma::vec coef_prior, double Xi_beta, double Xi_Sigma, int gamma);
+        void prior_R(const arma::vec& coef_prior, double Xi_beta, double Xi_Sigma, int gamma);
 
         void gibbs_R(int n_draws, int n_burnin);
 
         void IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
-        SEXP forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks);
+        SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };
 
 class bvartvp_R : public bm::bvartvp
 {
     public:
-        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
 
         void reset_draws_R();
 
@@ -87,14 +87,14 @@ class bvartvp_R : public bm::bvartvp
         void IRF_R(int n_irf_periods, int time_period);
 
         // SEXP forecast_R(int n_horizon, bool incl_shocks);
-        // SEXP forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks);
+        // SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };
 
 class cvar_R : public bm::cvar
 {
     public:
-        void build_R(arma::mat data_raw, bool cons_term_inp, int p_inp);
-        void build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp);
 
         void reset_draws_R();
 
@@ -105,5 +105,5 @@ class cvar_R : public bm::cvar
         void IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
-        SEXP forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks);
+        SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };

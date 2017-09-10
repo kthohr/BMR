@@ -14,14 +14,17 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * DSGE model class
  */
 
-#ifndef _bmlib_dsge_HPP
-#define _bmlib_dsge_HPP
+#ifndef _bmlib_dsge_class_HPP
+#define _bmlib_dsge_class_HPP
 
 template<class T>
 class dsge
@@ -58,12 +61,23 @@ class dsge
 
         arma::mat dsge_draws;
 
+        arma::cube irfs;
+
         // a function mapping the 'deep' parameters to the structural matrices
 
         std::function<void (const arma::vec& pars_inp, T& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out)> model_fn;
 
         //
         // member functions
+
+        ~dsge() = default;
+         dsge() = default;
+
+        dsge(const dsge&) = default;
+        dsge& operator=(const dsge&) = default;
+
+        dsge(dsge&&) = default;
+        dsge& operator=(dsge&&) = default;
 
         void set_bounds(const arma::vec& lower_bounds_inp, const arma::vec& upper_bounds_inp);
         void set_prior(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp);
@@ -82,6 +96,8 @@ class dsge
 
         void estim_mcmc(const arma::vec& initial_vals);
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
+
+        void IRF(const int n_irf_periods);
 
     protected:
         static double mode_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* mode_data);

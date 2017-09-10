@@ -26,11 +26,11 @@ RCPP_MODULE(bvarm_module)
     using namespace Rcpp ;
 
     // function overloading requires some trickery
-    void (bvarm_R::*build_1)(arma::mat,bool,int) = &bvarm_R::build_R;
-    void (bvarm_R::*build_2)(arma::mat,arma::mat,bool,int) = &bvarm_R::build_R;
+    void (bvarm_R::*build_1)(const arma::mat&, bool, int) = &bvarm_R::build_R;
+    void (bvarm_R::*build_2)(const arma::mat&,const arma::mat&, bool, int) = &bvarm_R::build_R;
 
     SEXP (bvarm_R::*forecast_1)(int, bool) = &bvarm_R::forecast_R;
-    SEXP (bvarm_R::*forecast_2)(arma::mat, int, bool) = &bvarm_R::forecast_R;
+    SEXP (bvarm_R::*forecast_2)(const arma::mat&, int, bool) = &bvarm_R::forecast_R;
   
     // now we can declare the class
     class_<bm::bvarm>( "bvarm_cpp" )
@@ -85,7 +85,7 @@ RCPP_MODULE(bvarm_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void bvarm_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
+void bvarm_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,cons_term_inp,p_inp);
@@ -96,7 +96,7 @@ void bvarm_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
     }
 }
 
-void bvarm_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp)
+void bvarm_R::build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
@@ -118,7 +118,7 @@ void bvarm_R::reset_draws_R()
     }
 }
 
-void bvarm_R::prior_R(arma::vec coef_prior, int var_type_inp, int decay_type_inp, double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp)
+void bvarm_R::prior_R(const arma::vec& coef_prior, int var_type_inp, int decay_type_inp, double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp)
 {
     try {
         this->prior(coef_prior,var_type_inp,decay_type_inp,HP_1_inp,HP_2_inp,HP_3_inp,HP_4_inp);
@@ -165,7 +165,7 @@ SEXP bvarm_R::forecast_R(int n_horizon, bool incl_shocks)
     return R_NilValue;
 }
 
-SEXP bvarm_R::forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks)
+SEXP bvarm_R::forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks)
 {
     try {
         arma::cube fcast_res = this->forecast(Y_T,n_horizon,incl_shocks);

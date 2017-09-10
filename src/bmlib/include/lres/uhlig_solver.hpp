@@ -14,21 +14,18 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /* 
  * Uhlig's method for solving linear rational  expectations
  * models using a generalized eigen decomposition.
- *
- * Written by
- * Keith O'Hara
- * 07/01/12
- *
- * This version:
- * 01/03/17
- *
- * Requires the 'Armadillo' linear algebra library.
  */
+
+#ifndef _bmlib_uhlig_solver_HPP
+#define _bmlib_uhlig_solver_HPP
 
 int uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C, const arma::mat& D,
                  const arma::mat& F, const arma::mat& G, const arma::mat& H, const arma::mat& J, const arma::mat& K, const arma::mat& L, const arma::mat& M, const arma::mat& N,
@@ -38,3 +35,5 @@ int uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C, con
 int uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C, const arma::mat& D,
                  const arma::mat& F, const arma::mat& G, const arma::mat& H, const arma::mat& J, const arma::mat& K, const arma::mat& L, const arma::mat& M, const arma::mat& N,
                  arma::mat& P, arma::mat& Q, arma::mat& R, arma::mat& S);
+
+#endif

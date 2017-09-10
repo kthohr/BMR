@@ -26,11 +26,11 @@ RCPP_MODULE(cvar_module)
     using namespace Rcpp ;
 
     // function overloading requires some trickery
-    void (cvar_R::*build_1)(arma::mat,bool,int) = &cvar_R::build_R;
-    void (cvar_R::*build_2)(arma::mat,arma::mat,bool,int) = &cvar_R::build_R;
+    void (cvar_R::*build_1)(const arma::mat&,bool,int) = &cvar_R::build_R;
+    void (cvar_R::*build_2)(const arma::mat&,const arma::mat&,bool,int) = &cvar_R::build_R;
 
     SEXP (cvar_R::*forecast_1)(int, bool) = &cvar_R::forecast_R;
-    SEXP (cvar_R::*forecast_2)(arma::mat, int, bool) = &cvar_R::forecast_R;
+    SEXP (cvar_R::*forecast_2)(const arma::mat&, int, bool) = &cvar_R::forecast_R;
   
     // now we can declare the class
     class_<bm::cvar>( "cvar_cpp" )
@@ -77,7 +77,7 @@ RCPP_MODULE(cvar_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void cvar_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
+void cvar_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,cons_term_inp,p_inp);
@@ -88,7 +88,7 @@ void cvar_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
     }
 }
 
-void cvar_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp)
+void cvar_R::build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
@@ -157,7 +157,7 @@ SEXP cvar_R::forecast_R(int n_horizon, bool incl_shocks)
     return R_NilValue;
 }
 
-SEXP cvar_R::forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks)
+SEXP cvar_R::forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks)
 {
     try {
         arma::cube fcast_res = this->forecast(Y_T,n_horizon,incl_shocks);

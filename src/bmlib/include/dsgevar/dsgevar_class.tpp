@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -37,13 +40,7 @@ dsgevar<T>::build(const arma::mat& data_raw, const bool cons_term_inp, const int
 
     K = c_int + M*p;
 
-    if (!std::isfinite(lambda_inp)) {
-        finite_lambda = false;
-        lambda = lambda_inp;
-    } else {
-        finite_lambda = true;
-        lambda = std::max(lambda_inp, (double) (M*(p+1) + c_int) / (double) n);
-    }
+    lambda = (std::isfinite(lambda_inp)) ? std::max(lambda_inp, (double) (M*(p+1) + c_int) / (double) n) : lambda_inp;
 
     //
 
@@ -159,6 +156,7 @@ template<typename T>
 double
 dsgevar<T>::log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX, const arma::mat& Gamma_XX, const arma::mat& Gamma_bar_YY, const arma::mat& Gamma_bar_YX, const arma::mat& Gamma_bar_XX)
 {
+    // note: assumes finite lambda value
     const double lambdaT = (n-p)*lambda;
     const double lambda_recip = 1.0/lambda;
 
@@ -171,7 +169,7 @@ dsgevar<T>::log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX,
 
     const double term_1 = M * ( - std::log(arma::det(Gamma_XX + lambda_recip*XX)) + std::log(arma::det(Gamma_XX)) ) / 2.0;
     // const double term_2 = - (n - p + lambdaT - M*p - c_int)*std::log(arma::det((1.0 + lambda_recip)*Sigma_hat_eps)) / 2.0;
-    const double term_2 = - (n - p + lambdaT - M*p - c_int)*( M*std::log(1.0 + lambda_recip) + std::log(arma::det(Sigma_hat_eps)) ) / 2.0;
+    const double term_2 = - (n - p + lambdaT - M*p - c_int)*( M*std::log(1.0 + lambda_recip) + std::log(arma::det(Sigma_hat_eps)) ) / 2.0; // avoids bug in BMR
     const double term_3 = (lambdaT - M*p - c_int) * std::log(arma::det(Sigma_eps)) / 2.0;
 
     return cons_val + term_1 + term_2 + term_3;
@@ -199,6 +197,8 @@ template<typename T>
 double
 dsgevar<T>::log_posterior_kernel(const arma::vec& pars_inp)
 {
+    const bool finite_lambda = std::isfinite(lambda);
+
     // setup DSGE model and solve
 
     dsge_obj.solve_to_state_space(pars_inp);
@@ -341,15 +341,14 @@ template<typename T>
 void
 dsgevar<T>::gibbs()
 {
+    const bool finite_lambda = std::isfinite(lambda);
 
     const int n_draws = dsge_obj.dsge_draws.n_rows;
 
     beta_draws.set_size(K, M, n_draws);
     Sigma_draws.set_size(M, M, n_draws);
 
-    const double tau = lambda / (1.0 + lambda); // will be NaN in the case of lambda = Inf
-
-    Sigma_pt_dof = (1+lambda)*(n-p) - M*p - c_int;
+    Sigma_pt_dof = (1+lambda)*(n-p) - M*p - c_int; // // will be inf (?) in the case of lambda = Inf
 
     //
     // begin loop
@@ -377,6 +376,8 @@ dsgevar<T>::gibbs()
         arma::mat beta_draw, Sigma_draw;
 
         if (finite_lambda) {
+
+            const double tau = lambda / (1.0 + lambda); // will be NaN in the case of lambda = Inf
 
             arma::mat Gamma_bar_YY = tau*Gamma_YY + (1.0 - tau)*YY;
             arma::mat Gamma_bar_YX = tau*Gamma_YX.t() + (1.0 - tau)*XY;
@@ -448,7 +449,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
         // adjust the impact matrix
 
         arma::mat shocks_cov, G_state;
-        dsge_obj_copy.model_fn(dsge_obj.dsge_draws.row(j-1).t(),dsge_obj_copy.lrem_obj,shocks_cov,dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_R);
+        dsge_obj_copy.model_fn(dsge_obj.dsge_draws.row(j-1).t(),dsge_obj_copy.lrem_obj,shocks_cov,dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_H,dsge_obj_copy.kalman_mat_R);
 
         dsge_obj_copy.solve();
 

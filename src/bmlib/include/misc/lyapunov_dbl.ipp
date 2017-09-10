@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -22,30 +25,28 @@
  *
  *            F X F' + Q = X
  *
- * The initial value for X is assumed to be set to Q.
- *
- * Keith O'Hara
- * 07/01/12
- *
- * This version:
- * 08/15/17
+ * The initial value for X is set to Q.
  */
 
-#include "bmlib.hpp"
-
+//
 // internal
+
 inline
 arma::mat
 lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp)
 {
     const int max_iter = (max_iter_inp) ? *max_iter_inp : 1000;
     const double err_tol = (err_tol_inp) ? *err_tol_inp : 1E-08;
+
     //
+
     arma::mat X_O = X; // Old
     arma::mat X_N = X; // New
     
     arma::mat dbl_mat = F;
+    
     //
+
     int iter = 0;
     double err = 2*err_tol;
 
@@ -58,15 +59,21 @@ lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp
         if (iter % 10 == 0) {
             err = arma::abs(X_N - X_O).max();
         }
+
         //
+
         dbl_mat *= dbl_mat;
         X_O = X_N;
     }
+
     //
+
     return X_N;
 }
 
+//
 // wrappers
+
 inline
 arma::mat
 lyapunov_dbl(const arma::mat& X, const arma::mat& F)
