@@ -20,26 +20,27 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * transpose square blocks
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+arma::mat
+inside_trans(const arma::mat& mat_inp, const bool skip_first_row)
+{
+    const int c_int = !!skip_first_row;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
+    const int K = mat_inp.n_rows;
+    const int M = mat_inp.n_cols;
 
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
+    const int p = (K-c_int) / M;
 
-#include "lyapunov_dbl.ipp"
+    //
 
-#endif
+    arma::mat ret_mat = mat_inp;
+
+    for (int i=0; i < p; i++) {
+        ret_mat.rows(c_int+i*M,(i+1)*M) = ret_mat.rows(c_int+i*M,(i+1)*M).t();
+    }
+
+    return ret_mat;
+}

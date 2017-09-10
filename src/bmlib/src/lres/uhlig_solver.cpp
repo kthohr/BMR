@@ -14,18 +14,14 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /* 
  * Uhlig's method for solving linear rational  expectations
  * models using a generalized eigen decomposition.
- *
- * Written by
- * Keith O'Hara
- * 07/01/12
- *
- * This version:
- * 08/16/17
  */
 
 #include "bmlib.hpp"
@@ -35,7 +31,9 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
                      const arma::vec* which_eig, arma::mat& P, arma::mat& Q, arma::mat& R, arma::mat& S, arma::cx_vec* eigen_vals_out, arma::cx_mat* eigen_vecs_out)
 {
     const double bignum = 1e+07;
+
     //
+    
     const int l = C.n_rows;
     const int n = C.n_cols;
     const int k = std::min(N.n_rows,N.n_cols);

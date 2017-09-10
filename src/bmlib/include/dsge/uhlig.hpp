@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -55,10 +58,25 @@ class uhlig
         // covariance matrix of shocks
         arma::mat shocks_cov;
 
+        //
         // member functions
-        void build(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp, const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp, const arma::mat& N_inp);
+
+        ~uhlig() = default;
+         uhlig() = default;
+
+        uhlig(const uhlig&) = default;
+        uhlig& operator=(const uhlig&) = default;
+
+        uhlig(uhlig&&) = default;
+        uhlig& operator=(uhlig&&) = default;
+
+        void build(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp, 
+                   const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, 
+                   const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp, const arma::mat& N_inp);
+
         void build_pre(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp);
-        void build_exp(const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp);
+        void build_exp(const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, 
+                       const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp);
         void build_exog(const arma::mat& N_inp);
 
         void solve();

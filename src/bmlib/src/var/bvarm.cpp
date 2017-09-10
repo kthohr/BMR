@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -240,22 +243,22 @@ bm::bvarm::gibbs(const int n_draws)
     beta_draws.set_size(K, M, n_draws);
 
     arma::mat inv_Sigma_hat = arma::inv(Sigma_hat);
+
     //
+
     arma::mat inv_alpha_pr_var = arma::inv(alpha_pr_var);
 
     alpha_pt_var = arma::inv_sympd(inv_alpha_pr_var + arma::kron(inv_Sigma_hat,X.t()*X));
     alpha_pt_mean = alpha_pt_var * (inv_alpha_pr_var*alpha_pr_mean + arma::vectorise(X.t() * Y * inv_Sigma_hat));
+    
     //
-    arma::vec alpha(K*M);
+
     arma::mat chol_alpha_pt_var = arma::chol(alpha_pt_var); // upper triangular
 
     // no need for burnin
     for (int i=0; i < n_draws; i++) {
-        alpha = stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true);
-
-        beta_draws.slice(i) = arma::reshape(alpha,K,M);
+        beta_draws.slice(i) = arma::reshape( stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true) ,K,M);
     }
-    //
 }
 
 //

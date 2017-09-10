@@ -16,14 +16,14 @@
   ##
   ################################################################################*/
 
-/*
+/* 
  * Sample from an inverse-Wishart distribution
  *
  * Keith O'Hara
  * 06/01/2015
  *
  * This version:
- * 07/15/2017
+ * 08/23/2017
  */
 
 inline
@@ -31,7 +31,7 @@ arma::mat
 rinvwish(const arma::mat& Psi_par, const int nu_par)
 {
     const int K = Psi_par.n_rows;
-
+	
     arma::mat chol_Psi_inv = arma::chol(arma::inv(Psi_par),"lower");
     //
     arma::mat A = arma::zeros(K,K);
@@ -41,13 +41,12 @@ rinvwish(const arma::mat& Psi_par, const int nu_par)
             A(i,j) = rnorm();
         }
     }
-
+	
     for (int i=0; i < K; i++) {
 	    A(i,i) = std::sqrt(rchisq(nu_par-i));
     }
 
     chol_Psi_inv = chol_Psi_inv*A;
     //
-    // return arma::inv( chol_Psi_inv * A * (chol_Psi_inv * A).t() );
     return arma::inv( chol_Psi_inv * chol_Psi_inv.t() );
 }

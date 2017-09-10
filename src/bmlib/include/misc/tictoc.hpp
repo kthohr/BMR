@@ -20,26 +20,30 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * simple tictoc functionality
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+using comptime = std::chrono::time_point<std::chrono::system_clock>;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
+inline
+comptime
+tic()
+{
+    return std::chrono::system_clock::now();
+}
 
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
+inline
+void
+tictoc(comptime time_inp)
+{
+    comptime time_now = std::chrono::system_clock::now();
 
-#include "lyapunov_dbl.ipp"
+    std::chrono::duration<double> run_time = time_now - time_inp;
 
-#endif
+    //
+
+    std::time_t end_time = std::chrono::system_clock::to_time_t(time_now);
+        
+    std::cout << "finished computation at " << std::ctime(&end_time)
+              << "total runtime: " << run_time.count() << "s\n";
+}

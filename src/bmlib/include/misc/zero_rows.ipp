@@ -1,7 +1,8 @@
 /*################################################################################
   ##
-  ##   BMLib by Keith O'Hara Copyright (C) 2011-2017
-  ##   This file is part of the C++ BMLib library.
+  ##   Copyright (C) 2011-2017 Keith O'Hara
+  ##
+  ##   This file is part of the BMLib C++ library.
   ##
   ##   BMLib is free software: you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by
@@ -13,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * find rows with all zero elements
- *
- * Keith O'Hara
- * 01/01/2014
- *
- * This version:
- * 06/13/2017
  */
 
 inline
@@ -33,11 +31,15 @@ zero_rows(const arma::mat& X)
     const int k = X.n_cols;
     
     arma::mat temp_mat = arma::zeros(n,k);
+
     //
+
     temp_mat.elem(arma::find(X==0)).ones(); // find whch elements of X are = 0
     arma::colvec temp_vec = sum(temp_mat,1);
     
     arma::uvec ret_vec = arma::find(temp_vec==k); // if a row of X contains only zeros, then the corresponding row in temp_vec will = k
+
     //
+    
     return ret_vec;
 }

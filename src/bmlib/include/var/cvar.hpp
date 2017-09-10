@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -29,7 +32,7 @@ class cvar
         int n;          // sample length (aka, 'T')
         int p;          // number of lags
         int M;          // number of endogenous variables
-        int K;          // number of coefficients in each 
+        int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
         arma::mat Y;    // Y = X beta + e
@@ -40,13 +43,21 @@ class cvar
 
         arma::cube beta_draws;   // bootstrap draws of beta
         arma::cube Sigma_draws;  // bootstrap draws of beta
-        
+
         arma::cube irfs;         // irfs based on the bootstrap draws
 
+        //
         // member functions
-        ~cvar(){};
-         cvar(){};
-        
+
+        ~cvar() = default;
+         cvar() = default;
+
+        cvar(const cvar&) = default;
+        cvar& operator=(const cvar&) = default;
+
+        cvar(cvar&&) = default;
+        cvar& operator=(cvar&&) = default;
+
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 

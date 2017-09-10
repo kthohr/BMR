@@ -20,26 +20,30 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * Simulate data from a DSGE Model
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+arma::mat
+dsge_simulate(const arma::mat& F_state, const arma::mat& G_state, const arma::mat& shocks_cov, const int sim_periods, const int burnin)
+{
+    // const int n_shocks = G_state.n_cols;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
+    arma::mat dsge_sim_mat(sim_periods+burnin,F_state.n_cols);
 
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
+    arma::mat shocks = stats::rmvnorm(sim_periods + burnin, shocks_cov);
 
-#include "lyapunov_dbl.ipp"
+    //
 
-#endif
+    dsge_sim_mat.row(0) = shocks.row(0) * G_state.t();
+
+    for (int i = 1; i < (sim_periods + burnin); i++) {
+        dsge_sim_mat.row(i) = dsge_sim_mat.row(i-1) * F_state.t() + shocks.row(i) * G_state.t();
+    }
+
+    dsge_sim_mat.shed_rows(0,burnin-1);
+
+    //
+    
+    return dsge_sim_mat;
+}

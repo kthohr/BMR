@@ -3,13 +3,12 @@
 # 
 
 rm(list=ls())
-library(BMR.Rcpp)
+library(BMR)
 
 #
 
 data(BMRVARData)
-USMacroData <- USMacroData[,2:4]
-var_data <- matrix(c(as.matrix(USMacroData)),ncol=3)
+var_data <- data.matrix(USMacroData[,2:4])
 
 var_obj = new(cvar)
 

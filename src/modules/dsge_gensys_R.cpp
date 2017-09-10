@@ -32,13 +32,15 @@ RCPP_MODULE(dsge_gensys_module)
 
         // basic objects
         .field( "estim_data", &bm::dsge<bm::gensys>::estim_data )
-        .field( "dsge_draws", &bm::dsge<bm::gensys>::dsge_draws )
 
         .field_readonly( "prior_form", &bm::dsge<bm::gensys>::prior_form )
         .field_readonly( "prior_pars", &bm::dsge<bm::gensys>::prior_pars )
 
         .field_readonly( "lower_bounds", &bm::dsge<bm::gensys>::lower_bounds )
         .field_readonly( "upper_bounds", &bm::dsge<bm::gensys>::upper_bounds )
+
+        .field_readonly( "dsge_draws", &bm::dsge<bm::gensys>::dsge_draws )
+        .field_readonly( "irfs", &bm::dsge<bm::gensys>::irfs )
     ;
 
     class_<dsge_gensys_R>( "dsge_gensys" )
@@ -72,8 +74,8 @@ dsge_gensys_R::set_model_fn(SEXP model_fn_inp)
 {
     try {
         model_fn_SEXP = model_fn_inp;
-        Rcpp::Function pars_fn = Rcpp::as<Rcpp::Function>(model_fn_SEXP);
 
+        // Rcpp::Function pars_fn = Rcpp::as<Rcpp::Function>(model_fn_SEXP);
         // model_fn_Rcpp = &pars_fn;
         // model_fn_Rcpp = reinterpret_cast<void*>(&pars_fn);
 
@@ -171,20 +173,17 @@ void dsge_gensys_R::set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bou
     try {
         const int n_vals = lower_bounds_inp.n_elem;
 
-        arma::vec lower_bounds_clean = lower_bounds_inp;
-        arma::vec upper_bounds_clean = upper_bounds_inp;
-
         for (int i=0; i < n_vals; i++) {
-            if (!R_FINITE(lower_bounds_clean[i])) { // R_NegInf
-                lower_bounds_clean[i] = - bm::inf;
+            if (!R_FINITE(lower_bounds_inp[i])) { // R_NegInf
+                lower_bounds_inp[i] = - bm::inf;
             }
 
-            if (!R_FINITE(upper_bounds_clean[i])) { // R_PosInf
-                upper_bounds_clean[i] = bm::inf;
+            if (!R_FINITE(upper_bounds_inp[i])) { // R_PosInf
+                upper_bounds_inp[i] = bm::inf;
             }
         }
 
-        this->set_bounds(lower_bounds_clean,upper_bounds_clean);
+        this->set_bounds(lower_bounds_inp,upper_bounds_inp);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
@@ -192,7 +191,7 @@ void dsge_gensys_R::set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bou
     }
 }
 
-void dsge_gensys_R::set_prior_R(arma::uvec prior_form_inp, arma::mat prior_pars_inp)
+void dsge_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp)
 { 
     try {
         this->set_prior(prior_form_inp,prior_pars_inp);
@@ -205,7 +204,7 @@ void dsge_gensys_R::set_prior_R(arma::uvec prior_form_inp, arma::mat prior_pars_
 
 //
 
-SEXP dsge_gensys_R::estim_mode_R(arma::vec initial_vals)
+SEXP dsge_gensys_R::estim_mode_R(const arma::vec& initial_vals)
 {
     try {
         optim::opt_settings settings;
@@ -229,7 +228,7 @@ SEXP dsge_gensys_R::estim_mode_R(arma::vec initial_vals)
     return R_NilValue;
 }
 
-void dsge_gensys_R::estim_mcmc_R(arma::vec initial_vals)
+void dsge_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
 {
     try {
         mcmc::mcmc_settings settings;
@@ -241,7 +240,22 @@ void dsge_gensys_R::estim_mcmc_R(arma::vec initial_vals)
             settings.de_initial_ub = mcmc_initial_ub;
         }
 
+        settings.de_n_pop = 50;
+        settings.de_n_gen = 100;
+        settings.de_n_burnin = 100;
+
         this->estim_mcmc(initial_vals,&settings);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+void dsge_gensys_R::IRF_R(int n_irf_periods)
+{
+    try {
+        this->IRF(n_irf_periods);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

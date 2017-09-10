@@ -14,6 +14,12 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -121,13 +127,14 @@ bm::cvar::boot(const int n_draws)
     arma::mat beta_b  = beta_hat;
     arma::mat Sigma_b = Sigma_hat;
 
+    arma::mat epsilon_hat = Y - X * beta_hat;
+
     // this might have to be changed to center the residuals
     // in case a constant wasn't included in the model
 
     arma::ivec sampling_vec = arma::randi(n - p, arma::distr_param(0,n-p-1));
     arma::uvec eps_sample = arma::conv_to<arma::uvec>::from(sampling_vec);
 
-    arma::mat epsilon_hat = Y - X * beta_hat;
     arma::mat epsilon_b = epsilon_hat.rows(eps_sample);
 
     arma::mat Y_b = Y;
@@ -173,8 +180,8 @@ bm::cvar::boot(const int n_draws)
 
         //
 
-        beta_draws.slice(i)  = beta_b;
-        Sigma_draws.slice(i) = Sigma_b;
+        beta_draws.slice(i)  = std::move(beta_b);
+        Sigma_draws.slice(i) = std::move(Sigma_b);
     }
     //
 }
@@ -224,7 +231,7 @@ bm::cvar::IRF(const int n_irf_periods)
                 impact_mat_b.rows(M,K_adj-c_int-1) = impact_mat_b.rows(0,K_adj-M-c_int-1);
             }
 
-            impact_mat_b.rows(0,M-1) = impact_mat_h;
+            impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
         }
     }
     //

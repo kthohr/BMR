@@ -26,15 +26,15 @@ RCPP_MODULE(bvars_module)
     using namespace Rcpp ;
 
     // function overloading requires some trickery
-    void (bvars_R::*build_1)(arma::mat,bool,int) = &bvars_R::build_R;
-    void (bvars_R::*build_2)(arma::mat,arma::mat,bool,int) = &bvars_R::build_R;
+    void (bvars_R::*build_1)(const arma::mat&, bool, int) = &bvars_R::build_R;
+    void (bvars_R::*build_2)(const arma::mat&, const arma::mat&, bool, int) = &bvars_R::build_R;
 
-    void (bvars_R::*prior_3)(arma::vec,double,double,arma::mat,double,int) = &bvars_R::prior_R;
+    void (bvars_R::*prior_3)(const arma::vec&, double, double, const arma::mat&, double, int) = &bvars_R::prior_R;
 
     void (bvars_R::*IRF_1)(int) = &bvars_R::IRF_R;
 
     SEXP (bvars_R::*forecast_1)(int, bool) = &bvars_R::forecast_R;
-    SEXP (bvars_R::*forecast_2)(arma::mat, int, bool) = &bvars_R::forecast_R;
+    SEXP (bvars_R::*forecast_2)(const arma::mat&, int, bool) = &bvars_R::forecast_R;
   
     // now we can declare the class
     class_<bm::bvars>( "bvars_cpp" )
@@ -101,7 +101,7 @@ RCPP_MODULE(bvars_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void bvars_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
+void bvars_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,cons_term_inp,p_inp);
@@ -112,7 +112,7 @@ void bvars_R::build_R(arma::mat data_raw, bool cons_term_inp, int p_inp)
     }
 }
 
-void bvars_R::build_R(arma::mat data_raw, arma::mat data_ext, bool cons_term_inp, int p_inp)
+void bvars_R::build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp)
 {
     try {
         this->build(data_raw,data_ext,cons_term_inp,p_inp);
@@ -134,7 +134,7 @@ void bvars_R::reset_draws_R()
     }
 }
 
-void bvars_R::prior_R(arma::vec coef_prior, double HP_1, double HP_2, arma::mat Psi_prior, double Xi_psi, int gamma)
+void bvars_R::prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, const arma::mat& Psi_prior, double Xi_psi, int gamma)
 {
     try {
         this->prior(coef_prior,HP_1,HP_2,Psi_prior,Xi_psi,gamma);
@@ -181,7 +181,7 @@ SEXP bvars_R::forecast_R(int n_horizon, bool incl_shocks)
     return R_NilValue;
 }
 
-SEXP bvars_R::forecast_R(arma::mat Y_T, int n_horizon, bool incl_shocks)
+SEXP bvars_R::forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks)
 {
     try {
         arma::cube fcast_res = this->forecast(Y_T,n_horizon,incl_shocks);

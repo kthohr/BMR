@@ -14,17 +14,18 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
-inline
-double
-log_GPR(const int n, const double a, const double b)
-{
-    double ret_val = 0.0;
+// used in DSGE-VAR
 
-    for (int i=1; i <= n; i++) {
-        ret_val += std::lgamma((a-i+1)/2.0) - std::lgamma((b-i+1)/2.0);
-    }
-    
-    return ret_val;
-}
+#ifndef _bmlib_log_GPR_HPP
+#define _bmlib_log_GPR_HPP
+
+double log_GPR(const int n, const double a, const double b);
+
+#include "log_GPR.ipp"
+
+#endif

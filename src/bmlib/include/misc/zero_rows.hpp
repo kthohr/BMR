@@ -1,7 +1,8 @@
 /*################################################################################
   ##
-  ##   BMLib by Keith O'Hara Copyright (C) 2011-2017
-  ##   This file is part of the C++ BMLib library.
+  ##   Copyright (C) 2011-2017 Keith O'Hara
+  ##
+  ##   This file is part of the BMLib C++ library.
   ##
   ##   BMLib is free software: you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by
@@ -13,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * find rows with all zero elements
- *
- * Keith O'Hara
- * 01/01/2014
- *
- * This version:
- * 06/13/2017
  */
 
 #ifndef _bmlib_zero_rows_HPP

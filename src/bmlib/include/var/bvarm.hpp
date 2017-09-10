@@ -14,6 +14,9 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
@@ -67,9 +70,17 @@ class bvarm
 
         arma::cube irfs;         // irfs based on the posterior draws
 
+        //
         // member functions
-        ~bvarm(){};
-         bvarm(){};
+
+        ~bvarm() = default;
+         bvarm() = default;
+
+        bvarm(const bvarm&) = default;
+        bvarm& operator=(const bvarm&) = default;
+
+        bvarm(bvarm&&) = default;
+        bvarm& operator=(bvarm&&) = default;
 
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);

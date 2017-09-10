@@ -14,19 +14,20 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
-inline
-arma::uvec
-uvec_linspace(const int a, const int b)
-{
-    const int n_points = b - a + 1;
+/*
+ * a linear space of (unsigned) integers
+ */
 
-    arma::uvec ret(n_points);
-    //
-    for (int i=0; i < n_points; i++) {
-        ret(i) = a + i;
-    }
-    //
-    return ret;
-}
+#ifndef _bmlib_uvec_linspace_HPP
+#define _bmlib_uvec_linspace_HPP
+
+arma::uvec uvec_linspace(const int a, const int b);
+
+#include "uvec_linspace.ipp"
+
+#endif

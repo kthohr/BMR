@@ -20,26 +20,42 @@
   ################################################################################*/
 
 /*
- * A doubling algorithm to solve a discrete Lyapunov eqn
- * of the form
- *
- *            F X F' + Q = X
- *
- * The initial value for X is set to Q.
+ * by-row reconstruction of a matrix ( mimics R's 'matrix(.,.,.,byrow=TRUE)' )
  */
 
- #ifndef _bmlib_lyapunov_dbl_HPP
- #define _bmlib_lyapunov_dbl_HPP
+inline
+arma::mat
+byrow(const arma::mat& mat_inp, const int n_rows, const int n_cols)
+{
+    arma::vec vec_tmp = arma::vectorise(mat_inp);
+    const int n_vals = vec_tmp.n_elem;
 
-// internal
-arma::mat lyapunov_dbl_int(const arma::mat& X, const arma::mat& F, const int* max_iter_inp, const double* err_tol_inp);
+    arma::mat ret(n_rows,n_cols);
 
-// wrappers
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const double err_tol);
-arma::mat lyapunov_dbl(const arma::mat& X, const arma::mat& F, const int max_iter, const double err_tol);
+    if (n_vals != n_rows*n_cols) { // use repmat in this case
+        if (n_vals == n_rows) {
+            ret = arma::repmat(vec_tmp,1,n_cols);
+        } else if (n_vals == n_cols) {
+            ret = arma::repmat(vec_tmp.t(),n_rows,1);
+        } else {
+            printf("error in byrow\n");
+            return ret;
+        }
+    } else { // otherwise rebuild the input matrix using byrow
 
-#include "lyapunov_dbl.ipp"
+        int kr = 0, kc = 0;
 
-#endif
+        for (int i=0; i < n_rows*n_cols; i++) {
+            ret(kr,kc) = vec_tmp(i);
+
+            kc++;
+
+            if (kc >= n_cols) {
+                kc = 0;
+                kr++;
+            }
+        }
+    }
+
+    return ret;
+}

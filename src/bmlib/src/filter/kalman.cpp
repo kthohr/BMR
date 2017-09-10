@@ -14,16 +14,13 @@
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##
   ################################################################################*/
 
 /*
  * Kalman filter and smoother
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/14/2017
  */
 
 #include "bmlib.hpp"
@@ -82,7 +79,9 @@ bm::kalman_filter(const arma::mat& data_inp, const arma::mat& F, const arma::mat
 
         Sigma = tH*state_cov_pred*H + R;
         inv_Sigma = arma::inv_sympd(Sigma);
+
         //
+
         kal_gain = state_cov_pred*H*inv_Sigma;
         resid = data_inp.row(i).t() - tH*state_pos_pred - C;
 
@@ -97,9 +96,7 @@ bm::kalman_filter(const arma::mat& data_inp, const arma::mat& F, const arma::mat
     }
 
     // Returns the loglikelihood value
-    loglikelihood *= -0.5;
-    
-    return loglikelihood;
+    return -0.5*loglikelihood;
 }
 
 double
