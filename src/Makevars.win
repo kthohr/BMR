@@ -45,4 +45,4 @@ all: $(SHLIB) libBMR.dll
 # some trickery to work around R's desire to link with gcc instead of g++
 
 libBMR.dll: $(OBJECTS_BMR)
-	$(SHLIB_CXXLD) -shared -s -static-libstdc++ -static-libgcc -o BMR.dll $(OBJECTS_BMR) $(SHLIB_CXXLDFLAGS) $(ALL_LIBS)
+	$(SHLIB_CXXLD) -shared -s -static-libstdc++ -static-libgcc $(SHLIB_OPENMP_CXXFLAGS) -o BMR.dll $(OBJECTS_BMR) $(SHLIB_CXXLDFLAGS) $(ALL_LIBS)
