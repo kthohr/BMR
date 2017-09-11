@@ -421,14 +421,14 @@ dsgevar<T>::gibbs()
 // IRFs
 
 template<typename T>
-void
+arma::cube
 dsgevar<T>::IRF(const int n_irf_periods)
 {
     const int n_draws = beta_draws.n_slices;
     // const int K_adj = K - n_ext_vars;
     const int K_adj = K;
 
-    irfs.set_size(M, M, n_irf_periods*n_draws);
+    arma::cube irfs_ret(M, M, n_irf_periods*n_draws);
 
     //
 
@@ -472,8 +472,6 @@ dsgevar<T>::IRF(const int n_irf_periods)
             S.rows(R_pos_inds).fill( 1.0 );
         }
 
-        // S = arma::diagmat(arma::vectorise(S));
-
         arma::mat Q = Q_dcm*arma::diagmat(S);
 
         impact_mat = impact_mat*Q.t();
@@ -485,11 +483,11 @@ dsgevar<T>::IRF(const int n_irf_periods)
 
         impact_mat_b.rows(0,M-1) = impact_mat;
 
-        irfs.slice((j-1)*n_irf_periods) = impact_mat;
+        irfs_ret.slice((j-1)*n_irf_periods) = impact_mat;
 
         for (int i=2; i <= n_irf_periods; i++) {
             impact_mat_h = beta_b.t()*impact_mat_b;
-            irfs.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
+            irfs_ret.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
 
             if(K_adj > M + c_int){
                 impact_mat_b.rows(M,K_adj-c_int-1) = impact_mat_b.rows(0,K_adj-M-c_int-1);
@@ -498,5 +496,8 @@ dsgevar<T>::IRF(const int n_irf_periods)
             impact_mat_b.rows(0,M-1) = impact_mat_h;
         }
     }
+
     //
+
+    return irfs_ret;
 }

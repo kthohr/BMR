@@ -49,8 +49,6 @@ RCPP_MODULE(dsgevar_gensys_module)
 
         .field_readonly( "beta_draws", &bm::dsgevar<bm::gensys>::beta_draws )
         .field_readonly( "Sigma_draws", &bm::dsgevar<bm::gensys>::Sigma_draws )
-
-        .field_readonly( "irfs", &bm::dsgevar<bm::gensys>::irfs )
     ;
 
     class_<dsgevar_gensys_R>( "dsgevar_gensys" )
@@ -80,6 +78,8 @@ RCPP_MODULE(dsgevar_gensys_module)
 
         .method( "estim_mode", &dsgevar_gensys_R::estim_mode_R )
         .method( "estim_mcmc", &dsgevar_gensys_R::estim_mcmc_R )
+
+        .method( "IRF", &dsgevar_gensys_R::IRF_R )
     ;
 }
 
@@ -283,6 +283,10 @@ void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
             settings.de_initial_ub = mcmc_initial_ub;
         }
 
+        settings.de_n_pop = 50;
+        settings.de_n_gen = 100;
+        settings.de_n_burnin = 100;
+
         this->estim_mcmc(initial_vals,&settings);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
@@ -291,13 +295,15 @@ void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
     }
 }
 
-void dsgevar_gensys_R::IRF_R(int n_irf_periods)
+SEXP dsgevar_gensys_R::IRF_R(int n_irf_periods)
 {
     try {
-        this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods);
+        return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+    return R_NilValue;
 }

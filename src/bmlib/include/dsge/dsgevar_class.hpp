@@ -67,8 +67,6 @@ class dsgevar
         arma::cube beta_draws;    // posterior draws of beta
         arma::cube Sigma_draws;   // posterior draws of Sigma
 
-        arma::cube irfs;          // irfs based on the posterior draws
-
         //
         // member functions
 
@@ -93,7 +91,7 @@ class dsgevar
 
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
 
-        void IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods);
 
     protected:
         void model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX);

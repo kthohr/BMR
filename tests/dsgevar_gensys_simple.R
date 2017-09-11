@@ -127,4 +127,11 @@ obj$opt_initial_ub <- opt_bounds[,2]
 
 obj$build(sim_data,FALSE,1,1.0);
 
-obj$estim_mode(x)
+#obj$estim_mode(x)
+
+obj$mcmc_initial_lb <- opt_bounds[,1]
+obj$mcmc_initial_ub <- opt_bounds[,2]
+
+obj$estim_mcmc(x)
+
+
