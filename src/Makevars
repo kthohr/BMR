@@ -1,24 +1,27 @@
-
-
-
-CXX_STD = CXX11
-PKG_CPPFLAGS= -std=c++11 -Wall -O2 -DUSE_RCPP_ARMADILLO -I./ -I./bmlib/include -I./bmlib/include/mcmc -I./bmlib/include/optim
-
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+# BMR Makevars
 
 SDIR = .
 BM_DIR = $(SDIR)/bmlib
 BM_SRC_DIR = $(BM_DIR)/src
 BM_HEADER_DIR = $(BM_DIR)/include
 
+# We need to check for the default Apple compiler, where we need to pass CXX to recognise R's settings
+APPLE_COMPILER := $(shell CXX11='$(CXX)' $(CXX11) --version 2>&1 | grep -i -c -E 'apple llvm')
+
+ifeq ($(APPLE_COMPILER),0)
+    #BMR_OPENMP=$(SHLIB_OPENMP_CXXFLAGS) -DBM_OMP -DOPTIM_OMP -DMCMC_OMP -DARMA_USE_OPENMP
+    BMR_OPENMP=$(SHLIB_OPENMP_CXXFLAGS) -DARMA_USE_OPENMP
+else
+    BMR_OPENMP=
+endif
+
+PKG_CPPFLAGS= $(CXX11STD) $(BMR_OPENMP) -DUSE_RCPP_ARMADILLO -DARMA_NO_DEBUG -DSTATSLIB_GO_INLINE -I./ -I./bmlib/include -I./bmlib/include/mcmc -I./bmlib/include/optim
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+CXX_STD=CXX11STD
+
 OPTIM_SRC_DIR = $(BM_SRC_DIR)/optim
 MCMC_SRC_DIR = $(BM_SRC_DIR)/mcmc
-
-# general flags
-CFLAGS = -Wall $(OPT_FLAGS) -I$(BM_HEADER_DIR)
-CXXFLAGS = $(CXX_STD) -Wall $(OPT_FLAGS) -DSTATSLIB_GO_INLINE -I$(ARMA_INCLUDE_PATH) -I$(BM_HEADER_DIR)
-FFLAGS = $(OPT_FLAGS)
-LIBS= -lgfortran -framework Accelerate
 
 # Optim and MCMC files
 SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/rwmh.cpp
@@ -42,8 +45,9 @@ OBJECTS_BM= $(OBJECTS_OPTIM) $(OBJECTS_MCMC) $(OBJECTS_BM_VAR) $(OBJECTS_BM_FILT
 SOURCES_MODULES= ./modules/bvarm_R.cpp ./modules/bvars_R.cpp ./modules/bvarw_R.cpp ./modules/bvartvp_R.cpp ./modules/cvar_R.cpp ./modules/gensys_R.cpp ./modules/uhlig_R.cpp ./modules/dsge_gensys_R.cpp ./modules/dsgevar_gensys_R.cpp
 OBJECTS_MODULES= $(SOURCES_MODULES:.cpp=.o)
 
-OBJECTS=$(OBJECTS_BM) $(OBJECTS_MODULES)
+OBJECTS_BMR=$(OBJECTS_BM) $(OBJECTS_MODULES)
 
-all: $(SHLIB)
+all: $(SHLIB) libBMR$(SHLIB_EXT)
 
-$(SHLIB): $(OBJECTS)
+libBMR$(SHLIB_EXT): $(OBJECTS_BMR)
+	$(SHLIB_CXX11LD) $(SHLIB_OPENMP_CXXFLAGS) $(SHLIB_CXX11LDFLAGS) -o BMR$(SHLIB_EXT) $(OBJECTS_BMR) $(ALL_LIBS)

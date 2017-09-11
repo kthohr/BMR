@@ -75,7 +75,9 @@ RCPP_MODULE(uhlig_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void uhlig_R::build_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arma::mat D_inp, arma::mat F_inp, arma::mat G_inp, arma::mat H_inp, arma::mat J_inp, arma::mat K_inp, arma::mat L_inp, arma::mat M_inp, arma::mat N_inp)
+void uhlig_R::build_R(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp, 
+                      const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, 
+                      const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp, const arma::mat& N_inp)
 {
     try {
         this->build(A_inp,B_inp,C_inp,D_inp,F_inp,G_inp,H_inp,J_inp,K_inp,L_inp,M_inp,N_inp);
@@ -86,7 +88,7 @@ void uhlig_R::build_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arma::m
     }
 }
 
-void uhlig_R::build_pre_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arma::mat D_inp)
+void uhlig_R::build_pre_R(const arma::mat& A_inp, const arma::mat& B_inp, const arma::mat& C_inp, const arma::mat& D_inp)
 {
     try {
         this->build_pre(A_inp,B_inp,C_inp,D_inp);
@@ -97,7 +99,8 @@ void uhlig_R::build_pre_R(arma::mat A_inp, arma::mat B_inp, arma::mat C_inp, arm
     }
 }
 
-void uhlig_R::build_exp_R(arma::mat F_inp, arma::mat G_inp, arma::mat H_inp, arma::mat J_inp, arma::mat K_inp, arma::mat L_inp, arma::mat M_inp)
+void uhlig_R::build_exp_R(const arma::mat& F_inp, const arma::mat& G_inp, const arma::mat& H_inp, const arma::mat& J_inp, 
+                          const arma::mat& K_inp, const arma::mat& L_inp, const arma::mat& M_inp)
 {
     try {
         this->build_exp(F_inp,G_inp,H_inp,J_inp,K_inp,L_inp,M_inp);
@@ -108,7 +111,7 @@ void uhlig_R::build_exp_R(arma::mat F_inp, arma::mat G_inp, arma::mat H_inp, arm
     }
 }
 
-void uhlig_R::build_exog_R(arma::mat N_inp)
+void uhlig_R::build_exog_R(const arma::mat& N_inp)
 {
     try {
         this->build_exog(N_inp);

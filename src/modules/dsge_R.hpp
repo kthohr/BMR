@@ -53,8 +53,9 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
 {
     public:
         SEXP model_fn_SEXP;
-        // Rcpp::Function model_fn_Rcpp = nullptr; // crashes
-        void* model_fn_Rcpp;
+
+        // Rcpp::Function model_fn_Rcpp;
+        // dsge_gensys_R(Rcpp::Function userR_fun) : model_fn_Rcpp(userR_fun) {};
 
         arma::vec opt_initial_lb;
         arma::vec opt_initial_ub;
