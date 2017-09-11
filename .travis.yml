@@ -1,11 +1,14 @@
 language: r
 sudo: required
-warnings_are_errors: true
+warnings_are_errors: false
 
 env:
   global:
     - R_BUILD_ARGS="--no-manual"
     - R_CHECK_ARGS="--no-manual --as-cran"
+
+before_install:
+  - rm -rf tests
 
 after_failure:
   - ./travis-tool.sh dump_logs

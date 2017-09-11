@@ -16,6 +16,7 @@ build_script:
   - travis-tool.sh install_deps
 
 test_script:
+  - rm -rf tests
   - travis-tool.sh run_tests
 
 on_failure:

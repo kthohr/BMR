@@ -4,3 +4,4 @@
 *.so
 *.dll
 *.vscode
+/src/bmlib/include/armadillo*

@@ -24,7 +24,7 @@
 \usage{
   IRF(obj,...)
 
-  \method{IRF}{BVARM}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
+  \method{IRF}{BVARM}(obj,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
   \method{IRF}{BVARS}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
   \method{IRF}{BVARW}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
   \method{IRF}{CVAR}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
