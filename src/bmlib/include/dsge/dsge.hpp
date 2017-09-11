@@ -19,22 +19,24 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_HPP
-#define _bmlib_HPP
+#ifndef _bmlib_dsge_HPP
+#define _bmlib_dsge_HPP
 
-// basic settings and misc fns.
-#include "misc/misc.hpp"
- 
-// VARs
-#include "var/var.hpp"
+namespace bm
+{
+    // DSGE
 
-// filters
-#include "filter/filter.hpp"
+    #include "dsge_irf.hpp"
+    #include "dsge_simulate.hpp"
 
-// LRES
-#include "lres/lres.hpp"
+    #include "gensys.hpp"
+    #include "uhlig.hpp"
 
-// DSGE and DSGE-VARs
-#include "dsge/dsge.hpp"
+    #include "dsge_class.hpp"
+
+    // DSGE-VAR
+
+    #include "dsgevar_class.hpp"
+}
 
 #endif

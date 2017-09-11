@@ -19,22 +19,28 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_HPP
-#define _bmlib_HPP
+#ifndef _bmlib_misc_HPP
+#define _bmlib_misc_HPP
 
-// basic settings and misc fns.
-#include "misc/misc.hpp"
- 
-// VARs
-#include "var/var.hpp"
+#include "bm_options.hpp"
 
-// filters
-#include "filter/filter.hpp"
+#include "optim/optim.hpp"
+#include "mcmc/mcmc.hpp"
+#include "stats/stats.hpp"
 
-// LRES
-#include "lres/lres.hpp"
+namespace bm
+{
+    #include "bind.hpp"
+    #include "byrow.hpp"
+    #include "cube_to_mat.hpp"
+    #include "embed.hpp"
+    #include "inside_trans.hpp"
+    #include "log_GPR.hpp"
+    #include "lyapunov_dbl.hpp"
+    #include "uvec_linspace.hpp"
+    #include "zero_rows.hpp"
 
-// DSGE and DSGE-VARs
-#include "dsge/dsge.hpp"
+    #include "tictoc.hpp"
+}
 
 #endif

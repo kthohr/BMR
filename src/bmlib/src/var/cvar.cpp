@@ -23,10 +23,13 @@
   ################################################################################*/
 
 /*
- * CVAR class
+ * cvar class
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "var/cvar.hpp"
+}
 
 //
 // data and basic setup

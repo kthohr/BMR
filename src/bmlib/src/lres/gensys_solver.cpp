@@ -43,7 +43,10 @@
  * 08/16/17
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "lres/gensys_solver.hpp"
+}
 
 int bm::gensys_solver(const arma::mat& Gamma0, const arma::mat& Gamma1, const arma::mat& GammaC, const arma::mat& Psi, const arma::mat& Pi,
                       arma::mat& G1, arma::mat& Cons, arma::mat& impact, 

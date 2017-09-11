@@ -5,7 +5,7 @@ BM_DIR = $(SDIR)/bmlib
 BM_SRC_DIR = $(BM_DIR)/src
 BM_HEADER_DIR = $(BM_DIR)/include
 
-# We need to check for the default Apple compiler, where we need to pass CXX to recognise R's settings
+# Check for the default Apple compiler, where we pass CXX to recognise R's settings
 APPLE_COMPILER := $(shell CXX11='$(CXX)' $(CXX11) --version 2>&1 | grep -i -c -E 'apple llvm')
 
 ifeq ($(APPLE_COMPILER),0)
@@ -24,10 +24,10 @@ OPTIM_SRC_DIR = $(BM_SRC_DIR)/optim
 MCMC_SRC_DIR = $(BM_SRC_DIR)/mcmc
 
 # Optim and MCMC files
-SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp $(MCMC_SRC_DIR)/rwmh.cpp
+SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp
 OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
 
-SOURCES_OPTIM= $(OPTIM_SRC_DIR)/line_search/more_thuente.cpp $(OPTIM_SRC_DIR)/unconstrained/bfgs.cpp $(OPTIM_SRC_DIR)/unconstrained/cg.cpp $(OPTIM_SRC_DIR)/unconstrained/de.cpp $(OPTIM_SRC_DIR)/unconstrained/de_prmm.cpp $(OPTIM_SRC_DIR)/unconstrained/nm.cpp $(OPTIM_SRC_DIR)/unconstrained/pso.cpp $(OPTIM_SRC_DIR)/unconstrained/pso_dv.cpp
+SOURCES_OPTIM= $(OPTIM_SRC_DIR)/unconstrained/de.cpp
 OBJECTS_OPTIM= $(SOURCES_OPTIM:.cpp=.o)
 
 # core BM files

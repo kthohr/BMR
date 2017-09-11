@@ -23,7 +23,10 @@
  * Chandrasekhar recursions
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "filter/chandrasekhar.hpp"
+}
 
 // X_t = F*X_{t-1} + e, e ~ N(0,Q)
 // Y_t = H'*X_{t}  + z, z ~ N(0,R)

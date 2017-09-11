@@ -19,22 +19,19 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_HPP
-#define _bmlib_HPP
+#ifndef _bmlib_var_HPP
+#define _bmlib_var_HPP
 
-// basic settings and misc fns.
-#include "misc/misc.hpp"
- 
-// VARs
-#include "var/var.hpp"
+namespace bm
+{
+    #include "var_sim.hpp"
 
-// filters
-#include "filter/filter.hpp"
+    #include "bvarm.hpp"
+    #include "bvars.hpp"
+    #include "bvarw.hpp"
+    #include "cvar.hpp"
 
-// LRES
-#include "lres/lres.hpp"
-
-// DSGE and DSGE-VARs
-#include "dsge/dsge.hpp"
+    #include "bvartvp.hpp"
+}
 
 #endif

@@ -19,22 +19,13 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_HPP
-#define _bmlib_HPP
+#ifndef _bmlib_lres_HPP
+#define _bmlib_lres_HPP
 
-// basic settings and misc fns.
-#include "misc/misc.hpp"
- 
-// VARs
-#include "var/var.hpp"
-
-// filters
-#include "filter/filter.hpp"
-
-// LRES
-#include "lres/lres.hpp"
-
-// DSGE and DSGE-VARs
-#include "dsge/dsge.hpp"
+namespace bm
+{
+    #include "gensys_solver.hpp"
+    #include "uhlig_solver.hpp"
+}
 
 #endif

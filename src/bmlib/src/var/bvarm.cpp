@@ -23,7 +23,10 @@
  * bvarm class
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "var/bvarm.hpp"
+}
 
 //
 // data and basic setup

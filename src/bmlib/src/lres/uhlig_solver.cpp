@@ -24,7 +24,10 @@
  * models using a generalized eigen decomposition.
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "lres/uhlig_solver.hpp"
+}
 
 int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C, const arma::mat& D,
                      const arma::mat& F, const arma::mat& G, const arma::mat& H, const arma::mat& J, const arma::mat& K, const arma::mat& L, const arma::mat& M, const arma::mat& N,

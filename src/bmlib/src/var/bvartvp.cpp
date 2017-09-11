@@ -23,7 +23,11 @@
  * bvartvp class
  */
 
-#include "bmlib.hpp"
+#include "misc/misc.hpp"
+namespace bm {
+    #include "var/bvartvp.hpp"
+    #include "filter/dk_filter.hpp"
+}
 
 //
 // data and basic setup
