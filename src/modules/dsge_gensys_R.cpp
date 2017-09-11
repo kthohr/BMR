@@ -45,6 +45,7 @@ RCPP_MODULE(dsge_gensys_module)
 
     class_<dsge_gensys_R>( "dsge_gensys" )
         .derives<bm::dsge<bm::gensys>>( "dsge_gensys_cpp" )
+        // .constructor<Rcpp::Function>()
         .default_constructor()
 
         .field( "opt_initial_lb", &dsge_gensys_R::opt_initial_lb )

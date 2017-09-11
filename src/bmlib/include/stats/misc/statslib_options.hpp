@@ -16,6 +16,15 @@
   ##
   ################################################################################*/
 
+#ifdef USE_RCPP_ARMADILLO
+    #include <RcppArmadillo.h>
+#else
+    #ifndef ARMA_DONT_USE_WRAPPER
+        #define ARMA_DONT_USE_WRAPPER
+    #endif
+    #include "armadillo"
+#endif
+
 #ifndef STATSLIB_GO_INLINE
     #define statslib_constexpr constexpr
     #define stats_math gcem
@@ -35,7 +44,7 @@
     #if __cplusplus >= 201300
         #define stats_math gcem
     #else
-        #include <cmath>
+        // #include <cmath>
         #define stats_math std
     #endif
 #endif

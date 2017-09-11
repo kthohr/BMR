@@ -61,7 +61,7 @@ RCPP_MODULE(gensys_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void gensys_R::build_R(arma::mat Gamma_0_inp, arma::mat Gamma_1_inp, arma::mat Gamma_C_inp, arma::mat Psi_inp, arma::mat Pi_inp)
+void gensys_R::build_R(const arma::mat& Gamma_0_inp, const arma::mat& Gamma_1_inp, const arma::mat& Gamma_C_inp, const arma::mat& Psi_inp, const arma::mat& Pi_inp)
 {
     try {
         this->build(Gamma_0_inp,Gamma_1_inp,Gamma_C_inp,Psi_inp,Pi_inp);
