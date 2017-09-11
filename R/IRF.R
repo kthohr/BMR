@@ -49,6 +49,10 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
     .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
 }
 
+IRF.Rcpp_dsge_gensys <- function(obj,periods=10,obs_irfs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+    .irfedsge(obj,periods,obs_irfs,varnames,percentiles,save,height,width)
+}
+
 # IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
 #     .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
 # }
@@ -442,10 +446,8 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
     if (periods <= 0) {
         stop("error: need periods > 0")
     }
-    
-    if (!is.null(shocks_cov)) {
-        obj$shocks_cov <- shocks_cov
-    }
+
+    #
 
     irfs <- obj$IRF(periods)$irf_vals
 
@@ -559,80 +561,87 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
                 }
             }
         }
+
         if(save==TRUE){dev.off()}
     }
     #
     return=list(irfs=irfs)
 }
 
-.irfedsge <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
-    #
-    if(nrow(obj$Parameters)==0){
-        stop("no MCMC draws detected.\n",call.=FALSE)
+.irfedsge <- function(obj,periods=10,obs_irfs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13){
+    
+    if (periods <= 0) {
+        stop("error: need periods > 0")
     }
+
     #
-    IRFs <- round(obj$IRFs,10)
-    irf.periods <- as.numeric(dim(IRFs)[1])
-    nResp <- as.numeric(dim(IRFs)[2])
-    n_shocks <- as.numeric(dim(IRFs)[3])
-    keep <- dim(IRFs)[4]
-    #
-    ObserveMat <- obj$ObserveMat
-    #
-    IRFObservable <- array(0,dim=c(irf.periods,ncol(ObserveMat),n_shocks,keep))
-    if(observableIRFs == TRUE){
-        if(ncol(ObserveMat)==1){
-            for(i in 1:keep){
-                for(j in 1:n_shocks){
-                    IRFObservable[,1,j,i] <- IRFs[,,j,i]%*%ObserveMat
-                }
-            }
-        }else{
-            for(i in 1:keep){
-                for(j in 1:n_shocks){
-                    IRFObservable[,,j,i] <- IRFs[,,j,i]%*%ObserveMat
-                }
-            }
-        }
-        IRFs <- IRFObservable
-        nResp <- as.numeric(ncol(ObserveMat))
+
+    n_draws <- dim(obj$dsge_draws)[1]
+
+    if (n_draws <= 0) {
+        stop("error: no MCMC draws detected")
     }
+
+    irfs <- obj$IRF(periods)$irf_vals # deep copy is needed
+    irfs <- round(irfs,10)
+
+    M <- dim(irfs)[2]
+    n_shocks <- dim(irfs)[3] / n_draws
+
+    n_response <- M - n_shocks + 1
+
     #
-    ImpSorted<-aperm(IRFs,c(2,3,1,4))
-    #
-    IRFs<-apply(ImpSorted,c(3,1,2),sort)
-    #
-    IRFUpper <- round(percentiles[3]*keep)
-    IRFMid <- round(percentiles[2]*keep)
-    IRFLower <- round(percentiles[1]*keep)
-    #
-    IRFPlot <- array(NA,dim=c(irf.periods,4,nResp,n_shocks))
-    for(i in 1:n_shocks){
-        for(k in 1:nResp){
-            IRFPData <- data.frame(c(IRFs[IRFLower,,k,i]),c(IRFs[IRFMid,,k,i]),c(IRFs[IRFUpper,,k,i]),1:(irf.periods))
-            IRFPData <- as.matrix(IRFPData)
-            IRFPlot[,,k,i] <- IRFPData
+
+    irfs_i <- array(0, dim=c(periods, M, n_shocks))
+    irfs_tess <- array(0, dim=c(periods, n_response, n_shocks, n_draws))
+
+    drop_ind <- n_response:M
+    
+    for (i in 1:n_draws) {
+        irfs_i <- irfs[,,((i-1)*n_shocks + 1):(i*n_shocks)]
+
+        if (n_shocks > 1) {
+            for (j in 1:n_shocks) {
+                irfs_tess[,,j,i] <- irfs_i[,-drop_ind[-(j)],j]
+            }
+        } else {
+            irfs_tess[,,,i] <- irfs_i
         }
     }
+
+    irfs_tess <- aperm(irfs_tess,c(2,3,1,4))
+    irfs_tess <- apply(irfs_tess,c(3,1,2),sort)
+
     #
-    IRFsRet <- IRFPlot
+
+    irf_upper <- round(percentiles[3]*n_draws)
+    irf_mid <- round(percentiles[2]*n_draws)
+    irf_lower <- round(percentiles[1]*n_draws)
+
     #
-    if(class(varnames) != "character"){
-        varnames <- character(length=nResp)
-        for(i in 1:nResp){  
+
+    irfs_plot <- array(NA,dim=c(periods,4,n_response,n_shocks))
+
+    for (i in 1:n_shocks) {
+        for (k in 1:n_response) {
+            irfs_plot_temp <- data.frame(c(irfs_tess[irf_lower,,k,i]),c(irfs_tess[irf_mid,,k,i]),c(irfs_tess[irf_upper,,k,i]),1:(periods))
+            irfs_plot[,,k,i] <- data.matrix(irfs_plot_temp)
+        }
+    }
+
+    #
+
+    if (class(varnames) != "character") {
+        varnames <- character(length=M)
+        for (i in 1:M) {  
             varnames[i] <- paste("VAR",i,sep="")
         }
     }
+
     #
-    if(n_shocks > 1 && observableIRFs!=TRUE){
-        IRFPlot <- array(0,dim=c(irf.periods,4,nResp-n_shocks+1,n_shocks))
-        DropCount <- (nResp-n_shocks+1):nResp
-        for(j in 1:n_shocks){
-            IRFPlot[,,,j] <- IRFsRet[,,-DropCount[-(j)],j]
-        }
-    }
-    #
-    n_response <- nResp - n_shocks + 1
+
+    IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
+
     MR <- 0; MC <- 0
     if(n_response < 4){
         MR <- n_response; MC <- 1
@@ -657,57 +666,73 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FAL
     }else{
         stop("You have too many IRFs to plot!")
     }
+
     #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
+
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+
+    if(class(dev.list()) != "NULL"){dev.off()}
+    
     #
-    for(j in 1:n_shocks){
+
+    varnames2 <- varnames
+
+    for (j in 1:n_shocks) {
         #
-        if(save==TRUE){
-            if(n_shocks==1){
+        if (save==TRUE) {
+            if (n_shocks==1) {
                 cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
-            }else{
-                SaveIRF <- paste(varnames[nResp-n_shocks+j],"_Shock",".eps",sep="")
+            } else {
+                SaveIRF <- paste(varnames[M-n_shocks+j],"_Shock",".eps",sep="")
                 #
                 cairo_ps(filename=SaveIRF,height=height,width=width)
             }
         }
+
         grid.newpage()
         pushViewport(viewport(layout=grid.layout(MR,MC)))
+
         #
-        IRFM <- IRFU <- IRFL <- Time <- NULL # CRAN check workaround
+
+        if (n_shocks > 1) {
+            varnames2 <- varnames[-drop_ind[-(j)]]
+        } else {
+            varnames2 <- varnames
+        }
+
         #
-        if(n_shocks > 1 && observableIRFs!=TRUE){
-            varnames2 <- varnames[-DropCount[-(j)]]
-        }else{varnames2 <- varnames}
-        #
+
         irf_plot_count <- 1
-        IRFO <- 1
-        if(observableIRFs==TRUE){IRFO <- nResp}
-        #
-        for(i in 1:MR){
-            for(k in 1:MC){
+
+        for (i in 1:MR) {
+            for (k in 1:MC) {
                 #
-                if(irf_plot_count <= (nResp - n_shocks + IRFO)){
-                    IRFDF <- data.frame(IRFPlot[,,irf_plot_count,j])
+                if (irf_plot_count <= n_response) {
+                    IRFDF <- data.frame(irfs_plot[,,irf_plot_count,j])
                     colnames(IRFDF) <- c("IRFL","IRFM","IRFU","Time")
+
                     #
+
                     gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) 
                     gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) 
                     gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
                     print(gg3,vp = vplayout(i,k))
+                    
                     #
+
                     irf_plot_count <- irf_plot_count + 1
-                    #
+                    
                     Sys.sleep(0.3)
-                }else{irf_plot_count <- irf_plot_count + 1}
+                } else {
+                    irf_plot_count <- irf_plot_count + 1
+                }
             }
         }
+
         if(save==TRUE){dev.off()}
     }
     #
-    return=list(IRFs=IRFsRet)
+    return=list()
 }
 
 .irfdsgevar <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13){

@@ -38,8 +38,8 @@ plot.Rcpp_cvar <- function(x,type=1,varnames=NULL,save=FALSE,height=13,width=13,
     .plotbvar(x,type,varnames,save,height,width)
 }
 
-plot.EDSGE <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...){
-    .plotedsge(x,parnames,BinDenom,MCMCplot,save,height,width)
+plot.Rcpp_dsge_gensys <- function(x,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13,...){
+    .plotedsge(x,parnames,BinDenom,trace_plot,save,height,width)
 }
 
 plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...){
@@ -425,132 +425,157 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
     #
 }
 
-.plotedsge <- function(obj,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13){
+.plotedsge <- function(obj,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13){
     #
-    Parameters <- obj$Parameters
-    nParam <- as.numeric(ncol(Parameters))
-    #
-    if(nrow(Parameters)==0){
+
+    n_draws <- dim(obj$dsge_draws)[1]
+    n_param <- dim(obj$dsge_draws)[2]
+
+    if (n_draws==0) {
         stop("no MCMC draws detected.\n",call.=FALSE)
     }
+
+    dsge_draws <- obj$dsge_draws # make a copy
+
     #
-    if(class(dev.list()) != "NULL"){dev.off()}
-    #
+
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+    
     #
-    ParNames <- parnames
-    if(is.null(parnames)==TRUE){
-        ParNames <- colnames(Parameters)
-        if(class(ParNames) != "character"){
-            ParNames <- character(length=nParam)
-            for(i in 1:nParam){  
-                ParNames[i] <- paste("Parameter",i,sep="")
-            }
+    
+    if (is.null(parnames)==TRUE) {
+        parnames <- character(length=n_param)
+        for(i in 1:n_param){  
+            parnames[i] <- paste("parameter",i,sep="")
         }
     }
+    
     #
+
     MR <- 0; MC <- 0
-    plotpages <- 1
-    #
-    if(nParam < 4){
-        MR <- nParam; MC <- 1
-    }else if(nParam == 4){
+    plot_pages <- 1
+    
+    if(n_param < 4){
+        MR <- n_param; MC <- 1
+    }else if(n_param == 4){
         MR <- 2; MC <-2
-    }else if(nParam > 4 && nParam < 7){
+    }else if(n_param > 4 && n_param < 7){
         MR <- 3; MC <- 2
-    }else if(nParam > 6 && nParam < 10){
+    }else if(n_param > 6 && n_param < 10){
         MR <- 3; MC <- 3
-    }else if(nParam > 9 && nParam < 13){
+    }else if(n_param > 9 && n_param < 13){
         MR <- 4; MC <- 3
-    }else if(nParam > 12 && nParam < 25){
+    }else if(n_param > 12 && n_param < 25){
         MR <- 4; MC <- 3
-        plotpages <- 2
-    }else if(nParam > 24 && nParam < 37){
+        plot_pages <- 2
+    }else if(n_param > 24 && n_param < 37){
         MR <- 4; MC <- 3
-        plotpages <- 3
-    }else if(nParam > 36 && nParam < 49){
+        plot_pages <- 3
+    }else if(n_param > 36 && n_param < 49){
         MR <- 4; MC <- 3
-        plotpages <- 4
-    }else if(nParam > 48 && nParam < 61){
+        plot_pages <- 4
+    }else if(n_param > 48 && n_param < 61){
         MR <- 4; MC <- 3
-        plotpages <- 5
-    }else if(nParam > 60 && nParam < 73){
+        plot_pages <- 5
+    }else if(n_param > 60 && n_param < 73){
         MR <- 4; MC <- 3
-        plotpages <- 6
+        plot_pages <- 6
     }
+
     #
-    ParamCount <- 1
-    for(j in 1:plotpages){
-        #
-        if(save==TRUE){
-            if(plotpages==1){
+
+    param_count <- 1
+
+    for (j in 1:plot_pages) {
+        
+        if (save==TRUE) {
+            if(class(dev.list()) != "NULL"){dev.off()}
+            
+            if (plot_pages==1) {
                 cairo_ps(filename="DSGEParameters.eps",height=height,width=width)
-            }else{
+            } else {
                 SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
-                #
-                if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
+                cairo_ps(filename=SaveParam,height=height,width=width)
             }
         }
+
         grid.newpage()
         pushViewport(viewport(layout=grid.layout(MR,MC)))
+
         #
+
         DSGEPar <- Keep <- NULL # CRAN check workaround
-        #
-        for(i in 1:MR){
-            for(k in 1:MC){
+        
+        for (i in 1:MR) {
+            for (k in 1:MC) {
                 #
-                if(ParamCount <= nParam){
-                    ParamDF <- data.frame(Parameters[,ParamCount])
+                if (param_count <= n_param) {
+
+                    ParamDF <- data.frame(dsge_draws[,param_count])
                     colnames(ParamDF) <- c("DSGEPar")
-                    ParName <- ParNames[ParamCount]
+                    
                     #
+
                     ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
-                    print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=parnames[param_count]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    
                     #
-                    ParamCount <- ParamCount + 1
-                    #
+
+                    param_count <- param_count + 1
                     Sys.sleep(0.3)
-                }else{ParamCount <- ParamCount + 1}
+
+                }else{param_count <- param_count + 1}
             }
         }
+
         if(save==TRUE){dev.off()}
     }
+
     #
-    #
-    #
-    if(MCMCplot==TRUE){
-        ParamCount <- 1
-        for(j in 1:plotpages){
+    # Trace Plot
+
+    if (trace_plot==TRUE) {
+
+        param_count <- 1
+
+        for (j in 1:plot_pages) {
             #
-            if(save==TRUE){
+            if (save==TRUE) {
                 if(class(dev.list()) != "NULL"){dev.off()}
-                if(plotpages==1){
+
+                if (plot_pages==1) {
                     cairo_ps(filename="MCMCplot.eps",height=height,width=width)
-                }else{
+                } else {
                     SaveParam <- paste("MCMCplot_",j,".eps",sep="")
-                    #
-                    if(save==TRUE){cairo_ps(filename=SaveParam,height=height,width=width)}
+                    cairo_ps(filename=SaveParam,height=height,width=width)
                 }
             }
+            
             grid.newpage()
             pushViewport(viewport(layout=grid.layout(MR,MC)))
+            
             #
+            
             for(i in 1:MR){
                 for(k in 1:MC){
                     #
-                    if(ParamCount <= nParam){
-                        ParamDF <- data.frame(Parameters[,ParamCount],1:nrow(Parameters))
+                    if(param_count <= n_param){
+                        ParamDF <- data.frame(dsge_draws[,param_count],1:n_draws)
                         colnames(ParamDF) <- c("DSGEPar","Keep")
-                        ParName <- ParNames[ParamCount]
+                        
                         #
-                        print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                        
+                        print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(parnames[param_count])) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                        
                         #
-                        ParamCount <- ParamCount + 1
-                        #
+                        
+                        param_count <- param_count + 1
                         Sys.sleep(0.3)
-                    }else{ParamCount <- ParamCount + 1}
+                        
+                    }else{param_count <- param_count + 1}
                 }
             }
+            
             if(save==TRUE){dev.off()}
         }
     }
@@ -560,7 +585,7 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
 .plotdsgevar <- function(obj,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13){
     #
     Parameters <- obj$Parameters
-    nParam <- as.numeric(ncol(Parameters))
+    n_param <- as.numeric(ncol(Parameters))
     #
     if(nrow(Parameters)==0){
         stop("no MCMC draws detected.\n",call.=FALSE)
@@ -570,52 +595,52 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
     #
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     #
-    ParNames <- parnames
+    parnames <- parnames
     if(is.null(parnames)==TRUE){
-        ParNames <- colnames(Parameters)
-        if(class(ParNames) != "character"){
-            ParNames <- character(length=nParam)
-            for(i in 1:nParam){  
-                ParNames[i] <- paste("Parameter",i,sep="")
+        parnames <- colnames(Parameters)
+        if(class(parnames) != "character"){
+            parnames <- character(length=n_param)
+            for(i in 1:n_param){  
+                parnames[i] <- paste("Parameter",i,sep="")
             }
         }
     }
     #
     MR <- 0; MC <- 0
-    plotpages <- 1
+    plot_pages <- 1
     #
-    if(nParam < 4){
-        MR <- nParam; MC <- 1
-    }else if(nParam == 4){
+    if(n_param < 4){
+        MR <- n_param; MC <- 1
+    }else if(n_param == 4){
         MR <- 2; MC <-2
-    }else if(nParam > 4 && nParam < 7){
+    }else if(n_param > 4 && n_param < 7){
         MR <- 3; MC <- 2
-    }else if(nParam > 6 && nParam < 10){
+    }else if(n_param > 6 && n_param < 10){
         MR <- 3; MC <- 3
-    }else if(nParam > 9 && nParam < 13){
+    }else if(n_param > 9 && n_param < 13){
         MR <- 4; MC <- 3
-    }else if(nParam > 12 && nParam < 25){
+    }else if(n_param > 12 && n_param < 25){
         MR <- 4; MC <- 3
-        plotpages <- 2
-    }else if(nParam > 24 && nParam < 37){
+        plot_pages <- 2
+    }else if(n_param > 24 && n_param < 37){
         MR <- 4; MC <- 3
-        plotpages <- 3
-    }else if(nParam > 36 && nParam < 49){
+        plot_pages <- 3
+    }else if(n_param > 36 && n_param < 49){
         MR <- 4; MC <- 3
-        plotpages <- 4
-    }else if(nParam > 48 && nParam < 61){
+        plot_pages <- 4
+    }else if(n_param > 48 && n_param < 61){
         MR <- 4; MC <- 3
-        plotpages <- 5
-    }else if(nParam > 60 && nParam < 73){
+        plot_pages <- 5
+    }else if(n_param > 60 && n_param < 73){
         MR <- 4; MC <- 3
-        plotpages <- 6
+        plot_pages <- 6
     }
     #
-    ParamCount <- 1
-    for(j in 1:plotpages){
+    param_count <- 1
+    for(j in 1:plot_pages){
         #
         if(save==TRUE){
-            if(plotpages==1){
+            if(plot_pages==1){
                 cairo_ps(filename="DSGEParameters.eps",height=height,width=width)
             }else{
                 SaveParam <- paste("DSGEParameters_",j,".eps",sep="")
@@ -631,18 +656,18 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
         for(i in 1:MR){
             for(k in 1:MC){
                 #
-                if(ParamCount <= nParam){
-                    ParamDF <- data.frame(Parameters[,ParamCount])
+                if(param_count <= n_param){
+                    ParamDF <- data.frame(Parameters[,param_count])
                     colnames(ParamDF) <- c("DSGEPar")
-                    ParName <- ParNames[ParamCount]
+                    ParName <- parnames[param_count]
                     #
                     ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
                     print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=ParName) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                     #
-                    ParamCount <- ParamCount + 1
+                    param_count <- param_count + 1
                     #
                     Sys.sleep(0.3)
-                }else{ParamCount <- ParamCount + 1}
+                }else{param_count <- param_count + 1}
             }
         }
         if(save==TRUE){dev.off()}
@@ -651,12 +676,12 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
     #
     #
     if(MCMCplot==TRUE){
-        ParamCount <- 1
-        for(j in 1:plotpages){
+        param_count <- 1
+        for(j in 1:plot_pages){
             #
             if(save==TRUE){
                 if(class(dev.list()) != "NULL"){dev.off()}
-                if(plotpages==1){
+                if(plot_pages==1){
                     cairo_ps(filename="MCMCplot.eps",height=height,width=width)
                 }else{
                     SaveParam <- paste("MCMCplot_",j,".eps",sep="")
@@ -670,17 +695,17 @@ plot.DSGEVAR <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,h
             for(i in 1:MR){
                 for(k in 1:MC){
                     #
-                    if(ParamCount <= nParam){
-                        ParamDF <- data.frame(Parameters[,ParamCount],1:nrow(Parameters))
+                    if(param_count <= n_param){
+                        ParamDF <- data.frame(Parameters[,param_count],1:nrow(Parameters))
                         colnames(ParamDF) <- c("DSGEPar","Keep")
-                        ParName <- ParNames[ParamCount]
+                        ParName <- parnames[param_count]
                         #
                         print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(ParName)) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                         #
-                        ParamCount <- ParamCount + 1
+                        param_count <- param_count + 1
                         #
                         Sys.sleep(0.3)
-                    }else{ParamCount <- ParamCount + 1}
+                    }else{param_count <- param_count + 1}
                 }
             }
             if(save==TRUE){dev.off()}

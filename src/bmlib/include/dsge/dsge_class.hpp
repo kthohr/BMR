@@ -97,7 +97,7 @@ class dsge
         void estim_mcmc(const arma::vec& initial_vals);
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
 
-        void IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods);
 
     protected:
         static double mode_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* mode_data);

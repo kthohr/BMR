@@ -255,7 +255,7 @@ dsge<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings
 // IRFs
 
 template<typename T>
-void
+arma::cube
 dsge<T>::IRF(const int n_irf_periods)
 {
     const int n_draws = dsge_draws.n_rows;
@@ -266,7 +266,7 @@ dsge<T>::IRF(const int n_irf_periods)
 
     const int n_shocks = test_cube.n_slices;
 
-    irfs.set_size(test_cube.n_rows, test_cube.n_cols, n_shocks*n_draws);
+    arma::cube irfs(test_cube.n_rows, test_cube.n_cols, n_shocks*n_draws);
 
     //
 
@@ -285,5 +285,8 @@ dsge<T>::IRF(const int n_irf_periods)
         irfs.slices(j*n_shocks,(j+1)*n_shocks-1) = dsge_obj_copy.lrem_obj.IRF(n_irf_periods);
 
     }
+
     //
+
+    return irfs;
 }

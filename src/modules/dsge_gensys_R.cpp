@@ -41,7 +41,6 @@ RCPP_MODULE(dsge_gensys_module)
         .field_readonly( "upper_bounds", &bm::dsge<bm::gensys>::upper_bounds )
 
         .field_readonly( "dsge_draws", &bm::dsge<bm::gensys>::dsge_draws )
-        .field_readonly( "irfs", &bm::dsge<bm::gensys>::irfs )
     ;
 
     class_<dsge_gensys_R>( "dsge_gensys" )
@@ -65,6 +64,8 @@ RCPP_MODULE(dsge_gensys_module)
 
         .method( "estim_mode", &dsge_gensys_R::estim_mode_R )
         .method( "estim_mcmc", &dsge_gensys_R::estim_mcmc_R )
+
+        .method( "IRF", &dsge_gensys_R::IRF_R )
     ;
 }
 
@@ -204,7 +205,7 @@ void dsge_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma::ma
     }
 }
 
-//
+// 
 
 SEXP dsge_gensys_R::estim_mode_R(const arma::vec& initial_vals)
 {
@@ -254,15 +255,17 @@ void dsge_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
     }
 }
 
-void dsge_gensys_R::IRF_R(int n_irf_periods)
+SEXP dsge_gensys_R::IRF_R(int n_irf_periods)
 {
     try {
-        this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods);
+        return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+    return R_NilValue;
 }
 
 // old

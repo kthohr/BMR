@@ -76,7 +76,7 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
         SEXP estim_mode_R(const arma::vec& initial_vals);
         void estim_mcmc_R(const arma::vec& initial_vals);
 
-        void IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods);
 };
 
 //
