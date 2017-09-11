@@ -15,7 +15,7 @@ else
     BMR_OPENMP=
 endif
 
-PKG_CPPFLAGS= $(CXX11STD) $(BMR_OPENMP) -DUSE_RCPP_ARMADILLO -DARMA_NO_DEBUG -DSTATSLIB_GO_INLINE -I./ -I./bmlib/include -I./bmlib/include/mcmc -I./bmlib/include/optim
+PKG_CPPFLAGS= $(CXX11STD) $(BMR_OPENMP) -DUSE_RCPP_ARMADILLO -DARMA_NO_DEBUG -DSTATSLIB_GO_INLINE -I./modules -I./bmlib/include -I./bmlib/include/mcmc -I./bmlib/include/optim
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 CXX_STD=CXX11STD

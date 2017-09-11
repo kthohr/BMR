@@ -33,7 +33,7 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
                      const arma::mat& F, const arma::mat& G, const arma::mat& H, const arma::mat& J, const arma::mat& K, const arma::mat& L, const arma::mat& M, const arma::mat& N,
                      const arma::vec* which_eig, arma::mat& P, arma::mat& Q, arma::mat& R, arma::mat& S, arma::cx_vec* eigen_vals_out, arma::cx_mat* eigen_vecs_out)
 {
-    const double bignum = 1e+07;
+    const double bignum = 1e+08;
 
     //
     
@@ -43,7 +43,7 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
     
     const int m = (l == 0) ? F.n_cols : A.n_cols;
 
-    bool pick_eig = (which_eig) ? ( (which_eig->n_elem > 0) ? true : false ) : false;
+    const bool pick_eig = (which_eig) ? ( (which_eig->n_elem > 0) ? true : false ) : false;
     
     //
     // setup
@@ -57,7 +57,7 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
     
     arma::mat C_pinv = C;
 
-    if(l > 0){
+    if (l > 0) {
         C_pinv = arma::pinv(C);
         Psi = F - J*C_pinv*A;
         Gamma = J*C_pinv*B - G + K*C_pinv*A;
@@ -82,30 +82,32 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
     
     arma::eig_pair(EigValue, EigVec, Xi, Delta);
     
-    arma::vec EigValueAbs = abs(EigValue);
-    arma::vec EigValueReal = real(EigValue);
+    arma::vec EigValueAbs = arma::abs(EigValue);
+    arma::vec EigValueReal = arma::real(EigValue);
 
     //
     // Deal with infinite values (otherwise sort will return an error):
     
-    arma::uvec infindices = find_nonfinite(EigValueAbs);
-    arma::uvec neginfind = arma::find(EigValueReal < -bignum);
-    //
-    int infin2 = infindices.n_elem;
-    int infin3 = neginfind.n_elem;
-    //
-    if(infin2 > 0){
+    // arma::uvec pos_inf_ind = arma::find_nonfinite(EigValueAbs);
+    arma::uvec pos_inf_ind = arma::find(EigValueReal > bignum);
+    arma::uvec neg_inf_ind = arma::find(EigValueReal < -bignum);
+
+    int infin2 = pos_inf_ind.n_elem;
+    int infin3 = neg_inf_ind.n_elem;
+    
+    if (infin2 > 0) {
         arma::cx_vec BigNum(infin2);
         BigNum.ones();
-        //
-        EigValueAbs.elem(infindices) = arma::ones(infin2)*bignum;
-        EigValue.elem(infindices) = BigNum*bignum;
+        
+        EigValueAbs.elem(pos_inf_ind).fill( bignum );
+        EigValue.elem(pos_inf_ind) = BigNum*bignum;
     }
-    if(infin3 > 0){
-        arma::cx_vec BigNum2(infin3);
-        BigNum2.ones();
-        //
-        EigValue.elem(neginfind) = - BigNum2*bignum;
+
+    if (infin3 > 0) {
+        arma::cx_vec BigNum(infin3);
+        BigNum.ones();
+        
+        EigValue.elem(neg_inf_ind) = - BigNum*bignum;
     }
 
     //
@@ -127,6 +129,7 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
         EigValueSorted = EigValueSorted.elem(indices);
         EigVecSorted = EigVecSorted.cols(indices);
     }
+
     //
 
     if (eigen_vals_out) {
@@ -152,23 +155,24 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
     arma::colvec LNMStacked = arma::vectorise(L*N + M);
     
     arma::mat V = arma::kron(N.t(),F) + arma::kron(arma::eye(k,k),(F*P + G));
-    
+
     arma::vec QS;
     R.set_size(0,P.n_cols); R.zeros();
 
     if (l == 0) {
         QS = -arma::inv(V)*LNMStacked;
     } else {
+
         //
         // First R
 
-        C_pinv = pinv(C);
+        C_pinv = arma::pinv(C);
         R = - C_pinv*(A*P + B);
         
         //
         // then Q
         
-        arma::mat V2 = arma::zeros<arma::mat>((k*A.n_rows) + V.n_rows, (k*A.n_rows) + V.n_rows);
+        arma::mat V2 = arma::zeros((k*A.n_rows) + V.n_rows, (k*A.n_rows) + V.n_rows);
         
         V2(arma::span(0,(k*A.n_rows)-1),arma::span(0,(k*A.n_cols)-1)) = arma::kron(arma::eye(k,k),A);
         V2(arma::span(0,(k*A.n_rows)-1),arma::span(k*A.n_cols,(k*A.n_cols)+(k*C.n_cols)-1)) = arma::kron(arma::eye(k,k),C);
@@ -188,11 +192,12 @@ int bm::uhlig_solver(const arma::mat& A, const arma::mat& B, const arma::mat& C,
     
     S.set_size(0,Q.n_cols); S.zeros();
 
-    if(l > 0){
-        arma::vec Sc = QS.rows(m*k,(m+n)*k-1);
-        S = arma::reshape(Sc, n, k);
+    if (l > 0) {
+        S = arma::reshape(QS.rows(m*k,(m+n)*k-1), n, k);
     }
+
     //
+
     return 0;
 }
 
