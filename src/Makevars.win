@@ -39,7 +39,7 @@ OBJECTS_MODULES= $(SOURCES_MODULES:.cpp=.o)
 
 OBJECTS_BMR=$(OBJECTS_BM) $(OBJECTS_MODULES)
 
-all: $(SHLIB) libBMR$(SHLIB_EXT)
+all: $(SHLIB) libBMR.dll
 
 # some trickery to work around R's desire to link with gcc instead of g++
 
