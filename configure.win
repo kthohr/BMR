@@ -1,0 +1,5 @@
+#!/bin/bash
+## BMR empty config script
+
+export SHLIB_LDFLAGS='$(SHLIB_CXXLDFLAGS)' 
+export SHLIB_LD='$(SHLIB_CXXLD)'
