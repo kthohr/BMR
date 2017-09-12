@@ -739,7 +739,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     return=list()
 }
 
-.irfdsgevar <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=TRUE,height=13,width=13)
+.irfdsgevar <- function(obj,periods,varnames=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=TRUE,height=13,width=13)
 {   
     if (periods <= 0) {
         stop("error: need periods > 0")
@@ -757,7 +757,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     irfs <- round(irfs,10)
 
     M <- dim(irfs)[2] 
-    n_shocks <- dim(irfs)[3] / n_draws
+    n_shocks <- M
 
     n_response <- M 
 
@@ -836,8 +836,6 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     if(class(dev.list()) != "NULL"){dev.off()}
     
     #
-
-    varnames2 <- varnames
 
     for (j in 1:n_shocks) {
         #

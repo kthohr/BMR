@@ -134,4 +134,6 @@ obj$mcmc_initial_ub <- opt_bounds[,2]
 
 obj$estim_mcmc(x)
 
+IRF(obj,20,varnames=colnames(dsgedata),save=FALSE)
+
 
