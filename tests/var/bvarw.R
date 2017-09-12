@@ -28,9 +28,9 @@ bvar_obj$build(bvar_data,TRUE,1)
 bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(bvar_obj,20,varnames=colnames(bvar_data),save=FALSE)
+plot(bvar_obj,varnames=colnames(bvar_data),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(bvar_data),backdata=10,save=FALSE)
 
 # p = 2
 
@@ -39,9 +39,9 @@ bvar_obj$build(bvar_data,TRUE,2)
 bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(bvar_obj,20,varnames=colnames(bvar_data),save=FALSE)
+plot(bvar_obj,varnames=colnames(bvar_data),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(bvar_data),backdata=10,save=FALSE)
 
 # p = 3
 
@@ -50,9 +50,9 @@ bvar_obj$build(bvar_data,TRUE,3)
 bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(bvar_obj,20,varnames=colnames(bvar_data),save=FALSE)
+plot(bvar_obj,varnames=colnames(bvar_data),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(bvar_data),backdata=10,save=FALSE)
 
 # p = 4
 
@@ -61,9 +61,9 @@ bvar_obj$build(bvar_data,TRUE,4)
 bvar_obj$prior(coef_prior,XiBeta,XiSigma,gamma)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(bvar_obj,20,varnames=colnames(bvar_data),save=FALSE)
+plot(bvar_obj,varnames=colnames(bvar_data),save=FALSE)
+forecast(bvar_obj,shocks=TRUE,varnames=colnames(bvar_data),backdata=10,save=FALSE)
 
 #
 #END
