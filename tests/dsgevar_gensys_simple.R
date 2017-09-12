@@ -125,15 +125,20 @@ obj$opt_initial_ub <- opt_bounds[,2]
 
 #
 
-obj$build(sim_data,FALSE,1,1.0);
+cons_term <- FALSE
+p <- 1
+lambda <- 1.0
+
+obj$build(sim_data,cons_term,p,lambda);
 
 #obj$estim_mode(x)
 
 obj$mcmc_initial_lb <- opt_bounds[,1]
 obj$mcmc_initial_ub <- opt_bounds[,2]
 
-obj$estim_mcmc(x)
+obj$estim_mcmc(x,50,100,100)
 
+plot(obj,parnames="eta",save=FALSE)
 IRF(obj,20,varnames=colnames(dsgedata),save=FALSE)
 
 

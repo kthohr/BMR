@@ -132,7 +132,7 @@ obj$estim_data = sim_data;
 obj$mcmc_initial_lb <- opt_bounds[,1]
 obj$mcmc_initial_ub <- opt_bounds[,2]
 
-obj$estim_mcmc(x)
+obj$estim_mcmc(x,50,100,100)
 
 varnames <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply",
               "Technology","MonetaryPolicy")

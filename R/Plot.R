@@ -46,7 +46,7 @@ plot.Rcpp_dsge_gensys <- function(x,parnames=NULL,BinDenom=40,trace_plot=FALSE,s
     .plotedsge(x,parnames,BinDenom,trace_plot,save,height,width)
 }
 
-plot.Rcpp_dsge_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
+plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
 {
     .plotdsgevar(x,parnames,BinDenom,MCMCplot,save,height,width)
 }

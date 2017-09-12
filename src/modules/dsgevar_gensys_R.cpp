@@ -271,7 +271,7 @@ SEXP dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
     return R_NilValue;
 }
 
-void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
+void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin)
 {
     try {
         mcmc::mcmc_settings settings;
@@ -283,9 +283,9 @@ void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals)
             settings.de_initial_ub = mcmc_initial_ub;
         }
 
-        settings.de_n_pop = 50;
-        settings.de_n_gen = 100;
-        settings.de_n_burnin = 100;
+        settings.de_n_pop = n_pop;
+        settings.de_n_gen = n_gen;
+        settings.de_n_burnin = n_burnin;
 
         this->estim_mcmc(initial_vals,&settings);
     } catch( std::exception &ex ) {

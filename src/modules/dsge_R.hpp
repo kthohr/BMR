@@ -74,7 +74,7 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
         void set_lrem_R(gensys_R lrem_obj_inp);
 
         SEXP estim_mode_R(const arma::vec& initial_vals);
-        void estim_mcmc_R(const arma::vec& initial_vals);
+        void estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin);
 
         SEXP IRF_R(int n_irf_periods);
 };
@@ -114,7 +114,7 @@ class dsgevar_gensys_R : public bm::dsgevar<bm::gensys>
         void set_dsge_R(dsge_gensys_R dsge_obj_inp);
 
         SEXP estim_mode_R(const arma::vec& initial_vals);
-        void estim_mcmc_R(const arma::vec& initial_vals);
+        void estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin);
 
         SEXP IRF_R(int n_irf_periods);
 };
