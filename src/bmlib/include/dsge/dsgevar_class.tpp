@@ -458,7 +458,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
         arma::mat dsge_obs_impact = dsge_obj_copy.kalman_mat_H.t() * G_state*arma::chol(shocks_cov,"lower");
 
         arma::mat Q_dcm, R_dcm;
-        arma::qr(Q_dcm,R_dcm,dsge_obs_impact);
+        arma::qr(Q_dcm,R_dcm,dsge_obs_impact.t());
 
         Q_dcm *= -1.0;
         R_dcm *= -1.0;

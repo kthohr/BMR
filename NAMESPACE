@@ -1,18 +1,20 @@
 useDynLib(BMR)
 
-importFrom(Rcpp, evalCpp)
 import(ggplot2)
+importFrom(Rcpp, evalCpp)
 importFrom(grid, grid.newpage, viewport, pushViewport, grid.layout)
 importFrom("grDevices", "cairo_ps", "dev.list", "dev.off")
-importFrom("stats", "acf", "dbeta", "dgamma", "dnorm", "dunif",
-           "embed", "optim", "pacf", "qnorm", "rnorm", "runif", "sd",
-           "var")
+importFrom("stats", "acf", "embed", "optim", "pacf", "qnorm", "rnorm", "runif", "sd", "var")
 
 exportClasses("Rcpp_bvarm")
 exportClasses("Rcpp_bvars")
 exportClasses("Rcpp_bvars")
 exportClasses("Rcpp_cvar")
 exportClasses("Rcpp_bvartvp")
+exportClasses("Rcpp_gensys")
+exportClasses("Rcpp_uhlig")
+exportClasses("Rcpp_dsge_gensys")
+exportClasses("Rcpp_dsgevar_gensys")
 
 export(IRF,forecast,modecheck,prior,stationarity,gtsplot,gacf,gpacf)
 
@@ -22,13 +24,13 @@ S3method(plot, Rcpp_bvarm)
 S3method(plot, Rcpp_bvars)
 S3method(plot, Rcpp_bvarw)
 S3method(plot, Rcpp_bvartvp)
-S3method(plot, EDSGE)
-S3method(plot, DSGEVAR)
+S3method(plot, Rcpp_dsge_gensys)
+S3method(plot, Rcpp_dsgevar_gensys)
 
 S3method(forecast, Rcpp_bvarm)
 S3method(forecast, Rcpp_bvars)
 S3method(forecast, Rcpp_bvarw)
 S3method(forecast, Rcpp_cvar)
 
-S3method(modecheck, EDSGE)
-S3method(modecheck, DSGEVAR)
+S3method(modecheck, Rcpp_dsge_gensys)
+S3method(modecheck, Rcpp_dsgevar_gensys)

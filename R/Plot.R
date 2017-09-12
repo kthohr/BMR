@@ -592,6 +592,6 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
 
 .plotdsgevar <- function(obj,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13)
 {    
-    dsge_obj <- obj$get_dsge()
+    dsge_obj <- obj$dsge
     .plotedsge(dsge_obj,parnames,BinDenom,trace_plot,save,height,width)
 }

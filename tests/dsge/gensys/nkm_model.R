@@ -1,41 +1,30 @@
 
 #
+# Simple NK Model
 
-rm(list=ls())
-library(BMR)
-
-#
-
-data(BMRVARData)
-dsgedata <- USMacroData[24:211,-c(1,3)]
-dsgedata <- as.matrix(dsgedata)
-for(i in 1:2){
-    dsgedata[,i] <- dsgedata[,i] - mean(dsgedata[,i])
-}
-
-#
-
-nkm_model_fn <- function(parameters){
-    alpha    <- 0.33
-    vartheta <- 6
-    beta     <- 0.99
-    theta    <- 0.6667
+nkm_model_fn <- function(parameters)
+{
+    alpha    <- parameters[1]
+    beta     <- parameters[2]
+    vartheta <- parameters[3]
+    theta    <- parameters[4]
     
-    eta    <- parameters[1]               
-    phi    <- 1                  
-    phi_pi <- 1.5             
-    phi_y  <- 0.5/4
-    rho_a  <- 0.90
-    rho_v  <- 0.5
+    eta    <- parameters[5]               
+    phi    <- parameters[6]
+    phi_pi <- parameters[7]
+    phi_y  <- parameters[8]
+    rho_a  <- parameters[9]
+    rho_v  <- parameters[10]
+    
+    sigma_T <- parameters[11]
+    sigma_M <- parameters[12]
     
     BigTheta <- (1-alpha)/(1-alpha+alpha*vartheta)
     kappa    <- (((1-theta)*(1-beta*theta))/(theta))*BigTheta*((1/eta)+((phi+alpha)/(1-alpha)))
     psi      <- (eta*(1+phi))/(1-alpha+eta*(phi + alpha))
     
-    sigma_T <- 1
-    sigma_M <- 0.25
-    
     #
+    
     G0_47 <- (1/eta)*psi*(rho_a - 1)
     #Order:                 yg,       y,      pi,      rn,       i,       n,       a,       v,  yg_t+1,  pi_t+1
     Gamma0 <- rbind(c(      -1,       0,       0,     eta,  -eta/4,       0,       0,       0,       1,   eta/4),
@@ -85,60 +74,28 @@ nkm_model_fn <- function(parameters){
     return=list(Gamma0=Gamma0,Gamma1=Gamma1,GammaC=C,Psi=Psi,Pi=Pi,shocks_cov_out=shocks,C_out=ObsCons,H_out=ObserveMat,R_out=MeasErrs)
 }
 
-obj <- new(dsgevar_gensys)
-obj$set_model_fn(nkm_model_fn)
-
-x <- c(1)
-
-obj$eval_model(x)
-
-lrem_obj = obj$get_lrem()
-lrem_obj$solve()
-
-lrem_obj$shocks_cov <- matrix(c(1,0,0,0.125),2,2,byrow=TRUE)
-
-sim_data <- lrem_obj$simulate(200,800)$sim_vals
-
-sim_data <- cbind(sim_data[,3],sim_data[,5])
-
-#
-
-prior_pars <- cbind(c(1.0),
-                    c(0.05))
-
-prior_form <- c(1)
-
-obj$set_prior(prior_form,prior_pars)
-
-#
-
-par_bounds <- cbind(c(-Inf),
-                    c( Inf))
-
-opt_bounds <- cbind(c(0.5),
-                    c(3.0))
-
-obj$set_bounds(opt_bounds[,1],opt_bounds[,2])
-
-obj$opt_initial_lb <- opt_bounds[,1]
-obj$opt_initial_ub <- opt_bounds[,2]
-
-#
-
-cons_term <- FALSE
-p <- 1
-lambda <- 1.0
-
-obj$build(sim_data,cons_term,p,lambda);
-
-#obj$estim_mode(x)
-
-obj$mcmc_initial_lb <- opt_bounds[,1]
-obj$mcmc_initial_ub <- opt_bounds[,2]
-
-obj$estim_mcmc(x,50,100,100)
-
-plot(obj,parnames="eta",save=FALSE)
-IRF(obj,20,varnames=colnames(dsgedata),save=FALSE)
-
-
+nkm_model_simple <- function(parameters)
+{
+    eta <- parameters[1]
+    
+    #
+    
+    pars_inp <- numeric(12)
+    
+    pars_inp[1]  <- 0.33   # alpha
+    pars_inp[2]  <- 0.99   # beta
+    pars_inp[3]  <- 6.0    # vartheta
+    pars_inp[4]  <- 0.6667 # theta
+    
+    pars_inp[5]  <- eta
+    pars_inp[6]  <- 1      # phi
+    pars_inp[7]  <- 1.5    # phi_pi
+    pars_inp[8]  <- 0.125  # phi_y
+    pars_inp[9]  <- 0.90   # rho_a
+    pars_inp[10] <- 0.5    # rho_v
+    
+    pars_inp[11] <- 1      # sigma_T
+    pars_inp[12] <- 0.25   # sigma_M
+    
+    return(nkm_model_fn(pars_inp))
+}

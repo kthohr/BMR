@@ -61,17 +61,14 @@ RCPP_MODULE(dsgevar_gensys_module)
         .field( "mcmc_initial_ub", &dsgevar_gensys_R::mcmc_initial_ub )
 
         .property( "dsge_draws", &dsgevar_gensys_R::get_dsge_draws )
+        .property( "lrem", &dsgevar_gensys_R::get_lrem_R, &dsgevar_gensys_R::set_lrem_R )
+        .property( "dsge", &dsgevar_gensys_R::get_dsge_R, &dsgevar_gensys_R::set_dsge_R )
 
         .method( "build", &dsgevar_gensys_R::build_R )
 
+        .method( "get_model_fn", &dsgevar_gensys_R::get_model_fn )
         .method( "set_model_fn", &dsgevar_gensys_R::set_model_fn )
         .method( "eval_model", &dsgevar_gensys_R::eval_model )
-
-        .method( "get_lrem", &dsgevar_gensys_R::get_lrem_R )
-        .method( "set_lrem", &dsgevar_gensys_R::set_lrem_R )
-
-        .method( "get_dsge", &dsgevar_gensys_R::get_dsge_R )
-        .method( "set_dsge", &dsgevar_gensys_R::set_dsge_R )
 
         .method( "set_bounds", &dsgevar_gensys_R::set_bounds_R )
         .method( "set_prior", &dsgevar_gensys_R::set_prior_R )
@@ -86,22 +83,10 @@ RCPP_MODULE(dsgevar_gensys_module)
 //
 // wrapper functions to catch errors and handle memory pointers
 
-void
-dsgevar_gensys_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp, double lambda_inp)
+SEXP
+dsgevar_gensys_R::get_model_fn()
 {
-    try {
-        this->build(data_raw,cons_term_inp,p_inp,lambda_inp);
-    } catch( std::exception &ex ) {
-        forward_exception_to_r( ex );
-    } catch(...) {
-        ::Rf_error( "BMR: C++ exception (unknown reason)" );
-    }
-}
-
-arma::mat
-dsgevar_gensys_R::get_dsge_draws()
-{
-    return dsge_obj.dsge_draws;
+    return model_fn_SEXP;
 }
 
 void
@@ -109,7 +94,6 @@ dsgevar_gensys_R::set_model_fn(SEXP model_fn_inp)
 {
     try {
         model_fn_SEXP = model_fn_inp;
-        // Rcpp::Function pars_fn = Rcpp::as<Rcpp::Function>(model_fn_SEXP);
         
         dsge_obj.model_fn = std::bind(&dsgevar_gensys_R::model_fn_R,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,std::placeholders::_6);
     } catch( std::exception &ex ) {
@@ -119,23 +103,7 @@ dsgevar_gensys_R::set_model_fn(SEXP model_fn_inp)
     }
 }
 
-gensys_R dsgevar_gensys_R::get_lrem_R()
-{
-    gensys_R lrem_obj_out = static_cast<gensys_R&>(dsge_obj.lrem_obj);
-
-    return lrem_obj_out;
-}
-
-void dsgevar_gensys_R::set_lrem_R(gensys_R lrem_obj_inp)
-{
-    try {
-        dsge_obj.lrem_obj = static_cast<bm::gensys&>(lrem_obj_inp);
-    } catch( std::exception &ex ) {
-        forward_exception_to_r( ex );
-    } catch(...) {
-        ::Rf_error( "BMR: C++ exception (unknown reason)" );
-    }
-}
+//
 
 void
 dsgevar_gensys_R::eval_model(Rcpp::NumericVector pars_inp)
@@ -191,14 +159,40 @@ dsgevar_gensys_R::model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp
     }
 }
 
-dsge_gensys_R dsgevar_gensys_R::get_dsge_R()
+// get and set LREM
+
+gensys_R
+dsgevar_gensys_R::get_lrem_R()
+{
+    gensys_R lrem_obj_out = static_cast<gensys_R&>(dsge_obj.lrem_obj);
+
+    return lrem_obj_out;
+}
+
+void
+dsgevar_gensys_R::set_lrem_R(gensys_R lrem_obj_inp)
+{
+    try {
+        dsge_obj.lrem_obj = static_cast<bm::gensys&>(lrem_obj_inp);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+// get and set DSGE model
+
+dsge_gensys_R
+dsgevar_gensys_R::get_dsge_R()
 {
     dsge_gensys_R dsge_obj_out = static_cast<dsge_gensys_R&>(dsge_obj);
 
     return dsge_obj_out;
 }
 
-void dsgevar_gensys_R::set_dsge_R(dsge_gensys_R dsge_obj_inp)
+void
+dsgevar_gensys_R::set_dsge_R(dsge_gensys_R dsge_obj_inp)
 {
     try {
         dsge_obj = static_cast<bm::dsge<bm::gensys>&>(dsge_obj_inp);
@@ -209,9 +203,30 @@ void dsgevar_gensys_R::set_dsge_R(dsge_gensys_R dsge_obj_inp)
     }
 }
 
+// build and access
+
+void
+dsgevar_gensys_R::build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp, double lambda_inp)
+{
+    try {
+        this->build(data_raw,cons_term_inp,p_inp,lambda_inp);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+arma::mat
+dsgevar_gensys_R::get_dsge_draws()
+{
+    return dsge_obj.dsge_draws;
+}
+
 // set bounds and prior
 
-void dsgevar_gensys_R::set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp)
+void
+dsgevar_gensys_R::set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp)
 {
     try {
         const int n_vals = lower_bounds_inp.n_elem;
@@ -234,7 +249,8 @@ void dsgevar_gensys_R::set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_
     }
 }
 
-void dsgevar_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp)
+void
+dsgevar_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp)
 {
     try {
         this->set_prior(prior_form_inp,prior_pars_inp);
@@ -247,7 +263,8 @@ void dsgevar_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma:
 
 //
 
-SEXP dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
+SEXP
+dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
 {
     try {
         optim::opt_settings settings;
@@ -271,7 +288,8 @@ SEXP dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
     return R_NilValue;
 }
 
-void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin)
+void
+dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin)
 {
     try {
         mcmc::mcmc_settings settings;
@@ -295,7 +313,10 @@ void dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, in
     }
 }
 
-SEXP dsgevar_gensys_R::IRF_R(int n_irf_periods)
+//
+
+SEXP
+dsgevar_gensys_R::IRF_R(int n_irf_periods)
 {
     try {
         arma::cube irf_vals = this->IRF(n_irf_periods);

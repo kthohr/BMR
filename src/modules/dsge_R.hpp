@@ -64,6 +64,9 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
 
         void model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
 
+        //
+
+        SEXP get_model_fn();
         void set_model_fn(SEXP model_fn_inp);
         void eval_model(Rcpp::NumericVector pars_inp);
 
@@ -93,14 +96,15 @@ class dsgevar_gensys_R : public bm::dsgevar<bm::gensys>
         arma::vec mcmc_initial_lb;
         arma::vec mcmc_initial_ub;
 
+        void model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
+
         // member functions
 
         void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp, double lambda_inp);
 
         arma::mat get_dsge_draws();
 
-        void model_fn_R(const arma::vec& pars_inp, bm::gensys& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
-
+        SEXP get_model_fn();
         void set_model_fn(SEXP model_fn_inp);
         void eval_model(Rcpp::NumericVector pars_inp);
 
