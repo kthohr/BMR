@@ -275,7 +275,7 @@ dsge<T>::IRF(const int n_irf_periods)
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_OMP
+#ifdef BM_USE_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++) {

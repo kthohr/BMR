@@ -34,14 +34,14 @@
     #include "armadillo"
 #endif
 
-#ifdef BM_OMP
+#ifdef BM_USE_OMP
     // #include <omp.h>
-    #ifndef OPTIM_OMP
-        #define OPTIM_OMP
+    #ifndef OPTIM_USE_OMP
+        #define OPTIM_USE_OMP
     #endif
     
-    #ifndef MCMC_OMP
-        #define MCMC_OMP
+    #ifndef MCMC_USE_OMP
+        #define MCMC_USE_OMP
     #endif
 #endif
 

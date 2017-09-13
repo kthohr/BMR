@@ -358,7 +358,7 @@ dsgevar<T>::gibbs()
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_OMP
+#ifdef BM_USE_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int i=0; i < n_draws; i++) {
@@ -437,7 +437,7 @@ dsgevar<T>::IRF(const int n_irf_periods)
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_OMP
+#ifdef BM_USE_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=1; j <= n_draws; j++) {
