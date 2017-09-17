@@ -10,7 +10,7 @@ library(BMR)
 data(BMRVARData)
 var_data <- data.matrix(USMacroData[,2:4])
 
-var_obj = new(cvar)
+var_obj <- new(cvar)
 
 #
 # Different p

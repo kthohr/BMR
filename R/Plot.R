@@ -108,8 +108,6 @@ plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,
 
     vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
     
-    if(class(dev.list()) != "NULL"){dev.off()}
-    
     #
 
     CoefCount <- 1
@@ -120,8 +118,12 @@ plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,
         q <- dim(obj$Psi_draws)[1]
         PsiPerm <- aperm(obj$Psi_draws,c(3,1,2))
 
-        if(save==TRUE){cairo_ps(filename="Psi.eps",height=(floor(height*q/M)),width=width)}
-        
+        if(save==TRUE){
+            if(class(dev.list()) != "NULL"){dev.off()}
+            cairo_ps(filename="Psi.eps",height=(floor(height*q/M)),width=width)
+        }
+
+        grid.newpage()
         pushViewport(viewport(layout=grid.layout(q,M)))
         
         for(i in 1:q){
@@ -152,9 +154,14 @@ plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,
         }
     } else if (constant==TRUE) {
         
-        if(save==TRUE){cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)}
+        if(save==TRUE){
+            if(class(dev.list()) != "NULL"){dev.off()}
+            cairo_ps(filename="Constant.eps",height=(floor(height/M)),width=width)
+        }
+
+        grid.newpage()
         pushViewport(viewport(layout=grid.layout(1,M)))
-        #
+        
         for(j in 1:M){
             VarName <- var_names[j]
                 
@@ -184,9 +191,13 @@ plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,
     #
 
     for(i in 1:p){
-        SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
         
-        if(save==TRUE){cairo_ps(filename=SaveLag,height=height,width=width)}
+        if(save==TRUE){
+            if(class(dev.list()) != "NULL"){dev.off()}
+
+            SaveLag <- paste("CoefLag",as.character(i),".eps",sep="")
+            cairo_ps(filename=SaveLag,height=height,width=width)
+        }
         
         #
         
@@ -251,12 +262,21 @@ plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,
     if (plotSigma==TRUE) {
         Sigmas <- obj$Sigma_draws
         SigmaPerm <- aperm(Sigmas,c(3,1,2))
+        
         #
-        SaveSig <- paste("Sigma.eps",sep="")
-        if(save==TRUE){cairo_ps(filename=SaveSig,height=height,width=width)}
+
+        if (save==TRUE) {
+            if(class(dev.list()) != "NULL"){dev.off()}
+
+            SaveSig <- paste("Sigma.eps",sep="")
+            cairo_ps(filename=SaveSig,height=height,width=width)
+        }
+
         grid.newpage()
         pushViewport(viewport(layout=grid.layout(M,M)))
+        
         #
+
         for(j in 1:M){
             for(l in 1:M){
                 VarNameY <- var_names[j]

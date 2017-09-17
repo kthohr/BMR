@@ -17,7 +17,7 @@ XiBeta <- 4
 XiSigma <- 1
 gamma = 4
 
-bvar_obj = new(bvarw)
+bvar_obj <- new(bvarw)
 
 #
 # Different p

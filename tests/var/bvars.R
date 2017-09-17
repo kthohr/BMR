@@ -20,7 +20,7 @@ HP2 <- 0.5
 XiPsi <- 1
 gamma = 4
 
-bvar_obj = new(bvars)
+bvar_obj <- new(bvars)
 
 #
 # Different p

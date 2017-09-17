@@ -14,7 +14,7 @@ bvar_data <- data.matrix(USMacroData[,2:4])
 
 coef_prior <- c(0.9,0.9,0.9)
 
-bvar_obj = new(bvarm)
+bvar_obj <- new(bvarm)
 
 #
 # Different p
