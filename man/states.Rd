@@ -34,9 +34,9 @@ states(obj,...)
 	\item{save}{
 	Whether to save the plots.}
 	\item{height}{
-	If save=TRUE, use this to set the height of the plot.}
+	If save=FALSE, use this to set the height of the plot.}
 	\item{width}{
-	If save=TRUE, use this to set the width of the plot.}
+	If save=FALSE, use this to set the width of the plot.}
   \item{\dots}{
   Additional arguments (not used).}
 }

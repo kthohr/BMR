@@ -94,6 +94,9 @@ class dsgevar
 
         arma::cube IRF(const int n_irf_periods) const;
 
+        arma::cube forecast(const int n_horizon, const bool incl_shocks);
+        arma::cube forecast(const arma::mat& X_T, const int n_horizon, const bool incl_shocks);
+
     protected:
         void model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;
         void model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;
@@ -105,6 +108,8 @@ class dsgevar
 
         static double mode_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* mode_data);
         static double mcmc_objfn(const arma::vec& pars_inp, void* mode_data);
+
+        arma::cube forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks);
 };
 
 template<typename T>

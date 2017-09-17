@@ -30,7 +30,7 @@ bvar_obj$gibbs(10000,5000)
 
 IRF(bvar_obj,20,var_names=colnames(bvar_data),save=FALSE)
 plot(bvar_obj,var_names=colnames(bvar_data),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),backdata=10,save=FALSE)
+forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),back_data=10,save=FALSE)
 
 # p = 2
 
@@ -41,7 +41,7 @@ bvar_obj$gibbs(10000,5000)
 
 IRF(bvar_obj,20,var_names=colnames(bvar_data),save=FALSE)
 plot(bvar_obj,var_names=colnames(bvar_data),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),backdata=10,save=FALSE)
+forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),back_data=10,save=FALSE)
 
 # p = 3
 
@@ -52,7 +52,7 @@ bvar_obj$gibbs(10000,5000)
 
 IRF(bvar_obj,20,var_names=colnames(bvar_data),save=FALSE)
 plot(bvar_obj,var_names=colnames(bvar_data),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),backdata=10,save=FALSE)
+forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),back_data=10,save=FALSE)
 
 # p = 4
 
@@ -63,7 +63,7 @@ bvar_obj$gibbs(10000,5000)
 
 IRF(bvar_obj,20,var_names=colnames(bvar_data),save=FALSE)
 plot(bvar_obj,var_names=colnames(bvar_data),save=FALSE)
-forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),backdata=10,save=FALSE)
+forecast(bvar_obj,shocks=TRUE,var_names=colnames(bvar_data),back_data=10,save=FALSE)
 
 #
 #END

@@ -86,7 +86,7 @@ testbvars <- BVARS(USMacroData[,2:4],mypsi,mycfp,p=4,irf.periods=20,
                    keep=20000,burnin=5000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
 plot(testbvars,save=F)
 IRF(testbvars,save=F)
-forecast(testbvars,shocks=T,backdata=10,save=F)
+forecast(testbvars,shocks=T,back_data=10,save=F)
 }
 }
 

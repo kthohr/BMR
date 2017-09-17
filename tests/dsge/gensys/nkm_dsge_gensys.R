@@ -76,3 +76,4 @@ var_names <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","La
 
 plot(obj,par_names="eta",save=FALSE)
 IRF(obj,20,var_names=var_names,save=FALSE)
+forecast(obj,10,back_data=10)

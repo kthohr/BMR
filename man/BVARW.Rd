@@ -85,7 +85,7 @@ testbvarw <- BVARW(USMacroData[,2:4],cores=1,c(0.9,0.95,0.95),p=4,constant=T,
                     XiBeta=4,XiSigma=1,gamma=4)
 plot(testbvarw,save=F)
 IRF(testbvarw,save=F)
-forecast(testbvarw,shocks=TRUE,backdata=10,save=FALSE)
+forecast(testbvarw,shocks=TRUE,back_data=10,save=FALSE)
 }
 }
 

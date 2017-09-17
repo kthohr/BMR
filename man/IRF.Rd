@@ -24,18 +24,18 @@
 \usage{
   IRF(obj,...)
 
-  \method{IRF}{BVARM}(obj,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
-  \method{IRF}{BVARS}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
-  \method{IRF}{BVARW}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
-  \method{IRF}{CVAR}(obj,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
+  \method{IRF}{BVARM}(obj,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
+  \method{IRF}{BVARS}(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
+  \method{IRF}{BVARW}(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
+  \method{IRF}{CVAR}(obj,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
 
   \method{IRF}{BVARTVP}(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),
   save=FALSE,height=13,width=13,...)
     
   \method{IRF}{DSGEVAR}(obj,var_names=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,
-    save=TRUE,height=13,width=13,...)
+    save=FALSE,height=13,width=13,...)
   \method{IRF}{EDSGE}(obj,observableIRFs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),
-    save=TRUE,height=13,width=13,...)
+    save=FALSE,height=13,width=13,...)
 
   \method{IRF}{gensys}(obj,shocks,irf.periods=20,var_names=NULL,
     plot=TRUE,save=FALSE,height=13,width=13,...)
@@ -54,9 +54,9 @@
 	\item{save}{
 	Whether to save the plots.}
 	\item{height}{
-	If save=TRUE, use this to set the height of the plot.}
+	If save=FALSE, use this to set the height of the plot.}
 	\item{width}{
-	If save=TRUE, use this to set the width of the plot.}\cr
+	If save=FALSE, use this to set the width of the plot.}\cr
   
   For objects of class `BVARTVP',
   \item{whichirfs}{

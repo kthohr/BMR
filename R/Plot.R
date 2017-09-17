@@ -112,6 +112,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE
         PsiPerm <- aperm(obj$Psi_draws,c(3,1,2))
 
         if(save==TRUE){cairo_ps(filename="Psi.eps",height=(floor(height*q/M)),width=width)}
+        
         pushViewport(viewport(layout=grid.layout(q,M)))
         
         for(i in 1:q){

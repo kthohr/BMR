@@ -69,6 +69,7 @@ RCPP_MODULE(dsge_gensys_module)
         .method( "mode_check", &dsge_gensys_R::mode_check_R )
 
         .method( "IRF", &dsge_gensys_R::IRF_R )
+        .method( "forecast", &dsge_gensys_R::forecast_R )
     ;
 }
 
@@ -308,6 +309,21 @@ dsge_gensys_R::IRF_R(int n_irf_periods)
     try {
         arma::cube irf_vals = this->IRF(n_irf_periods);
         return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+    return R_NilValue;
+}
+
+SEXP
+dsge_gensys_R::forecast_R(int n_horizon, bool incl_shocks)
+{
+    try {
+        arma::cube fcast_res = this->forecast(n_horizon,incl_shocks);
+
+        return Rcpp::List::create(Rcpp::Named("forecast_vals") = fcast_res);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

@@ -16,27 +16,27 @@
 ##
 ################################################################################
 
-IRF.Rcpp_bvarm <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvarm <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
     .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvars <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvars <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
     .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvarw <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvarw <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
     .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_cvar <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_cvar <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
     .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
     .irf_bvartvp(obj,periods,which_irfs,var_names,percentiles,which_shock,which_response,save,height,width)
 }
@@ -51,26 +51,26 @@ IRF.Rcpp_uhlig <- function(obj,periods=10,var_names=NULL,shocks_cov=NULL,save=FA
     .irf_dsge(obj,periods,var_names,shocks_cov,save,height,width)
 }
 
-IRF.Rcpp_dsge_gensys <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
+IRF.Rcpp_dsge_gensys <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
 {
     .irf_edsge(obj,periods,obs_irfs,var_names,percentiles,save,height,width)
 }
 
-# IRF.EDSGE <- function(obj,observableIRFs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+# IRF.EDSGE <- function(obj,observableIRFs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...){
 #     .irf_edsge(obj,observableIRFs,var_names,percentiles,save,height,width)
 # }
 
-IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),plot_comparison=TRUE,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),plot_comparison=TRUE,save=FALSE,height=13,width=13,...)
 {
     .irf_dsgevar(obj,periods,var_names,percentiles,plot_comparison,save,height,width)
 }
 
-# IRF.DSGEVAR <- function(obj,var_names=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
+# IRF.DSGEVAR <- function(obj,var_names=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=FALSE,height=13,width=13,...){
 #     .irf_dsgevar(obj,var_names,percentiles,comparison,save,height,width)
 # }
 
 
-.irf_var <- function(obj, periods=10, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
+.irf_var <- function(obj, periods=10, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=FALSE, height=13, width=13)
 {
     #
     
@@ -254,7 +254,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05
     return=list(IRFs=irf_plot)
 }
 
-.irf_bvartvp <- function(obj, periods=10, which_irfs=NULL, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
+.irf_bvartvp <- function(obj, periods=10, which_irfs=NULL, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=FALSE, height=13, width=13)
 {
     #
     
@@ -576,7 +576,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05
     return=list(irfs=irfs)
 }
 
-.irf_edsge <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13)
+.irf_edsge <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13)
 {    
     if (periods <= 0) {
         stop("error: need periods > 0")
@@ -743,7 +743,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05
     return=list()
 }
 
-.irf_dsgevar <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=TRUE,height=13,width=13)
+.irf_dsgevar <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=FALSE,height=13,width=13)
 {   
     if (periods <= 0) {
         stop("error: need periods > 0")

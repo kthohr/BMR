@@ -83,7 +83,7 @@ testbvarm <- BVARM(USMacroData[,2:4],prior,p=4,constant=T,irf.periods=20,
                   HP1=0.5,HP2=0.5,HP3=10)
 plot(testbvarm,save=F)
 IRF(testbvarm,save=F)
-forecast(testbvarm,shocks=TRUE,backdata=10,save=FALSE)
+forecast(testbvarm,shocks=TRUE,back_data=10,save=FALSE)
 }
 }
 

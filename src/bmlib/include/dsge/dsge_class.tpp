@@ -312,3 +312,71 @@ const
 
     return irfs_ret;
 }
+
+//
+// forecasting
+
+template<typename T>
+arma::cube
+dsge<T>::forecast(const int horizon, const bool incl_shocks)
+const
+{
+    const int M = estim_data.n_cols;
+    const int n_draws = dsge_draws.n_rows;
+
+    solve_to_state_space(dsge_draws.row(0).t());
+
+    const int n_states = kalman_mat_F.n_cols;
+
+    arma::cube forecast_cube(horizon,M,n_draws);
+
+    //
+
+    dsge<T> dsge_obj_copy = *this; // thread safety
+
+    dsge_obj_copy.estim_data.reset();
+    dsge_obj_copy.dsge_draws.reset();
+
+#ifdef BM_USE_OMP
+    #pragma omp parallel for firstprivate(dsge_obj_copy)
+#endif
+    for (int j=0; j < n_draws; j++) {
+        
+        dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
+
+        arma::mat G_state;
+        dsge_obj_copy.state_space(kalman_mat_F,G_state);
+
+        //
+
+        arma::mat filt_states;
+
+        kalman_filter(estim_data, dsge_obj_copy.kalman_mat_F,dsge_obj_copy.kalman_mat_Q, dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_H,dsge_obj_copy.kalman_mat_R, &filt_states);
+
+        arma::vec state_n = filt_states.row((int) filt_states.n_rows - 1).t();
+
+        //
+
+        arma::mat chol_shocks_cov = arma::chol(dsge_obj_copy.lrem_obj.shocks_cov);
+
+        arma::mat iter_mat = arma::eye(n_states,n_states), forecast_mat(horizon,M);
+
+        for (int i=0; i < horizon; i++) {
+            state_n = dsge_obj_copy.kalman_mat_F * state_n;
+
+            if (incl_shocks) {
+                state_n += G_state*stats::rmvnorm(chol_shocks_cov,true);
+            }
+
+            forecast_mat.row(i) = arma::trans( dsge_obj_copy.kalman_mat_C + dsge_obj_copy.kalman_mat_H.t() * state_n );
+        }
+
+        //
+        
+        forecast_cube.slice(j) = std::move(forecast_mat);
+    }
+
+    //
+
+    return forecast_cube;
+}

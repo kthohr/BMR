@@ -34,9 +34,9 @@ modecheck(obj,...)
 	\item{save}{
 	Whether to save the plot(s).}
 	\item{height}{
-	If save=TRUE, use this to set the height of the plot(s).}
+	If save=FALSE, use this to set the height of the plot(s).}
 	\item{width}{
-	If save=TRUE, use this to set the width of the plot(s).}
+	If save=FALSE, use this to set the width of the plot(s).}
   \item{\dots}{
   Additional arguments (not used).}
 }

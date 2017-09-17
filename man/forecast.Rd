@@ -20,23 +20,23 @@ forecast(obj,...)
 
 \method{forecast}{BVARM}(obj,periods=20,shocks=TRUE,plot=TRUE,
          percentiles=c(.05,.50,.95),useMean=FALSE,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{BVARS}(obj,periods=20,shocks=TRUE,plot=TRUE,
          percentiles=c(.05,.50,.95),useMean=FALSE,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{BVARW}(obj,periods=20,shocks=TRUE,plot=TRUE,
          percentiles=c(.05,.50,.95),useMean=FALSE,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{DSGEVAR}(obj,periods=20,shocks=TRUE,plot=TRUE,
          percentiles=c(.05,.50,.95),useMean=FALSE,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 
 \method{forecast}{CVAR}(obj,periods=20,plot=TRUE,confint=0.95,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 
 \method{forecast}{EDSGE}(obj,periods=20,plot=TRUE,
          percentiles=c(.05,.50,.95),useMean=FALSE,
-         backdata=0,save=FALSE,height=13,width=11,...)
+         back_data=0,save=FALSE,height=13,width=11,...)
 }
 
 \arguments{
@@ -53,14 +53,14 @@ forecast(obj,...)
 	The percentiles of the conditional posterior distribution of forecasts to use for plotting.}
 	\item{useMean}{
 	Whether the user would prefer to use the mean of the forecast distribution rather than the middle value in `percentiles'.}
-	\item{backdata}{
+	\item{back_data}{
 	How many 'real' data points to plot before plotting the forecast. A broken line will indicate whether the `real' data ends and the forecast begins.}
 	\item{save}{
 	Whether to save the plots.}
 	\item{height}{
-	If save=TRUE, use this to set the height of the plot.}
+	If save=FALSE, use this to set the height of the plot.}
 	\item{width}{
-	If save=TRUE, use this to set the width of the plot.}\cr
+	If save=FALSE, use this to set the width of the plot.}\cr
   
   For objects of class `CVAR',
 	\item{confint}{
@@ -86,7 +86,7 @@ data(BMRVARData)
 testbvarw <- BVARW(USMacroData[1:203,2:4],c(0.9,0.95,0.95),p=4,constant=T,
                     irf.periods=20,keep=10000,burnin=5000,
                     XiBeta=4,XiSigma=1,gamma=4)
-forecast(testbvarw,periods=10,shocks=T,plot=T,percentiles=c(.05,.50,.95),backdata=10,save=FALSE)
+forecast(testbvarw,periods=10,shocks=T,plot=T,percentiles=c(.05,.50,.95),back_data=10,save=FALSE)
 }
 }
 

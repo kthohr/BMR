@@ -43,6 +43,9 @@ RCPP_MODULE(dsgevar_gensys_module)
         .field_readonly( "M", &bm::dsgevar<bm::gensys>::M )
         .field_readonly( "K", &bm::dsgevar<bm::gensys>::K )
 
+        .field_readonly( "Y", &bm::dsgevar<bm::gensys>::Y )
+        .field_readonly( "X", &bm::dsgevar<bm::gensys>::X )
+
         .field_readonly( "alpha_pt_mean", &bm::dsgevar<bm::gensys>::alpha_pt_mean )
         .field_readonly( "alpha_pt_var", &bm::dsgevar<bm::gensys>::alpha_pt_var )
         .field_readonly( "Sigma_pt_mean", &bm::dsgevar<bm::gensys>::Sigma_pt_mean )
@@ -79,6 +82,7 @@ RCPP_MODULE(dsgevar_gensys_module)
         .method( "mode_check", &dsgevar_gensys_R::mode_check_R )
 
         .method( "IRF", &dsgevar_gensys_R::IRF_R )
+        .method( "forecast", &dsgevar_gensys_R::forecast_R )
     ;
 }
 
@@ -348,7 +352,23 @@ dsgevar_gensys_R::IRF_R(int n_irf_periods)
 {
     try {
         arma::cube irf_vals = this->IRF(n_irf_periods);
+
         return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+    return R_NilValue;
+}
+
+SEXP
+dsgevar_gensys_R::forecast_R(int n_horizon, bool incl_shocks)
+{
+    try {
+        arma::cube fcast_res = this->forecast(n_horizon,incl_shocks);
+
+        return Rcpp::List::create(Rcpp::Named("forecast_vals") = fcast_res);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
