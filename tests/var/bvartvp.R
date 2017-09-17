@@ -33,8 +33,8 @@ bvar_obj$build(bvar_data,TRUE,1)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,which_irfs,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
 
 # p = 2
 
@@ -43,8 +43,8 @@ bvar_obj$build(bvar_data,TRUE,2)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
 
 # p = 3
 
@@ -53,8 +53,8 @@ bvar_obj$build(bvar_data,TRUE,3)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
 
 # p = 4
 
@@ -63,8 +63,8 @@ bvar_obj$build(bvar_data,TRUE,4)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,varnames=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
 
 #
 #END

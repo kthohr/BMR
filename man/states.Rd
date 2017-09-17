@@ -14,10 +14,10 @@
 states(obj,...)
 
 \method{states}{DSGEVAR}(obj,percentiles=c(.05,.50,.95),
-       varnames=NULL,useMean=FALSE,
+       var_names=NULL,useMean=FALSE,
        save=FALSE,height=13,width=11,...)
 \method{states}{EDSGE}(obj,percentiles=c(.05,.50,.95),
-       varnames=NULL,useMean=FALSE,
+       var_names=NULL,useMean=FALSE,
        save=FALSE,height=13,width=11,...)
 }
 
@@ -27,7 +27,7 @@ states(obj,...)
   An object of class `EDSGE' or `DSGEVAR'.}
 	\item{percentiles}{
 	Which percentiles of the distribution to use.}
-  \item{varnames}{
+  \item{var_names}{
   Name labels for the states.}
 	\item{useMean}{
 	Whether the user would prefer to use the mean of the forecast distribution rather than the middle value in `percentiles'.}
@@ -55,7 +55,7 @@ The function returns a plot of the states with user-selected percentiles, as wel
 \dontrun{
 NKMest <- EDSGE(dsgedata,chains=1,cores=1,
                 ObserveMat,initialvals,partomats,
-                priorform,priorpars,parbounds,parnames,
+                priorform,priorpars,parbounds,par_names,
                 optimMethod=c("Nelder-Mead","CG"),
                 optimLower=NULL,optimUpper=NULL,
                 optimControl=list(maxit=10000),
@@ -63,9 +63,9 @@ NKMest <- EDSGE(dsgedata,chains=1,cores=1,
                 scalepar=0.27,keep=50000,burnin=75000,
                 tables=TRUE)
 #
-varnames=c("Output Gap","Output","Inflation","Natural Int",
+var_names=c("Output Gap","Output","Inflation","Natural Int",
            "Nominal Int","Labour Supply","Technology","MonetaryPolicy")
-states(NKMest,percentiles=c(0.01,0.50,0.99),varnames=varnames)
+states(NKMest,percentiles=c(0.01,0.50,0.99),var_names=var_names)
 }
 }
 

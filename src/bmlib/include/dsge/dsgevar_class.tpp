@@ -87,6 +87,7 @@ dsgevar<T>::set_prior(const arma::uvec& prior_form_inp, const arma::mat& prior_p
 template<typename T>
 void
 dsgevar<T>::model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_YX, arma::mat& Gamma_XX)
+const
 {
     this->model_moments(dsge_obj, Gamma_YY, Gamma_YX, Gamma_XX);
 }
@@ -94,6 +95,7 @@ dsgevar<T>::model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_YX, arma::mat& G
 template<typename T>
 void
 dsgevar<T>::model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, arma::mat& Gamma_YX, arma::mat& Gamma_XX)
+const
 {
     // we explicitly include the DSGE object to allow for parallelized gibbs sampling
     arma::mat KMC2 = dsge_model_inp.kalman_mat_C*dsge_model_inp.kalman_mat_C.t();
@@ -155,6 +157,7 @@ dsgevar<T>::model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, ar
 template<typename T>
 double
 dsgevar<T>::log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX, const arma::mat& Gamma_XX, const arma::mat& Gamma_bar_YY, const arma::mat& Gamma_bar_YX, const arma::mat& Gamma_bar_XX)
+const
 {
     // note: assumes finite lambda value
     const double lambdaT = (n-p)*lambda;
@@ -178,6 +181,7 @@ dsgevar<T>::log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX,
 template<typename T>
 double
 dsgevar<T>::log_likelihood_inf(const arma::mat& Gamma_YY, const arma::mat& Gamma_YX, const arma::mat& Gamma_XX)
+const
 {
     const arma::mat beta = arma::inv_sympd(Gamma_XX)*Gamma_YX.t();
     const arma::mat Sigma_eps = Gamma_YY - Gamma_YX*beta;
@@ -196,6 +200,7 @@ dsgevar<T>::log_likelihood_inf(const arma::mat& Gamma_YY, const arma::mat& Gamma
 template<typename T>
 double
 dsgevar<T>::log_posterior_kernel(const arma::vec& pars_inp)
+const
 {
     const bool finite_lambda = std::isfinite(lambda);
 
@@ -252,12 +257,19 @@ template<typename T>
 arma::vec
 dsgevar<T>::estim_mode(const arma::vec& initial_vals)
 {
-    return this->estim_mode(initial_vals,nullptr);
+    return this->estim_mode(initial_vals,nullptr,nullptr);
 }
 
 template<typename T>
 arma::vec
-dsgevar<T>::estim_mode(const arma::vec& initial_vals, optim::opt_settings* settings_inp)
+dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat)
+{
+    return this->estim_mode(initial_vals,&vcov_mat,nullptr);
+}
+
+template<typename T>
+arma::vec
+dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::opt_settings* settings_inp)
 {
     dsgevar_estim_data<T> mode_data;
     mode_data.dsgevar_obj = *this;
@@ -283,6 +295,14 @@ dsgevar<T>::estim_mode(const arma::vec& initial_vals, optim::opt_settings* setti
     arma::vec ret_vec = initial_vals;
 
     optim::de(ret_vec,mode_objfn,&mode_data,settings);
+
+    // compute standard errors
+
+    if (vcov_mat) {
+        arma::mat hess_mat = optim::numerical_hessian(ret_vec,nullptr,mode_objfn,&mode_data);
+
+        *vcov_mat = arma::inv(hess_mat);
+    }
 
     //
 
@@ -423,6 +443,7 @@ dsgevar<T>::gibbs()
 template<typename T>
 arma::cube
 dsgevar<T>::IRF(const int n_irf_periods)
+const
 {
     const int n_draws = beta_draws.n_slices;
     // const int K_adj = K - n_ext_vars;

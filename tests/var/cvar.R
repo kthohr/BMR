@@ -21,9 +21,9 @@ var_obj$build(var_data,TRUE,1)
 var_obj$estim()
 var_obj$boot(10000)
 
-IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(var_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(var_obj,var_names=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,var_names=colnames(USMacroData),backdata=10,save=FALSE)
 
 # p = 2
 
@@ -32,9 +32,9 @@ var_obj$build(var_data,TRUE,2)
 var_obj$estim()
 var_obj$boot(10000)
 
-IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(var_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(var_obj,var_names=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,var_names=colnames(USMacroData),backdata=10,save=FALSE)
 
 # p = 3
 
@@ -43,9 +43,9 @@ var_obj$build(var_data,TRUE,3)
 var_obj$estim()
 var_obj$boot(10000)
 
-IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(var_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(var_obj,var_names=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,var_names=colnames(USMacroData),backdata=10,save=FALSE)
 
 # p = 4
 
@@ -54,9 +54,9 @@ var_obj$build(var_data,TRUE,4)
 var_obj$estim()
 var_obj$boot(10000)
 
-IRF(var_obj,20,varnames=colnames(USMacroData),save=FALSE)
-plot(var_obj,varnames=colnames(USMacroData),save=FALSE)
-forecast(var_obj,shocks=TRUE,varnames=colnames(USMacroData),backdata=10,save=FALSE)
+IRF(var_obj,20,var_names=colnames(USMacroData),save=FALSE)
+plot(var_obj,var_names=colnames(USMacroData),save=FALSE)
+forecast(var_obj,shocks=TRUE,var_names=colnames(USMacroData),backdata=10,save=FALSE)
 
 #
 #END

@@ -12,7 +12,7 @@
 \usage{
 DSGEVAR(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
         constant=FALSE,ObserveMat,initialvals,partomats,
-        priorform,priorpars,parbounds,parnames=NULL,
+        priorform,priorpars,parbounds,par_names=NULL,
         optimMethod="Nelder-Mead",
         optimLower=NULL,optimUpper=NULL,
         optimControl=list(),
@@ -54,7 +54,7 @@ DSGEVAR(dsgedata,chains=1,cores=1,lambda=Inf,p=2,
   For example, if the user selects a Gaussian prior for a parameter, then the first entry will be the mean and the second its variance.}
 	\item{parbounds}{
 	The lower- and (where relevant) upper-bounds on the parameter values. `NA' values are permitted.}
-	\item{parnames}{
+	\item{par_names}{
 	A character vector containing labels for the parameters.}
 	\item{optimMethod}{
   The optimization algorithm used to find the posterior mode. The user may select: the ``Nelder-Mead'' simplex method, which is the default; ``BFGS'', a quasi-Newton method; ``CG'' for a conjugate gradient method; ``L-BFGS-B'', a limited-memory BFGS algorithm with box constraints; or ``SANN'', a simulated-annealing algorithm. 
@@ -125,7 +125,7 @@ The function returns an object of class DSGEVAR, which contains:
 \dontrun{
 NKMVAR <- DSGEVAR(dsgedata,chains=1,cores=1,lambda=1,p=4,
                   FALSE,ObserveMat,initialvals,partomats,
-                  priorform,priorpars,parbounds,parnames,
+                  priorform,priorpars,parbounds,par_names,
                   optimMethod=c("Nelder-Mead","CG"),
                   optimLower=NULL,optimUpper=NULL,
                   optimControl=list(maxit=20000,reltol=(10^(-12))),

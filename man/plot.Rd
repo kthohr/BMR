@@ -19,8 +19,8 @@
   \method{plot}{BVARTVP}(x,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
   \method{plot}{BVARW}(x,type=1,plotSigma=TRUE,save=FALSE,height=13,width=13,...)
   
-  \method{plot}{DSGEVAR}(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
-  \method{plot}{EDSGE}(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
+  \method{plot}{DSGEVAR}(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
+  \method{plot}{EDSGE}(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
 }
 
 \arguments{
@@ -45,7 +45,7 @@
   Which percentiles of the posterior distribution the function should use.}
   
   For objects of class `DSGEVAR' or `EDSGE',
-  \item{parnames}{
+  \item{par_names}{
   A vector of expressions containing the name of each parameter.}
   \item{BinDenom}{
   Bin width.}

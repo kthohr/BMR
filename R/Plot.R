@@ -16,45 +16,45 @@
 ##
 ################################################################################
 
-plot.Rcpp_bvarm <- function(x,type=1,varnames=NULL,save=FALSE,height=13,width=13,...)
+plot.Rcpp_bvarm <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
 {
-    .plotbvar(x,type,varnames,save,height,width)
+    .plotbvar(x,type,var_names,save,height,width)
 }
 
-plot.Rcpp_bvars <- function(x,type=1,varnames=NULL,save=FALSE,height=13,width=13,...)
+plot.Rcpp_bvars <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
 {
-    .plotbvar(x,type,varnames,save,height,width)
+    .plotbvar(x,type,var_names,save,height,width)
 }
 
-plot.Rcpp_bvarw <- function(x,type=1,varnames=NULL,save=FALSE,height=13,width=13,...)
+plot.Rcpp_bvarw <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
 {
-    .plotbvar(x,type,varnames,save,height,width)
+    .plotbvar(x,type,var_names,save,height,width)
 }
 
-plot.Rcpp_bvartvp <- function(x,varnames=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
+plot.Rcpp_bvartvp <- function(x,var_names=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13,...)
 {
-    .plotbvartvp(x,varnames,percentiles,save,height,width)
+    .plotbvartvp(x,var_names,percentiles,save,height,width)
 }
 
-plot.Rcpp_cvar <- function(x,type=1,varnames=NULL,save=FALSE,height=13,width=13,...)
+plot.Rcpp_cvar <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
 {
-    .plotbvar(x,type,varnames,save,height,width)
+    .plotbvar(x,type,var_names,save,height,width)
 }
 
-plot.Rcpp_dsge_gensys <- function(x,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13,...)
+plot.Rcpp_dsge_gensys <- function(x,par_names=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13,...)
 {
-    .plotedsge(x,parnames,BinDenom,trace_plot,save,height,width)
+    .plotedsge(x,par_names,BinDenom,trace_plot,save,height,width)
 }
 
-plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
+plot.Rcpp_dsgevar_gensys <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
 {
-    .plotdsgevar(x,parnames,BinDenom,MCMCplot,save,height,width)
+    .plotdsgevar(x,par_names,BinDenom,MCMCplot,save,height,width)
 }
 
 #
 #
 
-.plotbvar <- function(obj,type=1,varnames=NULL,save=FALSE,height=13,width=13)
+.plotbvar <- function(obj,type=1,var_names=NULL,save=FALSE,height=13,width=13)
 {    
     obj_class <- class(obj)[1]
 
@@ -83,10 +83,10 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         }
     }
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -116,7 +116,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         
         for(i in 1:q){
             for(j in 1:M){
-                VarName <- varnames[j]
+                VarName <- var_names[j]
                 #
                 CFDF <- data.frame(PsiPerm[,i,j])
                 colnames(CFDF) <- "CFDF"
@@ -146,7 +146,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         pushViewport(viewport(layout=grid.layout(1,M)))
         #
         for(j in 1:M){
-            VarName <- varnames[j]
+            VarName <- var_names[j]
                 
             CFDF <- data.frame(BetaPerm[,i,j])
             colnames(CFDF) <- "CFDF"
@@ -187,7 +187,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         
         for (j in 1:M) {
             for (l in 1:M) {
-                VarName <- varnames[l]
+                VarName <- var_names[l]
                 #
                 CFDF <- data.frame(BetaPerm[,((i-1)*M+j+c_int),l])
                 colnames(CFDF) <- "CFDF"
@@ -249,8 +249,8 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         #
         for(j in 1:M){
             for(l in 1:M){
-                VarNameY <- varnames[j]
-                VarNameX <- varnames[l]
+                VarNameY <- var_names[j]
+                VarNameX <- var_names[l]
                 #
                 SDF <- data.frame(SigmaPerm[,j,l])
                 colnames(SDF) <- "SDF"
@@ -296,7 +296,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
     }
 }
 
-.plotbvartvp <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13)
+.plotbvartvp <- function(obj,var_names=NULL,percentiles=c(.05,.50,.95),save=FALSE,height=13,width=13)
 {
     obj_class <- class(obj)[1]
 
@@ -332,10 +332,10 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
         }
     }
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -367,7 +367,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
             pushViewport(viewport(layout=grid.layout(1,M)))
             
             for (j in 1:M) {
-                VarName <- varnames[j]
+                VarName <- var_names[j]
 
                 CFDF <- data.frame(alpha_draws_sorted[CTPLower,,j],alpha_draws_sorted[CTPMid,,j],alpha_draws_sorted[CTPUpper,,j],tau:(kT+tau-1))
                 colnames(CFDF) <- c("CTPL","CTPM","CTPU","Time")
@@ -400,7 +400,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
 
         for (j in 1:M) {
             for (l in 1:M) {
-                VarName <- varnames[l]
+                VarName <- var_names[l]
                 coef_ind <- coefs_index[c_int+(i-1)*M+j,l]
 
                 CFDF <- data.frame(alpha_draws_sorted[CTPLower,,coef_ind],alpha_draws_sorted[CTPMid,,coef_ind],alpha_draws_sorted[CTPUpper,,coef_ind],tau:(kT+tau-1))
@@ -434,7 +434,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
     #
 }
 
-.plotedsge <- function(obj,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13)
+.plotedsge <- function(obj,par_names=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13)
 {
     n_draws <- dim(obj$dsge_draws)[1]
     n_param <- dim(obj$dsge_draws)[2]
@@ -451,10 +451,10 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
     
     #
     
-    if (is.null(parnames)==TRUE) {
-        parnames <- character(length=n_param)
+    if (is.null(par_names)==TRUE) {
+        par_names <- character(length=n_param)
         for(i in 1:n_param){  
-            parnames[i] <- paste("parameter",i,sep="")
+            par_names[i] <- paste("parameter",i,sep="")
         }
     }
     
@@ -525,14 +525,14 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
                     #
 
                     ParamBin <- (max(ParamDF) - min(ParamDF))/BinDenom
-                    print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=parnames[param_count]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    print(ggplot(data=(ParamDF),aes(DSGEPar)) + xlab("") + ylab("") + geom_histogram(colour="darkblue",binwidth=ParamBin) + labs(title=par_names[param_count]) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                     
                     #
 
                     param_count <- param_count + 1
                     Sys.sleep(0.3)
 
-                }else{param_count <- param_count + 1}
+                } else {param_count <- param_count + 1}
             }
         }
 
@@ -573,7 +573,7 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
                         
                         #
                         
-                        print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(parnames[param_count])) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                        print(ggplot(data=(ParamDF),aes(x=Keep)) + xlab("Keep Run") + ylab(paste(par_names[param_count])) + geom_line(aes(y=DSGEPar),color="black") + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                         
                         #
                         
@@ -590,8 +590,8 @@ plot.Rcpp_dsgevar_gensys <- function(x,parnames=NULL,BinDenom=40,MCMCplot=FALSE,
     #
 }
 
-.plotdsgevar <- function(obj,parnames=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13)
+.plotdsgevar <- function(obj,par_names=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13)
 {    
     dsge_obj <- obj$dsge
-    .plotedsge(dsge_obj,parnames,BinDenom,trace_plot,save,height,width)
+    .plotedsge(dsge_obj,par_names,BinDenom,trace_plot,save,height,width)
 }

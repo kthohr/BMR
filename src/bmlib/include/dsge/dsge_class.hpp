@@ -33,17 +33,17 @@ class dsge
 
         // a LREM object (e.g., gensys or uhlig)
 
-        T lrem_obj;
+        mutable T lrem_obj;
 
         // state equation:       X_t = F*X_{t-1} + G*shock_t,
         // measurement equation: Y_t = C + H'*X_t + measerr_t
 
-        arma::mat kalman_mat_F; // state VAR(1) matrix
-        arma::mat kalman_mat_Q; // covariance matrix = SS_G * cov_shock_t * SS_G.t()
+        mutable arma::mat kalman_mat_F; // state VAR(1) matrix
+        mutable arma::mat kalman_mat_Q; // covariance matrix = SS_G * cov_shock_t * SS_G.t()
 
-        arma::mat kalman_mat_C;
-        arma::mat kalman_mat_H;
-        arma::mat kalman_mat_R; // covariance matrix of meas. err.
+        mutable arma::mat kalman_mat_C;
+        mutable arma::mat kalman_mat_H;
+        mutable arma::mat kalman_mat_R; // covariance matrix of meas. err.
 
         // priors and bounds
 
@@ -60,8 +60,6 @@ class dsge
         // MCMC results
 
         arma::mat dsge_draws;
-
-        arma::cube irfs;
 
         // a function mapping the 'deep' parameters to the structural matrices
 
@@ -82,22 +80,23 @@ class dsge
         void set_bounds(const arma::vec& lower_bounds_inp, const arma::vec& upper_bounds_inp);
         void set_prior(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp);
 
-        void solve();
-        void state_space(arma::mat& F_state, arma::mat& G_state);
-        arma::mat simulate(const int sim_periods, const int burnin);
+        void solve() const;
+        void state_space(arma::mat& F_state, arma::mat& G_state) const;
+        arma::mat simulate(const int sim_periods, const int burnin) const;
 
-        void solve_to_state_space(const arma::vec& pars_inp);
+        void solve_to_state_space(const arma::vec& pars_inp) const;
 
-        double log_prior(const arma::vec& pars_inp);
-        double log_posterior_kernel(const arma::vec& pars_inp);
+        double log_prior(const arma::vec& pars_inp) const;
+        double log_posterior_kernel(const arma::vec& pars_inp) const;
 
         arma::vec estim_mode(const arma::vec& initial_vals);
-        arma::vec estim_mode(const arma::vec& initial_vals, optim::opt_settings* settings_inp);
+        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat);
+        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::opt_settings* settings_inp);
 
         void estim_mcmc(const arma::vec& initial_vals);
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
 
-        arma::cube IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods) const;
 
     protected:
         static double mode_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* mode_data);

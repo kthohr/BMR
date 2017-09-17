@@ -19,5 +19,5 @@
 forecast <- function(obj, ...) UseMethod("forecast")
 IRF <- function(obj, ...) UseMethod("IRF")
 
-modecheck <- function(obj, ...) UseMethod("modecheck")
+mode_check <- function(obj, ...) UseMethod("mode_check")
 states <- function(obj, ...) UseMethod("states")

@@ -17,7 +17,7 @@
 
 # 07/20/2015
 
-states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
+states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
     #
     DSGEPars <- obj$Parameters
     partomats <- obj$partomats
@@ -37,10 +37,10 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
     StateMats <- statespace(dsgesolved)
     nstates <- ncol(StateMats$F)
     #
-    if(class(varnames) != "character"){
-        varnames <- character(length=nstates)
+    if(class(var_names) != "character"){
+        var_names <- character(length=nstates)
         for(i in 1:nstates){  
-            varnames[i] <- paste("State",i,sep="")
+            var_names[i] <- paste("State",i,sep="")
         }
     }
     #
@@ -133,7 +133,7 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
             for(k in 1:MC){
                 #
                 if(StateCount <= nstates){
-                    StateName <- varnames[StateCount]
+                    StateName <- var_names[StateCount]
                     SDF <- StateData[,,StateCount]
                     SDF <- data.frame(SDF)
                     colnames(SDF) <- c("SL","SM","SU","Time")
@@ -154,7 +154,7 @@ states.EDSGE <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FA
     return=list(MeanState=StatesMean,States=StateData)
 }
 
-states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
+states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,useMean=FALSE,save=FALSE,height=13,width=11,...){
     #
     DSGEPars <- obj$Parameters
     partomats <- obj$partomats
@@ -174,10 +174,10 @@ states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=
     StateMats <- statespace(dsgesolved)
     nstates <- ncol(StateMats$F)
     #
-    if(class(varnames) != "character"){
-        varnames <- character(length=nstates)
+    if(class(var_names) != "character"){
+        var_names <- character(length=nstates)
         for(i in 1:nstates){  
-            varnames[i] <- paste("State",i,sep="")
+            var_names[i] <- paste("State",i,sep="")
         }
     }
     #
@@ -270,7 +270,7 @@ states.DSGEVAR <- function(obj,percentiles=c(.05,.50,.95),varnames=NULL,useMean=
             for(k in 1:MC){
                 #
                 if(StateCount <= nstates){
-                    StateName <- varnames[StateCount]
+                    StateName <- var_names[StateCount]
                     SDF <- StateData[,,StateCount]
                     SDF <- data.frame(SDF)
                     colnames(SDF) <- c("SL","SM","SU","Time")

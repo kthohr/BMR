@@ -45,7 +45,7 @@ class dsgevar
 
         // a DSGE object
 
-        dsge<T> dsge_obj;
+        mutable dsge<T> dsge_obj;
 
         // data used for estimation
 
@@ -84,21 +84,22 @@ class dsgevar
         void set_bounds(const arma::vec& lower_bounds_inp, const arma::vec& upper_bounds_inp);
         void set_prior(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp);
 
-        double log_posterior_kernel(const arma::vec& pars_inp);
+        double log_posterior_kernel(const arma::vec& pars_inp) const;
 
         arma::vec estim_mode(const arma::vec& initial_vals);
-        arma::vec estim_mode(const arma::vec& initial_vals, optim::opt_settings* settings_inp);
+        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat);
+        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::opt_settings* settings_inp);
 
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
 
-        arma::cube IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods) const;
 
     protected:
-        void model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX);
-        void model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX);
+        void model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;
+        void model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;
 
-        double log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_XY, const arma::mat& Gamma_XX, const arma::mat& Gamma_bar_YY, const arma::mat& Gamma_bar_XY, const arma::mat& Gamma_bar_XX);
-        double log_likelihood_inf(const arma::mat& Gamma_YY, const arma::mat& Gamma_XY, const arma::mat& Gamma_XX);
+        double log_likelihood(const arma::mat& Gamma_YY, const arma::mat& Gamma_XY, const arma::mat& Gamma_XX, const arma::mat& Gamma_bar_YY, const arma::mat& Gamma_bar_XY, const arma::mat& Gamma_bar_XX) const;
+        double log_likelihood_inf(const arma::mat& Gamma_YY, const arma::mat& Gamma_XY, const arma::mat& Gamma_XX) const;
 
         void gibbs();
 

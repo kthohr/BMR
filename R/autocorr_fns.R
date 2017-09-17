@@ -31,12 +31,12 @@ gpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=F
     ACFMat <- matrix(NA,lags,M)
     #
     if(class(colnames(y)) != "character"){
-        varnames <- ncol(y)
+        var_names <- ncol(y)
         for(i in 1:ncol(y)){  
-            varnames[i] <- paste("Var",i,sep="")
+            var_names[i] <- paste("Var",i,sep="")
         }
     }else{
-        varnames <- colnames(y)
+        var_names <- colnames(y)
     }
     #
     for(j in 1:M){
@@ -65,7 +65,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=F
         for(j in 1:M){
             kacf <- ACFMat[,j]
             kci <- CIMat[,j]
-            VarName <- varnames[j]
+            VarName <- var_names[j]
             #
             ACFdata <- data.frame(mycount,kacf,kci)
             #
@@ -101,12 +101,12 @@ gpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=F
     PACFMat <- matrix(NA,lags,M)
     #
     if(class(colnames(y)) != "character"){
-        varnames <- ncol(y)
+        var_names <- ncol(y)
         for(i in 1:ncol(y)){  
-            varnames[i] <- paste("Var",i,sep="")
+            var_names[i] <- paste("Var",i,sep="")
         }
     }else{
-        varnames <- colnames(y)
+        var_names <- colnames(y)
     }
     #
     for(j in 1:M){
@@ -135,7 +135,7 @@ gpacf<-function(y,lags=10,ci=.95,plot=TRUE,barcolor="darkred",names=FALSE,save=F
         for(j in 1:M){
             kpacf <- PACFMat[,j]
             kci <- CIMat[,j]
-            VarName <- varnames[j]
+            VarName <- var_names[j]
             #
             PACFdata <- data.frame(mycount,kpacf,kci)
             #

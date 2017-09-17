@@ -16,35 +16,33 @@
 ##
 ################################################################################
 
-# 08/31/2017
-
-forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,varnames,percentiles,useMean,backdata,save,height,width)
+forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,backdata,save,height,width)
 }
 
-forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,plot=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,varnames,percentiles,useMean,backdata,save,height,width)
+forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,backdata,save,height,width)
 }
 
-forecast.Rcpp_bvarw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,varnames,percentiles,useMean,backdata,save,height,width)
+forecast.Rcpp_bvarw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,backdata,save,height,width)
 }
 
-forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,varnames,percentiles,useMean,backdata,save,height,width)
+forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,backdata,save,height,width)
 }
 
 forecast.EDSGE <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    forecastdata <- .forecastdsge(obj,periods,plot,percentiles,useMean,backdata,save,height,width)
+    forecastdata <- .forecast_dsge(obj,periods,plot,percentiles,useMean,backdata,save,height,width)
     return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
 forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11,...){
-    forecastdata <- .forecastdsgevar(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
+    forecastdata <- .forecast_dsgevar(obj,periods,shocks,plot,percentiles,useMean,backdata,save,height,width)
     return=list(MeanForecast=forecastdata$MeanForecast,PointForecast=forecastdata$PointForecast,Forecasts=forecastdata$Forecasts)
 }
 
-.forecast_var <- function(obj,periods=20,shocks=TRUE,plot=TRUE,varnames=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+.forecast_var <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
     
     #if(getRversion() >= "3.1.0") utils::suppressForeignCheck(names=c("Time", "FCL", "FCU", "FCM"))
     
@@ -107,10 +105,10 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
 
         pushViewport(viewport(layout=grid.layout(M,1)))
 
-        if (class(varnames) != "character") {
-            varnames <- character(length=M)
+        if (class(var_names) != "character") {
+            var_names <- character(length=M)
             for (i in 1:M) {  
-                varnames[i] <- paste("VAR",i,sep="")
+                var_names[i] <- paste("VAR",i,sep="")
             }
         }
         
@@ -119,7 +117,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
         if (backdata > 0) {
             # Include a dashed line to mark where the forecast begins
             for (i in 1:M) {
-                FCastName <- varnames[i]
+                FCastName <- var_names[i]
                 FCDF <- ForecastData[,,i]
                 FCDF <- data.frame(FCDF)
                 colnames(FCDF) <- c("FCL","FCM","FCU","Time")
@@ -130,7 +128,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
             }
         } else {
             for (i in 1:M) {
-                FCastName <- varnames[i]
+                FCastName <- var_names[i]
                 FCDF <- ForecastData[,,i]
                 FCDF <- data.frame(FCDF)
                 colnames(FCDF) <- c("FCL","FCM","FCU","Time")
@@ -146,7 +144,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     return=list(MeanForecast=forecast_mean,PointForecast=forecast_sorted[,,mid_conf])
 }
 
-.forecastdsge <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+.forecast_dsge <- function(obj,periods=20,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
     #
     DSGEPars <- obj$Parameters
     partomats <- obj$partomats
@@ -251,7 +249,7 @@ forecast.DSGEVAR <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(
     return=list(MeanForecast=ForecastsMean,PointForecast=ForecastsSorted[,,MidCInt],Forecasts=Forecasts)
 }
 
-.forecastdsgevar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
+.forecast_dsgevar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,percentiles=c(.05,.50,.95),useMean=FALSE,backdata=0,save=FALSE,height=13,width=11){
     #
     Betas <- obj$Beta
     Sigmas <- obj$Sigma

@@ -32,16 +32,16 @@
   \method{IRF}{BVARTVP}(obj,whichirfs=NULL,percentiles=c(.05,.50,.95),
   save=FALSE,height=13,width=13,...)
     
-  \method{IRF}{DSGEVAR}(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,
+  \method{IRF}{DSGEVAR}(obj,var_names=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,
     save=TRUE,height=13,width=13,...)
-  \method{IRF}{EDSGE}(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),
+  \method{IRF}{EDSGE}(obj,observableIRFs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),
     save=TRUE,height=13,width=13,...)
 
-  \method{IRF}{gensys}(obj,shocks,irf.periods=20,varnames=NULL,
+  \method{IRF}{gensys}(obj,shocks,irf.periods=20,var_names=NULL,
     plot=TRUE,save=FALSE,height=13,width=13,...)
-  \method{IRF}{uhlig}(obj,shocks,irf.periods=20,varnames=NULL,
+  \method{IRF}{uhlig}(obj,shocks,irf.periods=20,var_names=NULL,
     plot=TRUE,save=FALSE,height=13,width=13,...)
-  \method{IRF}{SDSGE}(obj,shocks,irf.periods=20,varnames=NULL,
+  \method{IRF}{SDSGE}(obj,shocks,irf.periods=20,var_names=NULL,
     plot=TRUE,save=FALSE,height=13,width=13,...)
 }
 
@@ -63,7 +63,7 @@
   Which IRFs to plot. (The default is to plot all of the IRFs contained in the estimation object.)}\cr
   
   For objects of class `DSGEVAR',
-  \item{varnames}{
+  \item{var_names}{
   A character vector with the names of the relevant variables.}
   \item{comparison}{
   Whether to plot corresponding DSGE model IRFs.}\cr

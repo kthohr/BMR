@@ -16,7 +16,7 @@ exportClasses("Rcpp_uhlig")
 exportClasses("Rcpp_dsge_gensys")
 exportClasses("Rcpp_dsgevar_gensys")
 
-export(IRF,forecast,modecheck,prior,stationarity,gtsplot,gacf,gpacf)
+export(IRF,forecast,mode_check,prior,stationarity,gtsplot,gacf,gpacf)
 
 exportPattern("^[[:alpha:]]+")
 
@@ -32,5 +32,5 @@ S3method(forecast, Rcpp_bvars)
 S3method(forecast, Rcpp_bvarw)
 S3method(forecast, Rcpp_cvar)
 
-S3method(modecheck, Rcpp_dsge_gensys)
-S3method(modecheck, Rcpp_dsgevar_gensys)
+S3method(mode_check, Rcpp_dsge_gensys)
+S3method(mode_check, Rcpp_dsgevar_gensys)

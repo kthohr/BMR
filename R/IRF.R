@@ -16,57 +16,61 @@
 ##
 ################################################################################
 
-IRF.Rcpp_bvarm <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvarm <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvars <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvars <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvarw <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvarw <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_cvar <- function(obj,periods=10,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_cvar <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    .irfvar(obj,periods,varnames,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,varnames=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
+IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=TRUE,height=13,width=13,...)
 {
-    .irfbvartvp(obj,periods,which_irfs,varnames,percentiles,which_shock,which_response,save,height,width)
+    .irf_bvartvp(obj,periods,which_irfs,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_gensys <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...){
-    .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
+IRF.Rcpp_gensys <- function(obj,periods=10,var_names=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...)
+{
+    .irf_dsge(obj,periods,var_names,shocks_cov,save,height,width)
 }
 
-IRF.Rcpp_uhlig <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...){
-    .irfdsge(obj,periods,varnames,shocks_cov,save,height,width)
+IRF.Rcpp_uhlig <- function(obj,periods=10,var_names=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13,...)
+{
+    .irf_dsge(obj,periods,var_names,shocks_cov,save,height,width)
 }
 
-IRF.Rcpp_dsge_gensys <- function(obj,periods=10,obs_irfs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
-    .irfedsge(obj,periods,obs_irfs,varnames,percentiles,save,height,width)
+IRF.Rcpp_dsge_gensys <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...)
+{
+    .irf_edsge(obj,periods,obs_irfs,var_names,percentiles,save,height,width)
 }
 
-# IRF.EDSGE <- function(obj,observableIRFs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
-#     .irfedsge(obj,observableIRFs,varnames,percentiles,save,height,width)
+# IRF.EDSGE <- function(obj,observableIRFs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13,...){
+#     .irf_edsge(obj,observableIRFs,var_names,percentiles,save,height,width)
 # }
 
-IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,.50,.95),plot_comparison=TRUE,save=TRUE,height=13,width=13,...){
-    .irfdsgevar(obj,periods,varnames,percentiles,plot_comparison,save,height,width)
+IRF.Rcpp_dsgevar_gensys <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),plot_comparison=TRUE,save=TRUE,height=13,width=13,...)
+{
+    .irf_dsgevar(obj,periods,var_names,percentiles,plot_comparison,save,height,width)
 }
 
-# IRF.DSGEVAR <- function(obj,varnames=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
-#     .irfdsgevar(obj,varnames,percentiles,comparison,save,height,width)
+# IRF.DSGEVAR <- function(obj,var_names=NULL,percentiles=c(.05,.50,.95),comparison=TRUE,save=TRUE,height=13,width=13,...){
+#     .irf_dsgevar(obj,var_names,percentiles,comparison,save,height,width)
 # }
 
 
-.irfvar <- function(obj, periods=10, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
+.irf_var <- function(obj, periods=10, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
 {
     #
     
@@ -121,10 +125,10 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     n_response <- length(which_response)
     n_shocks   <- length(which_shock)
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -154,8 +158,8 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
         
         for(i in 1:M){
             for(k in 1:M){
-                NameResponse <- varnames[k]
-                NameImpulse  <- varnames[i]
+                NameResponse <- var_names[k]
+                NameImpulse  <- var_names[i]
                 
                 IRFDF <- irf_plot[,,k,i]
                 IRFDF <- data.frame(IRFDF)
@@ -206,7 +210,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
                 if (n_shocks==1) {
                     cairo_ps(filename="IRFs.eps",height=height,width=width)
                 } else {
-                    SaveIRF <- paste(varnames[i],"_Shock",".eps",sep="")
+                    SaveIRF <- paste(var_names[i],"_Shock",".eps",sep="")
                     cairo_ps(filename=SaveIRF,height=height,width=width)
                 }
             }
@@ -215,8 +219,8 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
             pushViewport(viewport(layout=grid.layout(MR,MC)))
             
             for(k in which_response){
-                NameResponse <- varnames[k]
-                NameImpulse  <- varnames[i]
+                NameResponse <- var_names[k]
+                NameImpulse  <- var_names[i]
                 
                 IRFDF <- irf_plot[,,k,i]
                 IRFDF <- data.frame(IRFDF)
@@ -250,7 +254,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     return=list(IRFs=irf_plot)
 }
 
-.irfbvartvp <- function(obj, periods=10, which_irfs=NULL, varnames=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
+.irf_bvartvp <- function(obj, periods=10, which_irfs=NULL, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=TRUE, height=13, width=13)
 {
     #
     
@@ -286,10 +290,10 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     n_response <- length(which_response)
     n_shocks   <- length(which_shock)
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -344,8 +348,8 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
             
             for(i in 1:M){
                 for(k in 1:M){
-                    NameResponse <- varnames[k]
-                    NameImpulse  <- varnames[i]
+                    NameResponse <- var_names[k]
+                    NameImpulse  <- var_names[i]
                     
                     IRFDF <- irf_plot[,,k,i]
                     IRFDF <- data.frame(IRFDF)
@@ -396,7 +400,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
                     if (n_shocks==1) {
                         cairo_ps(filename="IRFs.eps",height=height,width=width)
                     } else {
-                        SaveIRF <- paste(varnames[i],"_Shock",".eps",sep="")
+                        SaveIRF <- paste(var_names[i],"_Shock",".eps",sep="")
                         cairo_ps(filename=SaveIRF,height=height,width=width)
                     }
                 }
@@ -405,8 +409,8 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
                 pushViewport(viewport(layout=grid.layout(MR,MC)))
                 
                 for(k in which_response){
-                    NameResponse <- varnames[k]
-                    NameImpulse  <- varnames[i]
+                    NameResponse <- var_names[k]
+                    NameImpulse  <- var_names[i]
                     
                     IRFDF <- irf_plot[,,k,i]
                     IRFDF <- data.frame(IRFDF)
@@ -444,7 +448,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
 #
 # DSGE
 
-.irfdsge <- function(obj,periods=10,varnames=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13)
+.irf_dsge <- function(obj,periods=10,var_names=NULL,shocks_cov=NULL,save=FALSE,height=13,width=13)
 {
     
     if (periods <= 0) {
@@ -460,10 +464,10 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     M <- dim(irfs)[2]
     n_shocks <- dim(irfs)[3]
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
     
@@ -520,7 +524,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     
     #
 
-    varnames2 <- varnames
+    var_names2 <- var_names
 
     for (j in 1:n_shocks) {
         
@@ -528,7 +532,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
             if (n_shocks==1) {
                 cairo_ps(filename="DSGEIRFs.eps",height=height,width=width)
             } else {
-                SaveIRF <- paste(varnames[M-n_shocks+j],"_Shock",".eps",sep="")
+                SaveIRF <- paste(var_names[M-n_shocks+j],"_Shock",".eps",sep="")
                 cairo_ps(filename=SaveIRF,height=height,width=width)
             }
         }
@@ -537,9 +541,9 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
         pushViewport(viewport(layout=grid.layout(MR,MC)))
 
         if (n_shocks > 1) {
-            varnames2 <- varnames[-drop_ind[-(j)]]
+            var_names2 <- var_names[-drop_ind[-(j)]]
         } else {
-            varnames2 <- varnames
+            var_names2 <- var_names
         }
 
         #
@@ -553,7 +557,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
                     IRFDF <- data.frame(irfs_plot[,irf_plot_count,j],1:periods)
                     colnames(IRFDF) <- c("IRFM","Time")
                     
-                    print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(var_names2[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
                     
                     #
 
@@ -572,7 +576,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     return=list(irfs=irfs)
 }
 
-.irfedsge <- function(obj,periods=10,obs_irfs=FALSE,varnames=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13)
+.irf_edsge <- function(obj,periods=10,obs_irfs=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),save=TRUE,height=13,width=13)
 {    
     if (periods <= 0) {
         stop("error: need periods > 0")
@@ -635,10 +639,10 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
 
     #
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -679,7 +683,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     
     #
 
-    varnames2 <- varnames
+    var_names2 <- var_names
 
     for (j in 1:n_shocks) {
         #
@@ -687,7 +691,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
             if (n_shocks==1) {
                 cairo_ps(filename="DSGEBIRFs.eps",height=height,width=width)
             } else {
-                SaveIRF <- paste(varnames[M-n_shocks+j],"_Shock",".eps",sep="")
+                SaveIRF <- paste(var_names[M-n_shocks+j],"_Shock",".eps",sep="")
                 #
                 cairo_ps(filename=SaveIRF,height=height,width=width)
             }
@@ -699,9 +703,9 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
         #
 
         if (n_shocks > 1) {
-            varnames2 <- varnames[-drop_ind[-(j)]]
+            var_names2 <- var_names[-drop_ind[-(j)]]
         } else {
-            varnames2 <- varnames
+            var_names2 <- var_names
         }
 
         #
@@ -717,7 +721,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
 
                     #
 
-                    gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames2[irf_plot_count])) 
+                    gg1 <- ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(var_names2[irf_plot_count])) 
                     gg2 <- gg1 + geom_ribbon(aes(ymin=IRFL,ymax=IRFU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0) + geom_line(aes(y=IRFM),color="darkslateblue",size=2) 
                     gg3 <- gg2 + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89'))
                     print(gg3,vp = vplayout(i,k))
@@ -739,7 +743,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     return=list()
 }
 
-.irfdsgevar <- function(obj,periods,varnames=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=TRUE,height=13,width=13)
+.irf_dsgevar <- function(obj,periods,var_names=NULL,percentiles=c(.05,.50,.95),comparison_plot=TRUE,save=TRUE,height=13,width=13)
 {   
     if (periods <= 0) {
         stop("error: need periods > 0")
@@ -793,10 +797,10 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
     
     #
 
-    if (class(varnames) != "character") {
-        varnames <- character(length=M)
+    if (class(var_names) != "character") {
+        var_names <- character(length=M)
         for (i in 1:M) {  
-            varnames[i] <- paste("VAR",i,sep="")
+            var_names[i] <- paste("VAR",i,sep="")
         }
     }
 
@@ -865,7 +869,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
 
                     #
                     
-                    print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(varnames[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
+                    print(ggplot(data=(IRFDF),aes(x=Time)) + xlab("") + ylab(paste(var_names[irf_plot_count])) + geom_hline(yintercept=0) + geom_line(aes(y=VARIRFM),color="darkgreen",size=2) + geom_line(aes(y=VARIRFL),color="darkgreen",size=1,linetype=4) + geom_line(aes(y=VARIRFU),color="darkgreen",size=1,linetype=4) + theme(panel.background = element_rect(fill='white', colour='grey5')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,k))
 
                     #
                     
@@ -886,7 +890,7 @@ IRF.Rcpp_dsgevar_gensys <- function(obj,periods,varnames=NULL,percentiles=c(.05,
 
 # old
 
-# .irfbvartvp <- function(obj, which_irfs=NULL, varnames=NULL, percentiles=c(.05,.50,.95), save=FALSE, height=13, width=13){
+# .irfbvartvp <- function(obj, which_irfs=NULL, var_names=NULL, percentiles=c(.05,.50,.95), save=FALSE, height=13, width=13){
 #     IRFs <- obj$IRFs
 #     irf.periods <- as.numeric(dim(IRFs)[1])
 #     M <- as.numeric(dim(IRFs)[3])

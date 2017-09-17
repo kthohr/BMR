@@ -19,25 +19,24 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_dsge_HPP
-#define _bmlib_dsge_HPP
+/*
+ * Modecheck
+ */
 
-namespace bm
-{
-    // DSGE
+#ifndef _bmlib_mode_check_HPP
+#define _bmlib_mode_check_HPP
 
-    #include "mode_check.hpp"
-    #include "dsge_irf.hpp"
-    #include "dsge_simulate.hpp"
+template<typename T>
+arma::cube mode_check(const T& model_inp, const arma::vec& mode_vals, const int grid_size);
 
-    #include "gensys.hpp"
-    #include "uhlig.hpp"
+template<typename T>
+double hess_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* hess_data);
 
-    #include "dsge_class.hpp"
+template<typename T>
+struct mode_check_data {
+    T model_obj;
+};
 
-    // DSGE-VAR
-
-    #include "dsgevar_class.hpp"
-}
+#include "mode_check.tpp"
 
 #endif

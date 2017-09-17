@@ -48,7 +48,7 @@ obj$set_prior(prior_form,prior_pars)
 par_bounds <- cbind(c(-Inf),
                     c( Inf))
 
-opt_bounds <- cbind(c(0.5),
+opt_bounds <- cbind(c(0.7),
                     c(3.0))
 
 obj$set_bounds(opt_bounds[,1],opt_bounds[,2])
@@ -60,15 +60,19 @@ obj$opt_initial_ub <- opt_bounds[,2]
 
 obj$estim_data = sim_data;
 
-#obj$estim_mode(x)
+mode_res <- obj$estim_mode(x,TRUE)
+
+mode_check(obj,mode_res$mode_vals,25,1,"eta")
+
+#
 
 obj$mcmc_initial_lb <- opt_bounds[,1]
 obj$mcmc_initial_ub <- opt_bounds[,2]
 
 obj$estim_mcmc(x,50,100,100)
 
-varnames <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply",
+var_names <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply",
               "Technology","MonetaryPolicy")
 
-plot(obj,parnames="eta",save=FALSE)
-IRF(obj,20,varnames=varnames,save=FALSE)
+plot(obj,par_names="eta",save=FALSE)
+IRF(obj,20,var_names=var_names,save=FALSE)

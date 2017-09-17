@@ -14,9 +14,9 @@
 \usage{
 modecheck(obj,...)
 
-\method{modecheck}{DSGEVAR}(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,parnames=NULL,
+\method{modecheck}{DSGEVAR}(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,par_names=NULL,
   save=FALSE,height=13,width=13,...)
-\method{modecheck}{EDSGE}(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,parnames=NULL,
+\method{modecheck}{EDSGE}(obj,gridsize=200,scalepar=NULL,plottransform=FALSE,par_names=NULL,
   save=FALSE,height=13,width=13,...)
 }
 
@@ -29,7 +29,7 @@ modecheck(obj,...)
 	A value to replace the scaling parameter from estimation (`c') when plotting the log posterior.}
 	\item{plottransform}{
 	Whether to plot the transformed values (i.e., such that the support of each parameter is unbounded), or to plot the untransformed values.}
-  \item{parnames}{
+  \item{par_names}{
   A vector of expressions containing the name of each parameter.}
 	\item{save}{
 	Whether to save the plot(s).}

@@ -76,6 +76,8 @@ RCPP_MODULE(dsgevar_gensys_module)
         .method( "estim_mode", &dsgevar_gensys_R::estim_mode_R )
         .method( "estim_mcmc", &dsgevar_gensys_R::estim_mcmc_R )
 
+        .method( "mode_check", &dsgevar_gensys_R::mode_check_R )
+
         .method( "IRF", &dsgevar_gensys_R::IRF_R )
     ;
 }
@@ -264,7 +266,7 @@ dsgevar_gensys_R::set_prior_R(const arma::uvec& prior_form_inp, const arma::mat&
 //
 
 SEXP
-dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
+dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals, bool calc_vcov)
 {
     try {
         optim::opt_settings settings;
@@ -278,8 +280,16 @@ dsgevar_gensys_R::estim_mode_R(const arma::vec& initial_vals)
 
         settings.de_check_freq = 50;
 
-        arma::vec res = this->estim_mode(initial_vals,&settings);
-        return Rcpp::List::create(Rcpp::Named("mode_vals") = res);
+        arma::vec res;
+        arma::mat vcov_mat;
+
+        if (calc_vcov) {
+            res = this->estim_mode(initial_vals,&vcov_mat,&settings);
+        } else {
+            res = this->estim_mode(initial_vals,nullptr,&settings);
+        }
+
+        return Rcpp::List::create(Rcpp::Named("mode_vals") = res, Rcpp::Named("vcov_mat") = vcov_mat);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
@@ -311,6 +321,24 @@ dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_g
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+}
+
+//
+
+SEXP
+dsgevar_gensys_R::mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val)
+{
+    try {
+        
+        arma::cube mode_check_vals = bm::mode_check(*this,mode_vals,grid_size);
+
+        return Rcpp::List::create(Rcpp::Named("mode_check_vals") = mode_check_vals);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+    return R_NilValue;
 }
 
 //

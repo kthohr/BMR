@@ -5,3 +5,5 @@
 .vscode
 LICENSE
 README.md
+^.*\.Rproj$
+^\.Rproj\.user$
