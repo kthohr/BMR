@@ -380,3 +380,50 @@ const
 
     return forecast_cube;
 }
+
+//
+// get filtered states
+
+template<typename T>
+arma::cube
+dsge<T>::state_filter()
+const
+{
+    const int n = estim_data.n_rows;
+    const int n_draws = dsge_draws.n_rows;
+
+    solve_to_state_space(dsge_draws.row(0).t());
+
+    const int n_states = kalman_mat_F.n_cols;
+
+    arma::cube filter_cube(n,n_states,n_draws);
+
+    //
+
+    dsge<T> dsge_obj_copy = *this; // thread safety
+
+    dsge_obj_copy.estim_data.reset();
+    dsge_obj_copy.dsge_draws.reset();
+
+#ifdef BM_USE_OMP
+    #pragma omp parallel for firstprivate(dsge_obj_copy)
+#endif
+    for (int j=0; j < n_draws; j++) {
+        
+        dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
+
+        //
+
+        arma::mat filt_vals;
+
+        kalman_filter(estim_data, dsge_obj_copy.kalman_mat_F,dsge_obj_copy.kalman_mat_Q, dsge_obj_copy.kalman_mat_C,dsge_obj_copy.kalman_mat_H,dsge_obj_copy.kalman_mat_R, &filt_vals);
+
+        //
+
+        filter_cube.slice(j) = std::move(filt_vals);
+    }
+
+    //
+
+    return filter_cube;
+}

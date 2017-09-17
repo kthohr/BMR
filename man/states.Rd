@@ -14,10 +14,10 @@
 states(obj,...)
 
 \method{states}{DSGEVAR}(obj,percentiles=c(.05,.50,.95),
-       var_names=NULL,useMean=FALSE,
+       var_names=NULL,use_mean=FALSE,
        save=FALSE,height=13,width=11,...)
 \method{states}{EDSGE}(obj,percentiles=c(.05,.50,.95),
-       var_names=NULL,useMean=FALSE,
+       var_names=NULL,use_mean=FALSE,
        save=FALSE,height=13,width=11,...)
 }
 
@@ -29,7 +29,7 @@ states(obj,...)
 	Which percentiles of the distribution to use.}
   \item{var_names}{
   Name labels for the states.}
-	\item{useMean}{
+	\item{use_mean}{
 	Whether the user would prefer to use the mean of the forecast distribution rather than the middle value in `percentiles'.}
 	\item{save}{
 	Whether to save the plots.}

@@ -1,7 +1,7 @@
-\name{BVARM}
+\name{bvarm}
 
-\alias{BVARM}
-\alias{BVARM.default}
+\alias{bvarm}
+\alias{bvarm.default}
 
 \title{BVAR with Minnesota Prior.}
 
@@ -10,7 +10,7 @@
 }
 
 \usage{
-BVARM(mydata,coefprior=NULL,p=4,constant=TRUE,
+bvarm(mydata,coefprior=NULL,p=4,constant=TRUE,
       irf.periods=20,keep=10000,burnin=1000,
       VType=1,decay="H",HP1=0.5,HP2=0.5,HP3=1,HP4=2)
 }
@@ -43,7 +43,7 @@ BVARM(mydata,coefprior=NULL,p=4,constant=TRUE,
 }
 
 \value{
-The function returns an object of class BVARM, which contains:
+The function returns an object of class bvarm, which contains:
   \item{Beta}{
 	A matrix of size (m p + 1_c) x m containing the posterior mean of the coefficient matrix (beta).}
 	\item{BDraws}{
@@ -71,14 +71,14 @@ The function returns an object of class BVARM, which contains:
 }
 
 \seealso{
-  \code{\link{forecast.BVARM}}, \code{\link{IRF.BVARM}}, \code{\link{plot.BVARM}}.
+  \code{\link{forecast.bvarm}}, \code{\link{IRF.bvarm}}, \code{\link{plot.bvarm}}.
 }
 
 \examples{
 \dontrun{
 data(BMRVARData)
 prior<-c(0.9,0.95,0.95)
-testbvarm <- BVARM(USMacroData[,2:4],prior,p=4,constant=T,irf.periods=20,
+testbvarm <- bvarm(USMacroData[,2:4],prior,p=4,constant=T,irf.periods=20,
                   keep=10000,burnin=5000,VType=1,
                   HP1=0.5,HP2=0.5,HP3=10)
 plot(testbvarm,save=F)

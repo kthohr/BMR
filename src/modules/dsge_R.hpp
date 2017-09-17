@@ -83,6 +83,41 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
 
         SEXP IRF_R(int n_irf_periods);
         SEXP forecast_R(int n_horizon, bool incl_shocks);
+        SEXP state_filter_R();
+};
+
+class dsge_uhlig_R : public bm::dsge<bm::uhlig>
+{
+    public:
+        SEXP model_fn_SEXP;
+
+        arma::vec opt_initial_lb;
+        arma::vec opt_initial_ub;
+        arma::vec mcmc_initial_lb;
+        arma::vec mcmc_initial_ub;
+
+        void model_fn_R(const arma::vec& pars_inp, bm::uhlig& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
+
+        //
+
+        SEXP get_model_fn();
+        void set_model_fn(SEXP model_fn_inp);
+        void eval_model(Rcpp::NumericVector pars_inp);
+
+        void set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp);
+        void set_prior_R(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp);
+
+        uhlig_R get_lrem_R();
+        void set_lrem_R(uhlig_R lrem_obj_inp);
+
+        SEXP estim_mode_R(const arma::vec& initial_vals, bool calc_vcov);
+        void estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin);
+
+        SEXP mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val);
+
+        SEXP IRF_R(int n_irf_periods);
+        SEXP forecast_R(int n_horizon, bool incl_shocks);
+        SEXP state_filter_R();
 };
 
 //
@@ -127,4 +162,48 @@ class dsgevar_gensys_R : public bm::dsgevar<bm::gensys>
 
         SEXP IRF_R(int n_irf_periods);
         SEXP forecast_R(int n_horizon, bool incl_shocks);
+        SEXP state_filter_R();
+};
+
+class dsgevar_uhlig_R : public bm::dsgevar<bm::uhlig>
+{
+    public:
+        SEXP model_fn_SEXP;
+        // Rcpp::Function model_fn_Rcpp = nullptr;
+        void* model_fn_Rcpp;
+
+        arma::vec opt_initial_lb;
+        arma::vec opt_initial_ub;
+        arma::vec mcmc_initial_lb;
+        arma::vec mcmc_initial_ub;
+
+        void model_fn_R(const arma::vec& pars_inp, bm::uhlig& lrem_obj_inp, arma::mat& shocks_cov_out, arma::mat& C_out, arma::mat& H_out, arma::mat& R_out);
+
+        // member functions
+
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp, double lambda_inp);
+
+        arma::mat get_dsge_draws();
+
+        SEXP get_model_fn();
+        void set_model_fn(SEXP model_fn_inp);
+        void eval_model(Rcpp::NumericVector pars_inp);
+
+        void set_bounds_R(arma::vec lower_bounds_inp, arma::vec upper_bounds_inp);
+        void set_prior_R(const arma::uvec& prior_form_inp, const arma::mat& prior_pars_inp);
+
+        uhlig_R get_lrem_R();
+        void set_lrem_R(uhlig_R lrem_obj_inp);
+
+        dsge_uhlig_R get_dsge_R();
+        void set_dsge_R(dsge_uhlig_R dsge_obj_inp);
+
+        SEXP estim_mode_R(const arma::vec& initial_vals, bool calc_vcov);
+        void estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin);
+
+        SEXP mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val);
+
+        SEXP IRF_R(int n_irf_periods);
+        SEXP forecast_R(int n_horizon, bool incl_shocks);
+        SEXP state_filter_R();
 };

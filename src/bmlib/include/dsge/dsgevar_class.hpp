@@ -97,6 +97,8 @@ class dsgevar
         arma::cube forecast(const int n_horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& X_T, const int n_horizon, const bool incl_shocks);
 
+        arma::cube state_filter() const;
+
     protected:
         void model_moments(arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;
         void model_moments(const dsge<T>& dsge_model_inp, arma::mat& Gamma_YY, arma::mat& Gamma_XY, arma::mat& Gamma_XX) const;

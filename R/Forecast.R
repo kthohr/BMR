@@ -16,31 +16,49 @@
 ##
 ################################################################################
 
-forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvarw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_bvarw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsge_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_dsge(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_dsge_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_dsge(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11,...){
-    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,useMean,back_data,save,height,width)
+forecast.Rcpp_dsge_uhlig <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_dsge(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-.forecast_var <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11){
+forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
+}
+
+forecast.Rcpp_dsgevar_uhlig <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
+}
+
+#
+
+.forecast_var <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11){
     
     #if(getRversion() >= "3.1.0") utils::suppressForeignCheck(names=c("Time", "FCL", "FCU", "FCM"))
     
@@ -75,7 +93,7 @@ forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,va
         for (i in 1:M) {
             FDataTemp <- 0
 
-            if (useMean == TRUE) { # Use the mean or middle percentile?
+            if (use_mean == TRUE) { # Use the mean or middle percentile?
                 FDataTemp <- data.frame(forecast_sorted[,i,lower_conf],forecast_mean[,i],forecast_sorted[,i,upper_conf])
             } else {
                 FDataTemp <- data.frame(forecast_sorted[,i,lower_conf],forecast_sorted[,i,mid_conf],forecast_sorted[,i,upper_conf])
@@ -146,7 +164,7 @@ forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,va
     return=list(MeanForecast=forecast_mean,PointForecast=forecast_sorted[,,mid_conf])
 }
 
-.forecast_dsge <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),useMean=FALSE,back_data=0,save=FALSE,height=13,width=11){
+.forecast_dsge <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11){
     
     #if(getRversion() >= "3.1.0") utils::suppressForeignCheck(names=c("Time", "FCL", "FCU", "FCM"))
     
@@ -181,7 +199,7 @@ forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,va
         for (i in 1:M) {
             FDataTemp <- 0
 
-            if (useMean == TRUE) { # Use the mean or middle percentile?
+            if (use_mean == TRUE) { # Use the mean or middle percentile?
                 FDataTemp <- data.frame(forecast_sorted[,i,lower_conf],forecast_mean[,i],forecast_sorted[,i,upper_conf])
             } else {
                 FDataTemp <- data.frame(forecast_sorted[,i,lower_conf],forecast_sorted[,i,mid_conf],forecast_sorted[,i,upper_conf])

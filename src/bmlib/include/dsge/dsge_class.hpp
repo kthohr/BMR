@@ -100,6 +100,8 @@ class dsge
 
         arma::cube forecast(const int n_horizon, const bool incl_shocks) const;
 
+        arma::cube state_filter() const;
+
     protected:
         static double mode_objfn(const arma::vec& pars_inp, arma::vec* grad_vec, void* mode_data);
         static double mcmc_objfn(const arma::vec& pars_inp, void* mode_data);

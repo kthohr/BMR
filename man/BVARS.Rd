@@ -1,7 +1,7 @@
-\name{BVARS}
+\name{bvars}
 
-\alias{BVARS}
-\alias{BVARS.default}
+\alias{bvars}
+\alias{bvars.default}
 
 \title{BVAR with Steady-State Prior.}
 
@@ -10,7 +10,7 @@
 }
 
 \usage{
-BVARS(mydata,psiprior=NULL,coefprior=NULL,p=4,
+bvars(mydata,psiprior=NULL,coefprior=NULL,p=4,
       irf.periods=20,keep=10000,burnin=1000,
       XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
 }
@@ -45,7 +45,7 @@ BVARS(mydata,psiprior=NULL,coefprior=NULL,p=4,
 }
 
 \value{
-The function returns an object of class BVARS, which contains:
+The function returns an object of class bvars, which contains:
 
   \item{Beta}{
 	A matrix of size (m p) x m containing the posterior mean of the coefficient matrix (beta).}
@@ -74,7 +74,7 @@ The function returns an object of class BVARS, which contains:
 }
 
 \seealso{
-  \code{\link{forecast.BVARS}}, \code{\link{IRF.BVARS}}, \code{\link{plot.BVARS}}.
+  \code{\link{forecast.bvars}}, \code{\link{IRF.bvars}}, \code{\link{plot.bvars}}.
 }
 
 \examples{
@@ -82,7 +82,7 @@ The function returns an object of class BVARS, which contains:
 data(BMRVARData)
 mycfp = c(0.9,0.95,0.95)
 mypsi = c(3,6,5)
-testbvars <- BVARS(USMacroData[,2:4],mypsi,mycfp,p=4,irf.periods=20,
+testbvars <- bvars(USMacroData[,2:4],mypsi,mycfp,p=4,irf.periods=20,
                    keep=20000,burnin=5000,XiPsi=1,HP1=0.5,HP4=2,gamma=NULL)
 plot(testbvars,save=F)
 IRF(testbvars,save=F)

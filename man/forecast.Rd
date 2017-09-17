@@ -19,23 +19,23 @@
 forecast(obj,...)
 
 \method{forecast}{BVARM}(obj,periods=20,shocks=TRUE,plot=TRUE,
-         percentiles=c(.05,.50,.95),useMean=FALSE,
+         percentiles=c(.05,.50,.95),use_mean=FALSE,
          back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{BVARS}(obj,periods=20,shocks=TRUE,plot=TRUE,
-         percentiles=c(.05,.50,.95),useMean=FALSE,
+         percentiles=c(.05,.50,.95),use_mean=FALSE,
          back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{BVARW}(obj,periods=20,shocks=TRUE,plot=TRUE,
-         percentiles=c(.05,.50,.95),useMean=FALSE,
+         percentiles=c(.05,.50,.95),use_mean=FALSE,
          back_data=0,save=FALSE,height=13,width=11,...)
 \method{forecast}{DSGEVAR}(obj,periods=20,shocks=TRUE,plot=TRUE,
-         percentiles=c(.05,.50,.95),useMean=FALSE,
+         percentiles=c(.05,.50,.95),use_mean=FALSE,
          back_data=0,save=FALSE,height=13,width=11,...)
 
 \method{forecast}{CVAR}(obj,periods=20,plot=TRUE,confint=0.95,
          back_data=0,save=FALSE,height=13,width=11,...)
 
 \method{forecast}{EDSGE}(obj,periods=20,plot=TRUE,
-         percentiles=c(.05,.50,.95),useMean=FALSE,
+         percentiles=c(.05,.50,.95),use_mean=FALSE,
          back_data=0,save=FALSE,height=13,width=11,...)
 }
 
@@ -51,7 +51,7 @@ forecast(obj,...)
 	Whether to plot the forecasts.}
 	\item{percentiles}{
 	The percentiles of the conditional posterior distribution of forecasts to use for plotting.}
-	\item{useMean}{
+	\item{use_mean}{
 	Whether the user would prefer to use the mean of the forecast distribution rather than the middle value in `percentiles'.}
 	\item{back_data}{
 	How many 'real' data points to plot before plotting the forecast. A broken line will indicate whether the `real' data ends and the forecast begins.}

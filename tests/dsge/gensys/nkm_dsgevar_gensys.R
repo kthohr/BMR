@@ -77,7 +77,11 @@ obj$mcmc_initial_ub <- opt_bounds[,2]
 
 obj$estim_mcmc(x,50,100,100)
 
+var_names <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply",
+               "Technology","MonetaryPolicy")
+
 plot(obj,par_names="eta",save=FALSE)
 IRF(obj,20,var_names=colnames(dsgedata),save=FALSE)
 forecast(obj,10,back_data=10)
+states(obj)
 

@@ -19,9 +19,19 @@ mode_check.Rcpp_dsge_gensys <- function(obj,mode_vals=NULL,grid_size=201,scale_v
     .mode_check_int(obj,mode_vals,grid_size,scale_val,par_names,save,height,width) 
 }
 
+mode_check.Rcpp_dsge_uhlig <- function(obj,mode_vals=NULL,grid_size=201,scale_val=1,par_names=NULL,save=FALSE,height=13,width=13,...){
+    .mode_check_int(obj,mode_vals,grid_size,scale_val,par_names,save,height,width) 
+}
+
 mode_check.Rcpp_dsgevar_gensys <- function(obj,mode_vals=NULL,grid_size=201,scale_val=1,par_names=NULL,save=FALSE,height=13,width=13,...){
     .mode_check_int(obj,mode_vals,grid_size,scale_val,par_names,save,height,width) 
 }
+
+mode_check.Rcpp_dsgevar_uhlig <- function(obj,mode_vals=NULL,grid_size=201,scale_val=1,par_names=NULL,save=FALSE,height=13,width=13,...){
+    .mode_check_int(obj,mode_vals,grid_size,scale_val,par_names,save,height,width) 
+}
+
+#
 
 .mode_check_int <- function(obj,mode_vals=NULL,grid_size=201,scale_val=1,par_names=NULL,save=FALSE,height=13,width=13){
     #

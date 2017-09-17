@@ -1,17 +1,17 @@
 Package: BMR
 Type: Package
 Title: Bayesian Macroeconometrics in R
-Version: 0.9.0
-Date: 2017-09-10
+Version: 0.9.1
+Date: 2017-09-17
 Author: Keith O'Hara <keith.ohara@nyu.edu>
 Maintainer: Keith O'Hara <keith.ohara@nyu.edu>
 Description: A package for estimating Bayesian macroeconometric models.
 License: GPL (>=2)
 Depends:
-    R (>= 3.3.0),
+    R (>= 3.4.0),
     Rcpp (>= 0.12.2),
     ggplot2 (>= 1.0.0)
-LinkingTo: Rcpp, RcppArmadillo (>= 0.6.400.2)
+LinkingTo: Rcpp, RcppArmadillo (>= 0.7.960.0)
 Imports:
     methods,
     Rcpp,
@@ -19,5 +19,5 @@ Imports:
 NeedsCompilation: yes
 RcppModules: bvarm_module, bvars_module, bvarw_module, bvartvp_module, cvar_module,
              gensys_module, uhlig_module, 
-             dsge_gensys_module, 
-             dsgevar_gensys_module
+             dsge_gensys_module, dsge_uhlig_module, 
+             dsgevar_gensys_module, dsgevar_uhlig_module

@@ -70,6 +70,7 @@ RCPP_MODULE(dsge_gensys_module)
 
         .method( "IRF", &dsge_gensys_R::IRF_R )
         .method( "forecast", &dsge_gensys_R::forecast_R )
+        .method( "states", &dsge_gensys_R::state_filter_R )
     ;
 }
 
@@ -324,6 +325,21 @@ dsge_gensys_R::forecast_R(int n_horizon, bool incl_shocks)
         arma::cube fcast_res = this->forecast(n_horizon,incl_shocks);
 
         return Rcpp::List::create(Rcpp::Named("forecast_vals") = fcast_res);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+    return R_NilValue;
+}
+
+SEXP
+dsge_gensys_R::state_filter_R()
+{
+    try {
+        arma::cube states = this->state_filter();
+
+        return Rcpp::List::create(Rcpp::Named("filter_vals") = states);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

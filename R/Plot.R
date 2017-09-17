@@ -46,12 +46,21 @@ plot.Rcpp_dsge_gensys <- function(x,par_names=NULL,BinDenom=40,trace_plot=FALSE,
     .plotedsge(x,par_names,BinDenom,trace_plot,save,height,width)
 }
 
+plot.Rcpp_dsge_uhlig <- function(x,par_names=NULL,BinDenom=40,trace_plot=FALSE,save=FALSE,height=13,width=13,...)
+{
+    .plotedsge(x,par_names,BinDenom,trace_plot,save,height,width)
+}
+
 plot.Rcpp_dsgevar_gensys <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
 {
     .plotdsgevar(x,par_names,BinDenom,MCMCplot,save,height,width)
 }
 
-#
+plot.Rcpp_dsgevar_uhlig <- function(x,par_names=NULL,BinDenom=40,MCMCplot=FALSE,save=FALSE,height=13,width=13,...)
+{
+    .plotdsgevar(x,par_names,BinDenom,MCMCplot,save,height,width)
+}
+
 #
 
 .plotbvar <- function(obj,type=1,var_names=NULL,save=FALSE,height=13,width=13)

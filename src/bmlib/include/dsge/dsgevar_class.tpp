@@ -614,3 +614,14 @@ dsgevar<T>::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool
     //
     return forecast_mat;
 }
+
+//
+// get filtered states
+
+template<typename T>
+arma::cube
+dsgevar<T>::state_filter()
+const
+{
+    return dsge_obj.state_filter();
+}
