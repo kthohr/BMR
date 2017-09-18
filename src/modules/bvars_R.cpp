@@ -55,7 +55,7 @@ RCPP_MODULE(bvars_module)
         .field_readonly( "Y", &bm::bvars::Y )
         .field_readonly( "X", &bm::bvars::X )
 
-        .field_readonly( "psi_hat", &bm::bvars::alpha_hat )
+        .field_readonly( "psi_hat", &bm::bvars::psi_hat )
         .field_readonly( "alpha_hat", &bm::bvars::alpha_hat )
         .field_readonly( "Sigma_hat", &bm::bvars::Sigma_hat )
 
