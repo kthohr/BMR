@@ -68,8 +68,6 @@ class bvarm
 
         arma::cube beta_draws;   // posterior draws of beta
 
-        arma::cube irfs;         // irfs based on the posterior draws
-
         //
         // member functions
 
@@ -93,8 +91,8 @@ class bvarm
 
         void gibbs(const int n_draws);
 
-        void IRF(const int n_irf_periods);
-        void IRF(const int n_irf_periods, const arma::mat& impact_mat);
+        arma::cube IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods, const arma::mat& impact_mat);
 
         arma::cube forecast(const int n_horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& X_T, const int n_horizon, const bool incl_shocks);
@@ -104,7 +102,7 @@ class bvarm
 
         void prior_int(const arma::vec& coef_prior, const int* var_type_inp, const int* decay_type_inp, const double HP_1_inp, const double HP_2_inp, const double HP_3_inp, const double* HP_4_inp);
 
-        void IRF_int(const int n_irf_periods, const arma::mat* impact_mat);
+        arma::cube IRF_int(const int n_irf_periods, const arma::mat* impact_mat);
 
         arma::cube forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks);
 

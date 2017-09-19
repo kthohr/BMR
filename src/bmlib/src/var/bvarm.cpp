@@ -95,7 +95,6 @@ bm::bvarm::reset_draws()
     alpha_pt_var.reset();
 
     beta_draws.reset();
-    irfs.reset();
 }
 
 //
@@ -267,38 +266,32 @@ bm::bvarm::gibbs(const int n_draws)
 //
 // IRFs
 
-void
+arma::cube
 bm::bvarm::IRF(const int n_irf_periods)
 {
-    this->IRF_int(n_irf_periods, nullptr);
+    return this->IRF_int(n_irf_periods, nullptr);
 }
 
-void
+arma::cube
 bm::bvarm::IRF(const int n_irf_periods, const arma::mat& impact_mat)
 {
-    this->IRF_int(n_irf_periods, &impact_mat);
+    return this->IRF_int(n_irf_periods, &impact_mat);
 }
 
-void
+arma::cube
 bm::bvarm::IRF_int(const int n_irf_periods, const arma::mat* impact_mat_inp)
 {
-    /*
-     * impact_mat should be lower triangular
-     */
-
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
 
-    arma::mat impact_mat = (impact_mat_inp) ? *impact_mat_inp : arma::chol(Sigma_hat,"lower");
+    arma::mat impact_mat = (impact_mat_inp) ? *impact_mat_inp : arma::chol(Sigma_hat,"lower"); // impact_mat should be lower triangular
+
+    arma::cube irfs(M, M, n_irf_periods*n_draws);
 
     //
-
-    irfs.set_size(M, M, n_irf_periods*n_draws);
 
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
-
-    //
 
     for (int j=1; j<=n_draws; j++) {
         arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1));
@@ -316,10 +309,13 @@ bm::bvarm::IRF_int(const int n_irf_periods, const arma::mat* impact_mat_inp)
                 impact_mat_b.rows(M,K_adj-c_int-1) = impact_mat_b.rows(0,K_adj-M-c_int-1);
             }
 
-            impact_mat_b.rows(0,M-1) = impact_mat_h;
+            impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
         }
     }
+    
     //
+
+    return irfs;
 }
 
 //

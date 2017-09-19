@@ -78,8 +78,6 @@ class bvars
         arma::cube Psi_draws;     // posterior draws of Psi
         arma::cube beta_draws;    // posterior draws of beta
         arma::cube Sigma_draws;   // posterior draws of Sigma
-        
-        arma::cube irfs;          // irfs based on the posterior draws
 
         //
         // member functions
@@ -102,7 +100,7 @@ class bvars
 
         void gibbs(const int n_draws, const int n_burnin);
 
-        void IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods);
 
         arma::cube forecast(const int horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);

@@ -67,7 +67,7 @@ class cvar
 
         void boot(const int n_draws);
 
-        void IRF(const int n_irf_periods);
+        arma::cube IRF(const int n_irf_periods);
 
         arma::cube forecast(const int horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);

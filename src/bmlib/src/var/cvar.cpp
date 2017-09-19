@@ -94,8 +94,6 @@ bm::cvar::reset_draws()
 {
     beta_draws.reset();
     Sigma_draws.reset();
-
-    irfs.reset();
 }
 
 //
@@ -192,32 +190,25 @@ bm::cvar::boot(const int n_draws)
 //
 // IRFs
 
-void
+arma::cube
 bm::cvar::IRF(const int n_irf_periods)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
-
-    arma::mat Sigma_b, impact_mat;
     
-    irfs.set_size(M, M, n_irf_periods*n_draws);
+    arma::cube irfs(M, M, n_irf_periods*n_draws);
 
     //
-    
-    arma::mat beta_b(K_adj-c_int,M);        // b'th draw, minus coefficients on any external variables 
-    arma::mat beta_b_trans(K_adj-c_int,M); 
 
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
 
-    //
 
     for (int j=1; j<=n_draws; j++) {
-        beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1));
-        beta_b_trans = beta_b.t();
+        arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables
 
-        Sigma_b = Sigma_draws.slice(j-1);
-        impact_mat = arma::chol(Sigma_b,"lower");
+        arma::mat Sigma_b = Sigma_draws.slice(j-1);
+        arma::mat impact_mat = arma::chol(Sigma_b,"lower");
 
         //
 
@@ -227,7 +218,7 @@ bm::cvar::IRF(const int n_irf_periods)
         irfs.slice((j-1)*n_irf_periods) = impact_mat;
 
         for (int i=2; i<=n_irf_periods; i++) {
-            impact_mat_h = beta_b_trans*impact_mat_b;
+            impact_mat_h = beta_b.t()*impact_mat_b;
             irfs.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
 
             if(K_adj > M+c_int){
@@ -237,7 +228,10 @@ bm::cvar::IRF(const int n_irf_periods)
             impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
         }
     }
+
     //
+
+    return irfs;
 }
 
 //

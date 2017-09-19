@@ -85,14 +85,11 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
 
     M <- obj$M
     n_draws <- dim(obj$beta_draws)[3]
-    
-    if (sum(dim(obj$irfs)) == 0) {
-        obj$IRF(periods)
-    }
+
+    irf_temp <- obj$IRF(periods)$irf_vals
 
     # put the IRFs in a tesseract-type format
 
-    irf_temp <- obj$irfs # make a copy; much faster than accessing IRFs slice-by-slice in the loop below
     irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
 
     for(i in 1:n_draws){
@@ -316,11 +313,10 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
 
     for (pp in 1:n_plots) {
 
-        obj$IRF(periods,which_irfs[pp]-1) # minus 1 to account for zero-index
+        irf_temp <- obj$IRF(periods,which_irfs[pp]-1)$irf_vals # minus 1 to account for zero-index
 
         # put the IRFs in a tesseract-type format
-
-        irf_temp <- obj$irfs
+        
         irf_tess <- array(NA,dim=c(M,M,periods,n_draws))
 
         for(i in 1:n_draws){

@@ -67,8 +67,6 @@ RCPP_MODULE(bvartvp_module)
         .field_readonly( "alpha_draws", &bm::bvartvp::alpha_draws )
         .field_readonly( "Q_draws", &bm::bvartvp::Q_draws )
         .field_readonly( "Sigma_draws", &bm::bvartvp::Sigma_draws )
-
-        .field_readonly( "irfs", &bm::bvartvp::irfs )
     ;
 
     class_<bvartvp_R>( "bvartvp" )
@@ -132,13 +130,16 @@ void bvartvp_R::gibbs_R(int n_draws, int n_burnin)
     }
 }
 
-void bvartvp_R::IRF_R(int n_irf_periods, int time_period)
+SEXP bvartvp_R::IRF_R(int n_irf_periods, int time_period)
 {
     try {
-        this->IRF(n_irf_periods,time_period);
+        arma::cube irf_vals = this->IRF(n_irf_periods,time_period);
+
+        return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+    return R_NilValue;
 }

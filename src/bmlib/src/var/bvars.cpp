@@ -113,8 +113,6 @@ bm::bvars::reset_draws()
     Psi_draws.reset();
     beta_draws.reset();
     Sigma_draws.reset();
-
-    irfs.reset();
 }
 
 //
@@ -302,26 +300,24 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
 //
 // IRFs
 
-void
+arma::cube
 bm::bvars::IRF(const int n_irf_periods)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K;
 
-    arma::mat Sigma_b, impact_mat;
-
-    irfs.set_size(M, M, n_irf_periods*n_draws);
+    arma::cube irfs(M, M, n_irf_periods*n_draws);
 
     //
-    
+
     arma::mat impact_mat_b(K_adj,M);
     arma::mat impact_mat_h(M,M);
 
     for (int j=1; j <= n_draws; j++) {
         arma::mat beta_b = beta_draws(arma::span(0,K_adj-1),arma::span(),arma::span(j-1,j-1));
 
-        Sigma_b = Sigma_draws.slice(j-1);
-        impact_mat = arma::chol(Sigma_b,"lower");
+        arma::mat Sigma_b = Sigma_draws.slice(j-1);
+        arma::mat impact_mat = arma::chol(Sigma_b,"lower");
 
         //
 
@@ -338,10 +334,13 @@ bm::bvars::IRF(const int n_irf_periods)
                 impact_mat_b.rows(M,K_adj-1) = impact_mat_b.rows(0,K_adj-M-1);
             }
 
-            impact_mat_b.rows(0,M-1) = impact_mat_h;
+            impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
         }
     }
+
     //
+
+    return irfs;
 }
 
 //

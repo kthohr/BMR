@@ -32,8 +32,6 @@ RCPP_MODULE(bvarw_module)
 
     void (bvarw_R::*prior_3)(const arma::vec&, double, double, int) = &bvarw_R::prior_R;
 
-    void (bvarw_R::*IRF_1)(int) = &bvarw_R::IRF_R;
-
     SEXP (bvarw_R::*forecast_1)(int, bool) = &bvarw_R::forecast_R;
     SEXP (bvarw_R::*forecast_2)(const arma::mat&, int, bool) = &bvarw_R::forecast_R;
   
@@ -72,8 +70,6 @@ RCPP_MODULE(bvarw_module)
 
         .field_readonly( "beta_draws", &bm::bvarw::beta_draws )
         .field_readonly( "Sigma_draws", &bm::bvarw::Sigma_draws )
-
-        .field_readonly( "irfs", &bm::bvarw::irfs )
     ;
 
     class_<bvarw_R>( "bvarw" )
@@ -85,7 +81,7 @@ RCPP_MODULE(bvarw_module)
         .method( "reset_draws", &bvarw_R::reset_draws_R )
         .method( "prior", prior_3 )
         .method( "gibbs", &bvarw_R::gibbs_R )
-        .method( "IRF", IRF_1 )
+        .method( "IRF", &bvarw_R::IRF_R )
         .method( "forecast", forecast_1 )
         .method( "forecast", forecast_2 )
     ;
@@ -149,15 +145,18 @@ void bvarw_R::gibbs_R(int n_draws, int n_burnin)
     }
 }
 
-void bvarw_R::IRF_R(int n_irf_periods)
+SEXP bvarw_R::IRF_R(int n_irf_periods)
 {
     try {
-        this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods);
+
+        return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+    return R_NilValue;
 }
 
 SEXP bvarw_R::forecast_R(int n_horizon, bool incl_shocks)

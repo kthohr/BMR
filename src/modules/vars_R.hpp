@@ -31,7 +31,7 @@ class bvarm_R : public bm::bvarm
 
         void gibbs_R(int n_draws);
 
-        void IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -49,7 +49,7 @@ class bvars_R : public bm::bvars
 
         void gibbs_R(int n_draws, int n_burnin);
 
-        void IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -67,7 +67,7 @@ class bvarw_R : public bm::bvarw
 
         void gibbs_R(int n_draws, int n_burnin);
 
-        void IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -84,7 +84,7 @@ class bvartvp_R : public bm::bvartvp
 
         void gibbs_R(int n_draws, int n_burnin);
 
-        void IRF_R(int n_irf_periods, int time_period);
+        SEXP IRF_R(int n_irf_periods, int time_period);
 
         // SEXP forecast_R(int n_horizon, bool incl_shocks);
         // SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -102,7 +102,7 @@ class cvar_R : public bm::cvar
 
         void boot_R(int n_draws);
 
-        void IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);

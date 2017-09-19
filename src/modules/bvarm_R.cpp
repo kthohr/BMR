@@ -41,11 +41,10 @@ RCPP_MODULE(bvarm_module)
         .field( "cons_term", &bm::bvarm::cons_term )
         .field( "p", &bm::bvarm::p )
 
-        .field( "var_type", &bm::bvarm::var_type )
-        .field( "decay_type", &bm::bvarm::decay_type )
-        // .field( "hyper_pars", &bvarm::hyper_pars )
-
         // read only objects
+        .field_readonly( "var_type", &bm::bvarm::var_type )
+        .field_readonly( "decay_type", &bm::bvarm::decay_type )
+
         .field_readonly( "c_int", &bm::bvarm::c_int )
         .field_readonly( "n", &bm::bvarm::n )
         .field_readonly( "M", &bm::bvarm::M )
@@ -65,7 +64,6 @@ RCPP_MODULE(bvarm_module)
         .field_readonly( "alpha_pt_var", &bm::bvarm::alpha_pt_var )
 
         .field_readonly( "beta_draws", &bm::bvarm::beta_draws )
-        .field_readonly( "irfs", &bm::bvarm::irfs )
     ;
 
     class_<bvarm_R>( "bvarm" )
@@ -141,15 +139,18 @@ void bvarm_R::gibbs_R(int n_draws)
     }
 }
 
-void bvarm_R::IRF_R(int n_irf_periods)
+SEXP bvarm_R::IRF_R(int n_irf_periods)
 {
     try {
-        this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods);
+
+        return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
         ::Rf_error( "BMR: C++ exception (unknown reason)" );
     }
+    return R_NilValue;
 }
 
 SEXP bvarm_R::forecast_R(int n_horizon, bool incl_shocks)
