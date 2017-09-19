@@ -211,7 +211,6 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
 
     arma::mat epsilon_mat = arma::zeros(M,n_adj);
     arma::mat alpha_plus = arma::zeros(K*M,n_adj+1); // ensures that alpha_1 ~ N(0,Q)
-    arma::mat Y_plus = arma::zeros(M,n_adj);
 
     for (int i=0; i < n_adj; i++) {
         arma::mat Z_t = Z.rows(i*M,(i+1)*M-1);
@@ -288,7 +287,6 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
         epsilon_mat.zeros();
 
         alpha_plus.zeros();
-        Y_plus.zeros();
 
         for (int i=0; i < n_adj; i++) {
             arma::mat Z_t = Z.rows(i*M,(i+1)*M-1);
