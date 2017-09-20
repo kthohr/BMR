@@ -5,9 +5,15 @@
 \alias{forecast.bvars}
 \alias{forecast.bvarw}
 \alias{forecast.cvar}
+\alias{forecast.Rcpp_bvarm}
+\alias{forecast.Rcpp_bvars}
+\alias{forecast.Rcpp_bvarw}
+\alias{forecast.Rcpp_cvar}
 
-\alias{forecast.DSGEVAR}
-\alias{forecast.EDSGE}
+\alias{forecast.Rcpp_dsge_gensys}
+\alias{forecast.Rcpp_dsge_uhlig}
+\alias{forecast.Rcpp_dsgevar_gensys}
+\alias{forecast.Rcpp_dsgevar_uhlig}
 
 \title{Forecasting with VAR, DSGE, and DSGE-VAR Models.}
 
