@@ -88,8 +88,8 @@ states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=N
     #
 
     if (class(var_names) != "character") {
-        var_names <- character(length=M)
-        for (i in 1:M) {  
+        var_names <- character(length=n_states)
+        for (i in 1:n_states) {  
             var_names[i] <- paste("VAR",i,sep="")
         }
     }

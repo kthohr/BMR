@@ -85,7 +85,7 @@ dsge_obj$G_state
 
 var_names = c("Consumption","Output","Capital","Labour","Interest","Investment","Technology")
 
-dsge_irf <- IRF(dsge_obj,12,var_names=var_names)
+dsge_irf <- IRF(dsge_obj,30,var_names=var_names)
 dsge_sim <- dsge_obj$simulate(800,200)
 
 #

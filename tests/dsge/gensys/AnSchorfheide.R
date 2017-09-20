@@ -35,6 +35,7 @@ pi       <- 1 + (piA/400)
 G0_16 <- rhoz/tau
 G0_42 <- (1 - rhoR)*psi1
 G0_43 <- (1 - rhoR)*psi2
+
 #                        c,      pi,       y,       R,       r,       g,       z    c_t+1,  pi_t+1,
 Gamma0 <- rbind(c(      -1,       0,       0,  -1/tau,       0,       0,   G0_16,       1,   1/tau),
                 c(       0,      -1,   kappa,       0,       0,  -kappa,       0,       0,    beta),
