@@ -17,20 +17,28 @@
   ################################################################################*/
 
 /* 
- * Sample from a normal distribution
+ * Sample from an exponential distribution
  */
 
-#ifndef _statslib_rnorm_HPP
-#define _statslib_rnorm_HPP
+inline
+double
+rexp(const double rate_par)
+{
+    return qexp(runif(),rate_par);
+}
 
-template<typename T>
-T rnorm(const T mu_par, const T sigma_par);
+inline
+arma::mat
+rexp(const int n, const double rate_par)
+{
+	return rexp(n,1,rate_par);
+}
 
-double rnorm();
+inline
+arma::mat
+rexp(const int n, const int k, const double rate_par)
+{
+	arma::mat U = runif(n,k,0.0,1.0);
 
-arma::mat rnorm(const int n, const double mu_par, const double sigma_par);
-arma::mat rnorm(const int n, const int k, const double mu_par, const double sigma_par);
-
-#include "rnorm.ipp"
-
-#endif
+	return qexp(U,rate_par);
+}

@@ -18,12 +18,6 @@
 
 /*
  * cdf of the univariate Bernoulli distribution
- *
- * Keith O'Hara
- * 06/23/2017
- *
- * This version:
- * 07/12/2017
  */
 
 //
@@ -78,6 +72,8 @@ pbern_int(const arma::mat& x, const double* prob_par_inp, const bool log_form)
     const int n = x.n_rows;
     const int k = x.n_cols;
 
+    //
+
     arma::mat ret(n,k);
 
     for (int j=0; j < k; j++) {
@@ -85,7 +81,9 @@ pbern_int(const arma::mat& x, const double* prob_par_inp, const bool log_form)
             ret(i,j) = pbern((int)x(i,j),prob_par,log_form);
         }
     }
+
     //
+    
     return ret;
 }
 

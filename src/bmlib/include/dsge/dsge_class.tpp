@@ -147,7 +147,22 @@ const
 
     // run filter
 
-    const double log_likelihood_val = kalman_filter(estim_data, kalman_mat_F,kalman_mat_Q, kalman_mat_C,kalman_mat_H,kalman_mat_R);
+    double log_likelihood_val = 0.0;
+
+    switch (filter_choice) {
+        case 1:
+            log_likelihood_val = kalman_filter(estim_data, kalman_mat_F,kalman_mat_Q, kalman_mat_C,kalman_mat_H,kalman_mat_R);
+            break;
+
+        case 2:
+            log_likelihood_val = chand_recur(estim_data, kalman_mat_F,kalman_mat_Q, kalman_mat_C,kalman_mat_H,kalman_mat_R);
+            break;
+
+        default:
+            printf("error: unknown choice for filter\n");
+            break;
+
+    }
 
     // compute the prior
 
@@ -345,7 +360,7 @@ const
         dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
 
         arma::mat G_state;
-        dsge_obj_copy.state_space(kalman_mat_F,G_state);
+        dsge_obj_copy.state_space(dsge_obj_copy.kalman_mat_F,G_state);
 
         //
 

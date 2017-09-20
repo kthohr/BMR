@@ -18,12 +18,6 @@
 
 /*
  * cdf of the univariate normal distribution
- *
- * Keith O'Hara
- * 01/03/2016
- *
- * This version:
- * 07/12/2017
  */
 
 //
@@ -73,11 +67,13 @@ inline
 arma::mat
 pnorm_int(const arma::mat& x, const double* mu_par_inp, const double* sigma_par_inp, const bool log_form)
 {
-    const double mu_par = (mu_par_inp) ? *mu_par_inp : 0;
-    const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1;
-    //
+    const double mu_par = (mu_par_inp) ? *mu_par_inp : 0.0;
+    const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1.0;
+    
     const int n = x.n_rows;
     const int k = x.n_cols;
+
+    //
 
     arma::mat ret(n,k);
 
@@ -86,7 +82,9 @@ pnorm_int(const arma::mat& x, const double* mu_par_inp, const double* sigma_par_
             ret(i,j) = pnorm(x(i,j),mu_par,sigma_par,log_form);
         }
     }
+
     //
+
     return ret;
 }
 

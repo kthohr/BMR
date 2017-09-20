@@ -18,12 +18,6 @@
 
 /*
  * quantile function of the Cauchy distribution
- *
- * Keith O'Hara
- * 07/01/2017
- *
- * This version:
- * 07/13/2017
  */
 
 //
@@ -73,11 +67,13 @@ inline
 arma::mat
 qcauchy_int(const arma::mat& p, const double* mu_par_inp, const double* sigma_par_inp, const bool log_form)
 {
-    const double mu_par = (mu_par_inp) ? *mu_par_inp : 0;
-    const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1;
-    //
+    const double mu_par = (mu_par_inp) ? *mu_par_inp : 0.0;
+    const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1.0;
+    
     const int n = p.n_rows;
     const int k = p.n_cols;
+
+    //
 
     arma::mat ret(n,k);
 
@@ -86,7 +82,9 @@ qcauchy_int(const arma::mat& p, const double* mu_par_inp, const double* sigma_pa
             ret(i,j) = qcauchy(p(i,j),mu_par,sigma_par,log_form);
         }
     }
+
     //
+    
     return ret;
 }
 

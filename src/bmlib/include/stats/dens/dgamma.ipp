@@ -18,12 +18,6 @@
 
 /*
  * pdf of the gamma distribution
- *
- * Keith O'Hara
- * 04/12/2017
- *
- * This version:
- * 07/07/2017
  */
 
 //
@@ -75,7 +69,9 @@ dgamma_int(const arma::mat& x, const double* shape_par_inp, const double* scale_
 {
     const double shape_par = (shape_par_inp) ? *shape_par_inp : 1.0;
     const double scale_par = (scale_par_inp) ? *scale_par_inp : 1.0;
+
     //
+
     const double norm_term = - std::lgamma(shape_par) - shape_par*std::log(scale_par);
 
     arma::mat ret = norm_term + (shape_par - 1) * arma::log(x) - x / scale_par;
@@ -83,7 +79,9 @@ dgamma_int(const arma::mat& x, const double* shape_par_inp, const double* scale_
     if (!log_form) {
         ret = arma::exp(ret);
     }
+
     //
+    
     return ret;
 }
 

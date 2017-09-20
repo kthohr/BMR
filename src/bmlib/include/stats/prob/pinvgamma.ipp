@@ -18,12 +18,6 @@
 
 /*
  * cdf of the inverse-gamma distribution
- *
- * Keith O'Hara
- * 06/17/2017
- *
- * This version:
- * 07/12/2017
  */
 
 //
@@ -75,9 +69,11 @@ pinvgamma_int(const arma::mat& x, const double* shape_par_inp, const double* rat
 {
     const double shape_par = (shape_par_inp) ? *shape_par_inp : 1.0;
     const double rate_par = (rate_par_inp) ? *rate_par_inp : 1.0;
-    //
+    
     const int n = x.n_rows;
     const int k = x.n_cols;
+
+    //
 
     arma::mat ret(n,k);
 
@@ -86,7 +82,9 @@ pinvgamma_int(const arma::mat& x, const double* shape_par_inp, const double* rat
             ret(i,j) = pinvgamma(x(i,j),shape_par,rate_par,log_form);
         }
     }
+
     //
+
     return ret;
 }
 

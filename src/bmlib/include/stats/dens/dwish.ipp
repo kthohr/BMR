@@ -18,12 +18,6 @@
 
 /* 
  * pdf of the Wishart distribution
- *
- * Keith O'Hara
- * 04/12/2017
-  *
- * This version:
- * 07/08/2017
  */
 
 inline
@@ -36,7 +30,9 @@ dwish_int(const arma::mat& X, const arma::mat* Psi_par_inp, const int* nu_par_in
     const int nu_par = (nu_par_inp) ? *nu_par_inp : K;
 
     const double nu_par_2 = ((double) nu_par) / 2.0;
+
     //
+
     const double lmg_term = gcem::log_multi_gamma(nu_par_2, K);
     const double norm_term = - nu_par_2*std::log(arma::det(Psi_par)) - nu_par_2*K*GCEM_LOG_2 - lmg_term;
 
@@ -45,7 +41,9 @@ dwish_int(const arma::mat& X, const arma::mat* Psi_par_inp, const int* nu_par_in
     if (!log_form) {
         ret = std::exp(ret);
     }
-	//
+
+    //
+    
 	return ret;
 }
 

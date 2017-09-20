@@ -53,6 +53,10 @@ class dsge
         arma::vec lower_bounds;
         arma::vec upper_bounds;
 
+        // choice of filtering method
+
+        int filter_choice = 1; // 1 for Kalman, 2 for Chandrasekhar
+
         // data used for estimation
 
         arma::mat estim_data;

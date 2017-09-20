@@ -18,12 +18,6 @@
 
 /*
  * pdf of the univariate log-normal distribution
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/07/2017
  */
 
 //
@@ -72,7 +66,9 @@ dlnorm_int(const arma::mat& x, const double* mu_par_inp, const double* sigma_par
     } else {
         ret /= x;
     }
+
     //
+    
     return ret;
 }
 

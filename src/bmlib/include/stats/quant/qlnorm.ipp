@@ -18,12 +18,6 @@
 
 /*
  * quantile function of the univariate log-normal distribution
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/14/2017
  */
 
 //
@@ -70,7 +64,9 @@ qlnorm_int(const arma::mat& p, const double* mu_par_inp, const double* sigma_par
     if (!log_form) {
         ret = arma::exp(ret);
     }
+
     //
+    
     return ret;
 }
 

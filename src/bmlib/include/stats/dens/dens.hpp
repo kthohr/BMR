@@ -23,6 +23,7 @@
 #include "dbeta.hpp"
 #include "dcauchy.hpp"
 #include "dchisq.hpp"
+#include "dexp.hpp"
 #include "dgamma.hpp"
 #include "dinvgamma.hpp"
 #include "dinvwish.hpp"

@@ -17,20 +17,17 @@
   ################################################################################*/
 
 /* 
- * Sample from a normal distribution
+ * Sample from an exponential distribution
  */
 
-#ifndef _statslib_rnorm_HPP
-#define _statslib_rnorm_HPP
+#ifndef _statslib_rexp_HPP
+#define _statslib_rexp_HPP
 
-template<typename T>
-T rnorm(const T mu_par, const T sigma_par);
+double rexp(const double rate_par);
 
-double rnorm();
+arma::mat rexp(const int n, const double rate_par);
+arma::mat rexp(const int n, const int k, const double rate_par);
 
-arma::mat rnorm(const int n, const double mu_par, const double sigma_par);
-arma::mat rnorm(const int n, const int k, const double mu_par, const double sigma_par);
-
-#include "rnorm.ipp"
+#include "rexp.ipp"
 
 #endif

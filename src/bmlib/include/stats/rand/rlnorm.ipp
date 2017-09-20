@@ -18,16 +18,9 @@
 
 /* 
  * Sample from a log-normal distribution
- *
- * Keith O'Hara
- * 06/24/2017
- *
- * This version:
- * 07/15/2017
  */
 
 template<typename T>
-inline
 T
 rlnorm(const T mu_par, const T sigma_par)
 {

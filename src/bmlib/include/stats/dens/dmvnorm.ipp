@@ -17,13 +17,7 @@
   ################################################################################*/
 
 /*
- * Multivariate normal density
- *
- * Keith O'Hara
- * 04/12/2017
- *
- * This version:
- * 07/08/2017
+ * pdf of the Multivariate Normal distribution
  */
 
 inline
@@ -34,7 +28,9 @@ dmvnorm_int(const arma::vec& x, const arma::vec* mu_par_inp, const arma::mat* Si
 
     const arma::vec mu_par = (mu_par_inp) ? *mu_par_inp : arma::zeros(K,1);
     const arma::mat Sigma_par = (Sigma_par_inp) ? *Sigma_par_inp : arma::eye(K,K);
+
     //
+
     const double cons_term = -0.5*K*GCEM_LOG_2PI;
 
     double ret = cons_term - 0.5 * ( std::log(arma::det(Sigma_par)) + arma::as_scalar((x - mu_par).t() * arma::inv(Sigma_par) * (x - mu_par)) );
@@ -42,7 +38,9 @@ dmvnorm_int(const arma::vec& x, const arma::vec* mu_par_inp, const arma::mat* Si
     if (!log_form) {
         ret = std::exp(ret);
     }
+
     //
+    
     return ret;
 }
 

@@ -33,6 +33,7 @@ RCPP_MODULE(dsge_gensys_module)
 
         // basic objects
         .field( "estim_data", &bm::dsge<bm::gensys>::estim_data )
+        .field( "filter_choice", &bm::dsge<bm::gensys>::filter_choice )
 
         .field_readonly( "prior_form", &bm::dsge<bm::gensys>::prior_form )
         .field_readonly( "prior_pars", &bm::dsge<bm::gensys>::prior_pars )

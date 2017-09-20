@@ -18,19 +18,12 @@
 
 /* 
  * Sample from a normal distribution
- *
- * Keith O'Hara
- * 06/01/2015
- *
- * This version:
- * 07/15/2017
  */
 
 //
 // single draw
 
 template<typename T>
-inline
 T
 rnorm(const T mu_par, const T sigma_par)
 {

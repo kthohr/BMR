@@ -16,21 +16,29 @@
   ##
   ################################################################################*/
 
-/* 
- * Sample from a normal distribution
+/*
+ * pdf of the exponential distribution
  */
 
-#ifndef _statslib_rnorm_HPP
-#define _statslib_rnorm_HPP
+#ifndef _statslib_dexp_HPP
+#define _statslib_dexp_HPP
 
+// single input
 template<typename T>
-T rnorm(const T mu_par, const T sigma_par);
+statslib_constexpr T dexp(const T x, const T dof_par, const bool log_form);
 
-double rnorm();
+statslib_constexpr double dexp(const double x);
+statslib_constexpr double dexp(const double x, const bool log_form);
+statslib_constexpr double dexp(const double x, const double dof_par);
 
-arma::mat rnorm(const int n, const double mu_par, const double sigma_par);
-arma::mat rnorm(const int n, const int k, const double mu_par, const double sigma_par);
+// matrix/vector input
+arma::mat dexp_int(const arma::mat& x, const double* dof_par_inp, const bool log_form);
 
-#include "rnorm.ipp"
+arma::mat dexp(const arma::mat& x);
+arma::mat dexp(const arma::mat& x, const bool log_form);
+arma::mat dexp(const arma::mat& x, const double dof_par);
+arma::mat dexp(const arma::mat& x, const double dof_par, const bool log_form);
+
+#include "dexp.ipp"
 
 #endif

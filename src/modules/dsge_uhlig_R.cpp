@@ -33,6 +33,7 @@ RCPP_MODULE(dsge_uhlig_module)
 
         // basic objects
         .field( "estim_data", &bm::dsge<bm::uhlig>::estim_data )
+        .field( "filter_choice", &bm::dsge<bm::uhlig>::filter_choice )
 
         .field_readonly( "prior_form", &bm::dsge<bm::uhlig>::prior_form )
         .field_readonly( "prior_pars", &bm::dsge<bm::uhlig>::prior_pars )

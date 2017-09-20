@@ -44,8 +44,11 @@
     #if __cplusplus >= 201300
         #define stats_math gcem
     #else
-        // #include <cmath>
+        #include <cmath>
         #define stats_math std
     #endif
 #endif
 
+namespace stats {
+    static const double inf = arma::datum::inf;
+}

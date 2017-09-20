@@ -18,16 +18,9 @@
 
 /* 
  * Sample from a Cauchy distribution
- *
- * Keith O'Hara
- * 06/15/2017
- *
- * This version:
- * 07/15/2017
  */
 
 template<typename T>
-inline
 T
 rcauchy(const T mu_par, const T sigma_par)
 {
