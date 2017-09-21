@@ -100,7 +100,7 @@ class dsge
         void estim_mcmc(const arma::vec& initial_vals);
         void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
 
-        arma::cube IRF(const int n_irf_periods) const;
+        arma::cube IRF(const int n_irf_periods, const bool observ_irfs) const;
 
         arma::cube forecast(const int n_horizon, const bool incl_shocks) const;
 

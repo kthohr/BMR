@@ -81,7 +81,7 @@ class dsge_gensys_R : public bm::dsge<bm::gensys>
 
         SEXP mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val);
 
-        SEXP IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods, bool observ_irfs);
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP state_filter_R();
 };
@@ -115,7 +115,7 @@ class dsge_uhlig_R : public bm::dsge<bm::uhlig>
 
         SEXP mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val);
 
-        SEXP IRF_R(int n_irf_periods);
+        SEXP IRF_R(int n_irf_periods, bool observ_irfs);
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP state_filter_R();
 };

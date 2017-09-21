@@ -613,13 +613,17 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
         stop("error: no MCMC draws detected")
     }
 
-    irfs <- obj$IRF(periods)$irf_vals # deep copy is needed
+    irfs <- obj$IRF(periods,obs_irfs)$irf_vals # deep copy is needed
     irfs <- round(irfs,10)
 
     M <- dim(irfs)[2]
     n_shocks <- dim(irfs)[3] / n_draws
 
     n_response <- M - n_shocks + 1
+    
+    if (obs_irfs) {
+        n_response <- M
+    }
 
     #
 
@@ -631,7 +635,7 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
     for (i in 1:n_draws) {
         irfs_i <- irfs[,,((i-1)*n_shocks + 1):(i*n_shocks)]
 
-        if (n_shocks > 1) {
+        if (n_shocks > 1 && obs_irfs==FALSE) {
             for (j in 1:n_shocks) {
                 irfs_tess[,,j,i] <- irfs_i[,-drop_ind[-(j)],j]
             }
@@ -725,10 +729,8 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
 
         #
 
-        if (n_shocks > 1) {
+        if (n_shocks > 1 && obs_irfs==FALSE) {
             var_names2 <- var_names[-drop_ind[-(j)]]
-        } else {
-            var_names2 <- var_names
         }
 
         #

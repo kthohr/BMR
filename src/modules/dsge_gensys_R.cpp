@@ -291,7 +291,6 @@ SEXP
 dsge_gensys_R::mode_check_R(const arma::vec& mode_vals, int grid_size, double scale_val)
 {
     try {
-        
         arma::cube mode_check_vals = bm::mode_check(*this,mode_vals,grid_size);
 
         return Rcpp::List::create(Rcpp::Named("mode_check_vals") = mode_check_vals);
@@ -306,10 +305,10 @@ dsge_gensys_R::mode_check_R(const arma::vec& mode_vals, int grid_size, double sc
 //
 
 SEXP
-dsge_gensys_R::IRF_R(int n_irf_periods)
+dsge_gensys_R::IRF_R(int n_irf_periods, bool observ_irfs)
 {
     try {
-        arma::cube irf_vals = this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods,observ_irfs);
         return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );

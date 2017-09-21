@@ -292,7 +292,7 @@ dsge<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings
 
 template<typename T>
 arma::cube
-dsge<T>::IRF(const int n_irf_periods)
+dsge<T>::IRF(const int n_irf_periods, const bool observ_irfs)
 const
 {
     const int n_draws = dsge_draws.n_rows;
@@ -301,9 +301,10 @@ const
 
     arma::cube test_cube = lrem_obj.IRF(n_irf_periods);
 
+    const int n_resp_cols = (observ_irfs) ? kalman_mat_H.n_cols : test_cube.n_cols;
     const int n_shocks = test_cube.n_slices;
 
-    arma::cube irfs_ret(test_cube.n_rows, test_cube.n_cols, n_shocks*n_draws);
+    arma::cube irfs_ret(test_cube.n_rows, n_resp_cols, n_shocks*n_draws);
 
     //
 
@@ -319,7 +320,15 @@ const
         
         dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
 
-        irfs_ret.slices(j*n_shocks,(j+1)*n_shocks-1) = dsge_obj_copy.lrem_obj.IRF(n_irf_periods);
+        arma::cube irf_mats = dsge_obj_copy.lrem_obj.IRF(n_irf_periods);
+
+        if (observ_irfs) {
+            for (int k=0; k < n_shocks; k++) {
+                irf_mats.slice(k) = irf_mats.slice(k) * dsge_obj_copy.kalman_mat_H;
+            }
+        }
+        
+        irfs_ret.slices(j*n_shocks,(j+1)*n_shocks-1) = irf_mats;
 
     }
 

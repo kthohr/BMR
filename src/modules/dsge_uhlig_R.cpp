@@ -319,10 +319,10 @@ dsge_uhlig_R::mode_check_R(const arma::vec& mode_vals, int grid_size, double sca
 //
 
 SEXP
-dsge_uhlig_R::IRF_R(int n_irf_periods)
+dsge_uhlig_R::IRF_R(int n_irf_periods, bool observ_irfs)
 {
     try {
-        arma::cube irf_vals = this->IRF(n_irf_periods);
+        arma::cube irf_vals = this->IRF(n_irf_periods,observ_irfs);
         return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
