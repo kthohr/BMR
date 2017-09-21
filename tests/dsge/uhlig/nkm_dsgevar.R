@@ -18,12 +18,14 @@ for(i in 1:2){
 
 #
 
-obj <- new(dsge_gensys)
+obj <- new(dsgevar_uhlig)
 obj$set_model_fn(nkm_model_simple)
 
 x <- c(1)
 
 obj$eval_model(x)
+
+#
 
 lrem_obj = obj$lrem
 lrem_obj$solve()
@@ -58,7 +60,11 @@ obj$opt_initial_ub <- opt_bounds[,2]
 
 #
 
-obj$estim_data = sim_data;
+cons_term <- TRUE
+p <- 1
+lambda <- 1.0
+
+obj$build(sim_data,cons_term,p,lambda)
 
 mode_res <- obj$estim_mode(x,TRUE)
 
@@ -72,9 +78,9 @@ obj$mcmc_initial_ub <- opt_bounds[,2]
 obj$estim_mcmc(x,50,100,100)
 
 var_names <- c("Output Gap","Output","Inflation","Natural Int","Nominal Int","Labour Supply",
-              "Technology","MonetaryPolicy")
+               "Technology","MonetaryPolicy")
 
 plot(obj,par_names="eta",save=FALSE)
-IRF(obj,20,var_names=var_names,save=FALSE)
+IRF(obj,20,var_names=colnames(dsgedata),save=FALSE)
 forecast(obj,10,back_data=10)
 states(obj,var_names=var_names)

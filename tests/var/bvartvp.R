@@ -1,6 +1,5 @@
 #
 # BVAR with time-varying parameters
-# 
 
 rm(list=ls())
 library(BMR)
@@ -15,7 +14,7 @@ bvar_data <- data.matrix(USMacroData[,2:4])
 tau <- 80
 
 XiBeta <- 4
-XiQ <- 0.005
+XiQ <- 0.001
 gammaQ <- tau
 XiSigma <- 1
 gammaS = 4
@@ -33,8 +32,8 @@ bvar_obj$build(bvar_data,TRUE,1)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData))
+plot(bvar_obj,var_names=colnames(USMacroData))
 
 # p = 2
 
@@ -43,8 +42,8 @@ bvar_obj$build(bvar_data,TRUE,2)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData))
+plot(bvar_obj,var_names=colnames(USMacroData))
 
 # p = 3
 
@@ -53,8 +52,8 @@ bvar_obj$build(bvar_data,TRUE,3)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData))
+plot(bvar_obj,var_names=colnames(USMacroData))
 
 # p = 4
 
@@ -63,8 +62,8 @@ bvar_obj$build(bvar_data,TRUE,4)
 bvar_obj$prior(tau,XiBeta,XiQ,gammaQ,XiSigma,gammaS)
 bvar_obj$gibbs(10000,5000)
 
-IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
-plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
+IRF(bvar_obj,20,which_irfs,var_names=colnames(USMacroData))
+plot(bvar_obj,var_names=colnames(USMacroData))
 
 #
 #END

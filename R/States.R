@@ -18,22 +18,22 @@
 
 states.Rcpp_dsge_gensys <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,use_mean=FALSE,save=FALSE,height=13,width=11,...)
 {
-    return=.states_int(obj,percentiles,use_mean,save,height,width)
+    return=.states_int(obj,percentiles,var_names,use_mean,save,height,width)
 }
 
 states.Rcpp_dsge_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,use_mean=FALSE,save=FALSE,height=13,width=11,...)
 {
-    return=.states_int(obj,percentiles,use_mean,save,height,width)
+    return=.states_int(obj,percentiles,var_names,use_mean,save,height,width)
 }
 
 states.Rcpp_dsgevar_gensys <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,use_mean=FALSE,save=FALSE,height=13,width=11,...)
 {
-    return=.states_int(obj,percentiles,use_mean,save,height,width)
+    return=.states_int(obj,percentiles,var_names,use_mean,save,height,width)
 }
 
 states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=NULL,use_mean=FALSE,save=FALSE,height=13,width=11,...)
 {
-    return=.states_int(obj,percentiles,use_mean,save,height,width)
+    return=.states_int(obj,percentiles,var_names,use_mean,save,height,width)
 }
 
 #
@@ -67,7 +67,7 @@ states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=N
     
     #
 
-    StateData <- array(NA,dim=c(n_data,4,n_states))
+    plot_vals <- array(NA,dim=c(n_data,4,n_states))
 
     for (i in 1:n_states) {
         # Use the mean or selected percentile?
@@ -82,7 +82,7 @@ states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=N
 
         #
 
-        StateData[,,i] <- FDataTemp
+        plot_vals[,,i] <- FDataTemp
     }
 
     #
@@ -162,7 +162,7 @@ states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=N
                 #
                 if (state_count <= n_states) {
                     StateName <- var_names[state_count]
-                    SDF <- StateData[,,state_count]
+                    SDF <- plot_vals[,,state_count]
                     SDF <- data.frame(SDF)
                     colnames(SDF) <- c("SL","SM","SU","Time")
 
@@ -182,5 +182,5 @@ states.Rcpp_dsgevar_uhlig <- function(obj,percentiles=c(.05,.50,.95),var_names=N
         if(save==TRUE){dev.off()}
     }
     #
-    return=list(MeanState=states_mean,States=StateData)
+    return=list(state_mean=states_mean,plot_vals=plot_vals)
 }
