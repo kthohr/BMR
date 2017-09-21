@@ -1,5 +1,5 @@
 
-# Lubik-Schorfheide (2007) Model
+# Solve the Lubik-Schorfheide (2007) Model using gensys
 
 rm(list=ls())
 library(BMR)
@@ -86,11 +86,11 @@ Pi <- matrix(0,ncol(Gamma0),2)
 Pi[11,1] <- 1
 Pi[12,2] <- 1
 
-Sigma <- rbind(c(  sigma_q,        0,          0,          0,         0),
-               c(        0, sigma_ys,          0,          0,         0),
-               c(        0,        0,  sigma_pis,          0,         0),
-               c(        0,        0,          0,    sigma_z,         0),
-               c(        0,        0,          0,          0,   sigma_r))
+Sigma <- rbind(c(  sigma_q^2,          0,            0,            0,           0),
+               c(          0, sigma_ys^2,            0,            0,           0),
+               c(          0,          0,  sigma_pis^2,            0,           0),
+               c(          0,          0,            0,    sigma_z^2,           0),
+               c(          0,          0,            0,            0,   sigma_r^2))
 
 #
 
@@ -129,6 +129,3 @@ q  <- dsge_sim[,6]
 
 LSData <- cbind(y,pi,R,e,q)
 #save(LSData,file="LSData.RData")
-
-#
-#END

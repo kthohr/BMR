@@ -107,6 +107,3 @@ R  <- piA + rA + 4*gammaQ + 400*dsge_sim[,4]
 
 ASData <- cbind(y,pi,R)
 #save(ASData,file="ASData.RData")
-
-#
-#END
