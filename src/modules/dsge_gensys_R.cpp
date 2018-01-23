@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2017 Keith O'Hara
+  ##   Copyright (C) 2011-2018 Keith O'Hara
   ##
   ##   This file is part of the R package BMR.
   ##
@@ -88,6 +88,11 @@ void
 dsge_gensys_R::set_model_fn(SEXP model_fn_inp)
 {
     try {
+        if (TYPEOF(model_fn_inp) != CLOSXP) 
+        {
+            Rf_error("BMR: model_fn must be a function");
+        }
+
         model_fn_SEXP = model_fn_inp;
 
         // Rcpp::Function pars_fn = Rcpp::as<Rcpp::Function>(model_fn_SEXP);

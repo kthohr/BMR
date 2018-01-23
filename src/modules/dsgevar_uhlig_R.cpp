@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2017 Keith O'Hara
+  ##   Copyright (C) 2011-2018 Keith O'Hara
   ##
   ##   This file is part of the R package BMR.
   ##
@@ -100,6 +100,11 @@ void
 dsgevar_uhlig_R::set_model_fn(SEXP model_fn_inp)
 {
     try {
+        if (TYPEOF(model_fn_inp) != CLOSXP) 
+        {
+            Rf_error("BMR: model_fn must be a function");
+        }
+
         model_fn_SEXP = model_fn_inp;
         
         dsge_obj.model_fn = std::bind(&dsgevar_uhlig_R::model_fn_R,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,std::placeholders::_6);
