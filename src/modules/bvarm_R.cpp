@@ -30,6 +30,9 @@ RCPP_MODULE(bvarm_module)
     void (bvarm_R::*build_1)(const arma::mat&, bool, int) = &bvarm_R::build_R;
     void (bvarm_R::*build_2)(const arma::mat&,const arma::mat&, bool, int) = &bvarm_R::build_R;
 
+    void (bvarm_R::*prior_1)(const arma::vec&) = &bvarm_R::prior_R;
+    void (bvarm_R::*prior_2)(const arma::vec&, int, int, double, double, double, double) = &bvarm_R::prior_R;
+
     SEXP (bvarm_R::*forecast_1)(int, bool) = &bvarm_R::forecast_R;
     SEXP (bvarm_R::*forecast_2)(const arma::mat&, int, bool) = &bvarm_R::forecast_R;
   
@@ -73,7 +76,8 @@ RCPP_MODULE(bvarm_module)
         .method( "build", build_1 )
         .method( "build", build_2 )
         .method( "reset_draws", &bvarm_R::reset_draws_R )
-        .method( "prior", &bvarm_R::prior_R )
+        .method( "prior", prior_1 )
+        .method( "prior", prior_2 )
         .method( "gibbs", &bvarm_R::gibbs_R )
         .method( "IRF", &bvarm_R::IRF_R )
         .method( "forecast", forecast_1 )
@@ -110,6 +114,17 @@ void bvarm_R::reset_draws_R()
 {
     try {
         this->reset_draws();
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+}
+
+void bvarm_R::prior_R(const arma::vec& coef_prior)
+{
+    try {
+        this->prior(coef_prior,1,1,0.5,0.5,1.0,2.0);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
