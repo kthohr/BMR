@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,20 +18,14 @@
 
 /*
  * BFGS method for quasi-Newton-based non-linear optimization
- *
- * Keith O'Hara
- * 12/23/2016
- *
- * This version:
- * 08/14/2017
  */
 
 #ifndef _optim_bfgs_HPP
 #define _optim_bfgs_HPP
 
-bool bfgs_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings* settings_inp);
+bool bfgs_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings* settings_inp);
 
 bool bfgs(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data);
-bool bfgs(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings& settings);
+bool bfgs(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings& settings);
 
 #endif

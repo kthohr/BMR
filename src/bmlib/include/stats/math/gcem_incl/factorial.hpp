@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /* 
  * compile-time factorial function
- *
- * Keith O'Hara
- * 06/23/2016
- *
- * This version:
- * 07/10/2017
  */
 
 #ifndef _gcem_factorial_HPP

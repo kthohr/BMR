@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * compile-time square-root function
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_sqrt_HPP
@@ -42,7 +36,7 @@ constexpr
 T
 sqrt(const T x)
 {
-    return ( x==1 ? x : sqrt_recur(x,x/2) );
+    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(0.0) : ( x == T(1.0) ? x : sqrt_recur(x,x/T(2.0)) ) );
 }
 
 #endif

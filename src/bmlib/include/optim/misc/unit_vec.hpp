@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,15 +18,12 @@
 
 /*
  * unit vector
- *
- * Keith O'Hara
- * 11/28/2014
  */
 
 #ifndef _optim_unit_vec_HPP
 #define _optim_unit_vec_HPP
 
-inline arma::vec unit_vec(const int j, const int n);
+inline arma::vec unit_vec(const size_t j, const size_t n);
 
 #include "unit_vec.ipp"
 

@@ -30,6 +30,7 @@
 #include "qlaplace.hpp"
 #include "qlogis.hpp"
 #include "qnorm.hpp"
+#include "qt.hpp"
 #include "qunif.hpp"
 
 // these depend on one of the above

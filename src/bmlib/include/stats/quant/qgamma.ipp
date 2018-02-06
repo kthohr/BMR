@@ -63,6 +63,8 @@ qgamma(const double p, const double shape_par, const double scale_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 qgamma_int(const arma::mat& p, const double* shape_par_inp, const double* scale_par_inp, const bool log_form)
@@ -70,17 +72,22 @@ qgamma_int(const arma::mat& p, const double* shape_par_inp, const double* scale_
     const double shape_par = (shape_par_inp) ? *shape_par_inp : 1.0;
     const double scale_par = (scale_par_inp) ? *scale_par_inp : 1.0;
     
-    const int n = p.n_rows;
-    const int k = p.n_cols;
+    const uint_t n = p.n_rows;
+    const uint_t k = p.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = qgamma(p(i,j),shape_par,scale_par,log_form);
-        }
+    const double* inp_mem = p.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = qgamma(inp_mem[j],shape_par,scale_par,log_form);
     }
 
     //
@@ -115,3 +122,5 @@ qgamma(const arma::mat& p, const double shape_par, const double scale_par, const
 {
     return qgamma_int(p,&shape_par,&scale_par,log_form);
 }
+
+#endif

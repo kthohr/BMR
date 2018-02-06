@@ -18,36 +18,29 @@
  
 /*
  * Differential Evolution (DE) MCMC
- *
- * Keith O'Hara
- * 03/01/2016
- *
- * This version:
- * 08/12/2017
  */
 
 #include "mcmc.hpp"
 
 bool
-mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp)
+mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-	const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
     
     //
     // DE settings
 
-    mcmc_settings settings;
+    algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
     }
 
-    const int n_pop    = settings.de_n_pop;
-    const int n_gen    = settings.de_n_gen;
-    const int n_burnin = settings.de_n_burnin;
+    const size_t n_pop    = settings.de_n_pop;
+    const size_t n_gen    = settings.de_n_gen;
+    const size_t n_burnin = settings.de_n_burnin;
 
     const bool jumps = settings.de_jumps;
     const double par_b = settings.de_par_b;
@@ -55,8 +48,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     const double par_gamma = 2.38 / std::sqrt(2.0*n_vals);
     const double par_gamma_jump = settings.de_par_gamma_jump;
 
-    const arma::vec par_initial_lb = ((int) settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : initial_vals - 0.5;
-    const arma::vec par_initial_ub = ((int) settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : initial_vals + 0.5;
+    const arma::vec par_initial_lb = (settings.de_initial_lb.n_elem == n_vals) ? settings.de_initial_lb : initial_vals - 0.5;
+    const arma::vec par_initial_ub = (settings.de_initial_ub.n_elem == n_vals) ? settings.de_initial_ub : initial_vals + 0.5;
 
     const bool vals_bound = settings.vals_bound;
 
@@ -67,13 +60,18 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) \
+    -> double
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        } 
+        else
+        {
             return target_log_kernel(vals_inp, target_data);
         }
     };
@@ -85,13 +83,14 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
     #pragma omp parallel for
 #endif
-    for (int i=0; i < n_pop; i++) {
+    for (size_t i=0; i < n_pop; i++)
+    {
         X.row(i) = par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
 
         double prop_kernel_val = box_log_kernel(X.row(i).t(),target_data);
 
         if (!std::isfinite(prop_kernel_val)) {
-            prop_kernel_val = BIG_NEG_VAL;
+            prop_kernel_val = minf;
         }
         
         target_vals(i) = prop_kernel_val;
@@ -105,7 +104,8 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
     int n_accept = 0;
     double par_gamma_run = par_gamma;
     
-    for (int j=0; j < n_gen + n_burnin; j++) {
+    for (size_t j=0; j < n_gen + n_burnin; j++) 
+    {
         double temperature_j = de_cooling_schedule(j,n_gen);
         
         if (jumps && ((j+1) % 10 == 0)) {
@@ -115,9 +115,9 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-            for (int i=0; i < n_pop; i++) {
+            for (size_t i=0; i < n_pop; i++) {
 
-                int R_1, R_2;
+                uint_t R_1, R_2;
 
                 do {
                     R_1 = arma::as_scalar(arma::randi(1, arma::distr_param(0, n_pop-1)));
@@ -136,12 +136,15 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                 double prop_kernel_val = box_log_kernel(X_prop.t(),target_data);
                 
                 if (!std::isfinite(prop_kernel_val)) {
-                    prop_kernel_val = BIG_NEG_VAL;
+                    prop_kernel_val = minf;
                 }
                 
-                double comp_val = prop_kernel_val - target_vals(i);
                 //
-                if (comp_val > temperature_j * std::log(arma::as_scalar(arma::randu(1)))) {
+                
+                double comp_val = prop_kernel_val - target_vals(i);
+                double z = arma::as_scalar(arma::randu(1,1));
+
+                if (comp_val > temperature_j * std::log(z)) {
                     X.row(i) = X_prop;
                     
                     target_vals(i) = prop_kernel_val;
@@ -151,33 +154,40 @@ mcmc::de_int(const arma::vec& initial_vals, arma::cube& draws_out, std::function
                     }
                 }
             }
+        
         //
-        if(j >= n_burnin){
+
+        if (j >= n_burnin) {
             draws_out.slice(j-n_burnin) = X;
         }
-        //
+        
         if (jumps && ((j+1) % 10 == 0)) {
             par_gamma_run = par_gamma;
         }
     }
-	//
-	if (vals_bound) {
+
+    success = true;
+
+    //
+    
+    if (vals_bound) {
 #ifdef MCMC_USE_OMP
         #pragma omp parallel for
 #endif
-        for (int ii = 0; ii < n_gen; ii++) {
-            for (int jj = 0; jj < n_pop; jj++) {
+        for (size_t ii = 0; ii < n_gen; ii++) {
+            for (size_t jj = 0; jj < n_pop; jj++) {
                 draws_out.slice(ii).row(jj) = arma::trans(inv_transform(draws_out.slice(ii).row(jj).t(), bounds_type, lower_bounds, upper_bounds));
             }
         }
-	}
-	//
-    if (settings_inp) {
-	    settings_inp->de_accept_rate = (double) n_accept / (double) (n_pop*n_gen);
     }
-	//
-    success = true;
-	return success;
+    
+    if (settings_inp) {
+        settings_inp->de_accept_rate = static_cast<double>(n_accept) / static_cast<double>(n_pop*n_gen);
+    }
+
+    //
+    
+    return success;
 }
 
 // wrappers
@@ -189,7 +199,7 @@ mcmc::de(const arma::vec& initial_vals, arma::cube& draws_out, std::function<dou
 }
 
 bool
-mcmc::de(const arma::vec& initial_vals, arma::cube& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings)
+mcmc::de(const arma::vec& initial_vals, arma::cube& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
 {
     return de_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

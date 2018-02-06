@@ -63,6 +63,8 @@ qnorm(const double p, const double mu_par, const double sigma_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 qnorm_int(const arma::mat& p, const double* mu_par_inp, const double* sigma_par_inp, const bool log_form)
@@ -70,17 +72,22 @@ qnorm_int(const arma::mat& p, const double* mu_par_inp, const double* sigma_par_
     const double mu_par = (mu_par_inp) ? *mu_par_inp : 0.0;
     const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1.0;
     
-    const int n = p.n_rows;
-    const int k = p.n_cols;
+    const uint_t n = p.n_rows;
+    const uint_t k = p.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = qnorm(p(i,j),mu_par,sigma_par,log_form);
-        }
+    const double* inp_mem = p.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = qnorm(inp_mem[j],mu_par,sigma_par,log_form);
     }
 
     //
@@ -115,3 +122,5 @@ qnorm(const arma::mat& p, const double mu_par, const double sigma_par, const boo
 {
     return qnorm_int(p,&mu_par,&sigma_par,log_form);
 }
+
+#endif

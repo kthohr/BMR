@@ -6,3 +6,4 @@
 *.vscode
 /src/bmlib/include/armadillo*
 .Rproj.user
+*.tmp

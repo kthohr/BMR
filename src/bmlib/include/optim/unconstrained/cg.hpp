@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,23 +18,17 @@
 
 /*
  * Conjugate Gradient method for non-linear optimization
- *
- * Keith O'Hara
- * 12/23/2016
- *
- * This version:
- * 08/14/2017
  */
 
 #ifndef _optim_cg_HPP
 #define _optim_cg_HPP
 
-bool cg_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings* settings_inp);
+bool cg_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings* settings_inp);
 
 bool cg(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data);
-bool cg(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings& settings);
+bool cg(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings& settings);
 
 // internal update function
-double cg_update(const arma::vec& grad, const arma::vec& grad_p, const arma::vec& direc, const int iter, const int cg_method_inp, const double cg_restart_threshold);
+double cg_update(const arma::vec& grad, const arma::vec& grad_p, const arma::vec& direc, const uint_t iter, const uint_t cg_method_inp, const double cg_restart_threshold);
 
 #endif

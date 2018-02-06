@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,22 +18,17 @@
 
 /*
  * the ('true') gamma function
- *
- * Keith O'Hara
- * 06/28/2017
- *
- * This version:
- * 07/01/2017
  */
 
 #ifndef _gcem_tgamma_HPP
 #define _gcem_tgamma_HPP
 
+template<typename T>
 constexpr
-long double
-tgamma(const long double x)
+T
+tgamma(const T x)
 {
-    return ( x == 1 ? 1 : exp(lgamma(x)));
+    return ( GCEM_LIM<T>::epsilon() > abs(x - T(1.0)) ? T(1.0) : exp(lgamma(x)));
 }
 
 #endif

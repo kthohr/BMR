@@ -63,6 +63,8 @@ pbeta(const double x, const double a_par, const double b_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 pbeta_int(const arma::mat& x, const double* a_par_inp, const double* b_par_inp, const bool log_form)
@@ -70,17 +72,22 @@ pbeta_int(const arma::mat& x, const double* a_par_inp, const double* b_par_inp, 
     const double a_par = (a_par_inp) ? *a_par_inp : 2.0; // shape parameter 'alpha'
     const double b_par = (b_par_inp) ? *b_par_inp : 2.0; // scale parameter 'beta'
 
-    const int n = x.n_rows;
-    const int k = x.n_cols;
+    const uint_t n = x.n_rows;
+    const uint_t k = x.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = pbeta(x(i,j),a_par,b_par,log_form);
-        }
+    const double* inp_mem = x.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = pbeta(inp_mem[j],a_par,b_par,log_form);
     }
 
     //
@@ -115,3 +122,5 @@ pbeta(const arma::mat& x, const double a_par, const double b_par, const bool log
 {
     return pbeta_int(x,&a_par,&b_par,log_form);
 }
+
+#endif

@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -16,8 +16,15 @@
   ##
   ################################################################################*/
 
+#include <limits>
+
 //
 // constants
+
+namespace gcem {
+    template<class T>
+    using GCEM_LIM = std::numeric_limits<T>;
+}
 
 #ifndef GCEM_LOG_2
     #define GCEM_LOG_2 0.693147180559945309417L
@@ -43,8 +50,16 @@
     #define GCEM_SQRT_2 1.41421356237309504880L
 #endif
 
+#ifndef GCEM_HALF_PI
+    #define GCEM_HALF_PI 1.57079632679489661923L
+#endif
+
 #ifndef GCEM_SQRT_PI
     #define GCEM_SQRT_PI 1.77245385090551602730L
+#endif
+
+#ifndef GCEM_SQRT_HALF_PI
+    #define GCEM_SQRT_HALF_PI 1.25331413731550025121L
 #endif
 
 #ifndef GCEM_E
@@ -54,20 +69,20 @@
 //
 // convergence settings
 
-#ifndef GCEM_ATAN_MAX_ITER
-    #define GCEM_ATAN_MAX_ITER 35
-#endif
+// #ifndef GCEM_ATAN_MAX_ITER
+//     #define GCEM_ATAN_MAX_ITER 25
+// #endif
 
 #ifndef GCEM_ERF_MAX_ITER
     #define GCEM_ERF_MAX_ITER 35
 #endif
 
 #ifndef GCEM_ERF_INV_MAX_ITER
-    #define GCEM_ERF_INV_MAX_ITER 35
+    #define GCEM_ERF_INV_MAX_ITER 45
 #endif
 
 #ifndef GCEM_EXP_MAX_ITER_SMALL
-    #define GCEM_EXP_MAX_ITER_SMALL 35
+    #define GCEM_EXP_MAX_ITER_SMALL 25
 #endif
 
 // #ifndef GCEM_LOG_TOL

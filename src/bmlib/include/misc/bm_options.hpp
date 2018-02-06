@@ -34,14 +34,21 @@
     #include "armadillo"
 #endif
 
+#ifndef STATS_GO_INLINE
+    #define STATS_GO_INLINE
+#endif
+
 #ifdef BM_USE_OMP
-    // #include <omp.h>
     #ifndef OPTIM_USE_OMP
         #define OPTIM_USE_OMP
     #endif
     
     #ifndef MCMC_USE_OMP
         #define MCMC_USE_OMP
+    #endif
+
+    #ifndef ARMA_USE_OPENMP
+        #define ARMA_USE_OPENMP
     #endif
 #endif
 

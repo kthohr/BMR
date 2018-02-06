@@ -172,7 +172,8 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
 
         // ML estimate of the variance (no bias adjustment)
 
-        sigma(i) = arma::as_scalar(arma::trans(Y_AR - X_AR*alpha_AR) * (Y_AR - X_AR*alpha_AR)) / ((double) (n-p));
+        arma::vec err_vec = Y_AR - X_AR*alpha_AR;
+        sigma(i) = arma::dot(err_vec,err_vec) / static_cast<double>(n-p);
     }
 
     //

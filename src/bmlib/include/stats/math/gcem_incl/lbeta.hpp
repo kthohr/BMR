@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,20 +18,15 @@
 
 /*
  * compile-time log-beta function
- *
- * Keith O'Hara
- * 06/28/2017
- *
- * This version:
- * 07/01/2017
  */
 
 #ifndef _gcem_lbeta_HPP
 #define _gcem_lbeta_HPP
 
+template<typename T>
 constexpr
-long double
-lbeta(const long double a, const long double b)
+T
+lbeta(const T a, const T b)
 {
     return ( lgamma(a) + lgamma(b) - lgamma(a+b) );
 }

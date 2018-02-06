@@ -24,31 +24,46 @@ template<typename T>
 int
 rbinom(const int n_trials_par, const T prob_par)
 {
-    return arma::accu(rbern(n_trials_par,1,prob_par));
+    // return arma::accu(rbern(n_trials_par,1,prob_par)); // removed for STATS_NO_ARMA
+    int ret = 0;
+
+    for (int i=0; i < n_trials_par; i++) {
+        ret += rbern(prob_par);
+    }
+
+    return ret;
 }
+
+#ifndef STATS_NO_ARMA
 
 inline
 arma::mat
-rbinom(const int n, const int n_trials_par, const double prob_par)
+rbinom(const uint_t n, const int n_trials_par, const double prob_par)
 {
-	return rbinom(n,1,n_trials_par,prob_par);
+    return rbinom(n,1,n_trials_par,prob_par);
 }
 
 inline
 arma::mat
-rbinom(const int n, const int k, const int n_trials_par, const double prob_par)
+rbinom(const uint_t n, const uint_t k, const int n_trials_par, const double prob_par)
 {
     arma::mat ret(n,k);
     
     //
-    
-	for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = rbinom(n_trials_par,prob_par);
-        }
+
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = rbinom(n_trials_par,prob_par);
     }
 
     //
 
-	return ret;
+    return ret;
 }
+
+#endif

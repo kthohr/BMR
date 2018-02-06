@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2018 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,26 +18,22 @@
  
 /*
  * Determine the upper-lower bounds combo type
- *
- * Keith O'Hara
- * 05/01/2012
- *
- * This version:
- * 08/12/2017
  */
 
 // note: std::isfinite is not true for: NaN, - Inf, or + Inf
 
 inline
 arma::uvec
-determine_bounds_type(const bool vals_bound, const int n_vals, const arma::vec& lower_bounds, const arma::vec& upper_bounds)
+determine_bounds_type(const bool vals_bound, const size_t n_vals, const arma::vec& lower_bounds, const arma::vec& upper_bounds)
 {
     arma::uvec ret_vec(n_vals);
 
     ret_vec.fill(1); // base case: 1 - no bounds imposed
 
-    if (vals_bound) {
-        for (int i=0; i < n_vals; i++) {
+    if (vals_bound)
+    {
+        for (size_t i=0; i < n_vals; i++)
+        {
             if ( std::isfinite(lower_bounds(i)) && std::isfinite(upper_bounds(i)) ) {
                 // lower and upper bound imposed
                 ret_vec(i) = 4;
@@ -50,6 +46,8 @@ determine_bounds_type(const bool vals_bound, const int n_vals, const arma::vec& 
             }
         }
     }
+
     //
+    
     return ret_vec;
 }

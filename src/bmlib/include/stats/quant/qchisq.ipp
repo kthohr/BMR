@@ -63,23 +63,30 @@ qchisq(const double p, const double dof_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 qchisq_int(const arma::mat& p, const double* dof_par_inp, bool log_form)
 {
     const double dof_par = (dof_par_inp) ? *dof_par_inp : 1.0;
     
-    const int n = p.n_rows;
-    const int k = p.n_cols;
+    const uint_t n = p.n_rows;
+    const uint_t k = p.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = qchisq(p(i,j),dof_par,log_form);
-        }
+    const double* inp_mem = p.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = qchisq(inp_mem[j],dof_par,log_form);
     }
 
     //
@@ -114,3 +121,5 @@ qchisq(const arma::mat& p, const double dof_par, const bool log_form)
 {
     return qchisq_int(p,&dof_par,log_form);
 }
+
+#endif

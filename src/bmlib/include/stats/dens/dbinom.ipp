@@ -65,6 +65,8 @@ dbinom(const int x, const int n_trials_par, const double prob_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 dbinom_int(const arma::mat& x, const int* n_trials_par_inp, const double* prob_par_inp, const bool log_form)
@@ -72,17 +74,22 @@ dbinom_int(const arma::mat& x, const int* n_trials_par_inp, const double* prob_p
     const int n_trials_par = (n_trials_par_inp) ? *n_trials_par_inp : 1;
     const double prob_par = (prob_par_inp) ? *prob_par_inp : 0.5;
 
-    const int n = x.n_rows;
-    const int k = x.n_cols;
+    const uint_t n = x.n_rows;
+    const uint_t k = x.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = dbinom((int)x(i,j),n_trials_par,prob_par,log_form);
-        }
+    const double* inp_mem = x.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = dbinom(static_cast<int>(inp_mem[j]),n_trials_par,prob_par,log_form);
     }
 
     //
@@ -117,3 +124,5 @@ dbinom(const arma::mat& x, const int n_trials_par, const double prob_par, const 
 {
     return dbinom_int(x,&n_trials_par,&prob_par,log_form);
 }
+
+#endif

@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * find the whole number part of x = n + r, where -0.5 < r < 0.5
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_find_whole_HPP
@@ -34,7 +28,7 @@ constexpr
 T
 find_whole(const T x)
 {
-    return ( abs(x - int(x)) > 0.5 ? (int)x + sign_dbl(x) : (int)x );
+    return ( abs(x - int(x)) > T(0.5) ? int(x) + sgn(x) : int(x) );
 }
 
 #endif

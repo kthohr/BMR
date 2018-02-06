@@ -1,7 +1,7 @@
 
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -19,12 +19,6 @@
 
 /* 
  * compile-time binomial coefficient
- *
- * Keith O'Hara
- * 06/23/2016
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_binomial_coef_HPP
@@ -34,7 +28,7 @@ constexpr
 long double
 binomial_coef_int(const int n, const int k, const int count)
 {
-    return ( count < k ? binomial_coef_int(n,k,count+1) * (long double)(n - k + count) / count : (long double)(n) / count );
+    return ( count < k ? binomial_coef_int(n,k,count+1) * static_cast<long double>(n - k + count) / count : static_cast<long double>(n) / count );
 }
 
 constexpr

@@ -27,28 +27,36 @@ rinvgamma(T shape_par, T rate_par)
     return 1.0/rgamma(shape_par,1.0/rate_par);
 }
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
-rinvgamma(const int n, const double shape_par, const double rate_par)
+rinvgamma(const uint_t n, const double shape_par, const double rate_par)
 {
-	return rinvgamma(n,1,shape_par,rate_par);
+    return rinvgamma(n,1,shape_par,rate_par);
 }
 
 inline
 arma::mat
-rinvgamma(const int n, const int k, const double shape_par, const double rate_par)
+rinvgamma(const uint_t n, const uint_t k, const double shape_par, const double rate_par)
 {
     arma::mat ret(n,k);
     
     //
-    
-	for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = rinvgamma(shape_par,rate_par);
-        }
+
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = rinvgamma(shape_par,rate_par);
     }
 
     //
     
-	return ret;
+    return ret;
 }
+
+#endif

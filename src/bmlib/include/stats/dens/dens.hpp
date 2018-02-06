@@ -31,6 +31,7 @@
 #include "dlogis.hpp"
 #include "dmvnorm.hpp"
 #include "dnorm.hpp"
+#include "dt.hpp"
 #include "dunif.hpp"
 #include "dwish.hpp"
 

@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -17,23 +17,20 @@
   ################################################################################*/
 
 /*
- * compile-time inverse (aka area) hyperbolic cosine function
- *
- * Keith O'Hara
- * 06/28/2017
- *
- * This version:
- * 07/01/2017
+ * compile-time inverse hyperbolic cosine function
  */
 
 #ifndef _gcem_acosh_HPP
 #define _gcem_acosh_HPP
 
+template<typename T>
 constexpr
-long double
-acosh(const long double x)
+T
+acosh(const T x)
 {
-    return ( x == 1 ? 0 : log( x + sqrt(x*x-1) ) );
+    return ( x < T(1.0)                                ? GCEM_LIM<T>::quiet_NaN() : // function defined for x >= 1
+             GCEM_LIM<T>::epsilon() > abs(x -  T(1.0)) ? T(0.0) : 
+                                                         log( x + sqrt(x*x - T(1.0)) ) );
 }
 
 #endif

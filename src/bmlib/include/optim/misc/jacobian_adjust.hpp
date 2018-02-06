@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2011-2018 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,24 +18,20 @@
  
 /*
  * Jacobian adjustment
- *
- * Keith O'Hara
- * 05/01/2012
- *
- * This version:
- * 08/13/2017
  */
 
 inline
 arma::mat
 jacobian_adjust(const arma::vec& vals_trans_inp, const arma::uvec& bounds_type, const arma::vec& lower_bounds, const arma::vec& upper_bounds)
 {
-    const int n_vals = bounds_type.n_elem;
+    const size_t n_vals = bounds_type.n_elem;
 
     arma::mat ret_mat = arma::eye(n_vals,n_vals);
 
-    for (int i=0; i < n_vals; i++) {
-        switch (bounds_type(i)) {
+    for (size_t i=0; i < n_vals; i++)
+    {
+        switch (bounds_type(i)) 
+        {
             case 2: // lower bound only
                 ret_mat(i,i) = std::exp(vals_trans_inp(i));
                 break;

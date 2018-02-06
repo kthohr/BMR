@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,30 +18,27 @@
 
 /*
  * compile-time sine function using tan(x/2)
+ * 
  * see eq. 5.4.8 in Numerical Recipes
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/01/2017
  */
 
 #ifndef _gcem_sin_HPP
 #define _gcem_sin_HPP
 
+template<typename T>
 constexpr
-long double
-sin_int(const long double x)
+T
+sin_int(const T x)
 {
-    return 2*x/(1+x*x);
+    return T(2.0)*x/(T(1.0) + x*x);
 }
 
+template<typename T>
 constexpr
-long double
-sin(const long double x)
+T
+sin(const T x)
 {
-    return ( x == 0 ? 0 : sin_int(tan(x/2)) );
+    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(0.0) : sin_int( tan(x/T(2.0)) ) );
 }
 
 #endif

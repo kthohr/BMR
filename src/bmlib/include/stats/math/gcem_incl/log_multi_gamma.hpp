@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /* 
  * log multivariate gamma function
- *
- * Keith O'Hara
- * 06/01/2016
- *
- * This version:
- * 07/01/2017
  */
 
 #ifndef _gcem_log_multi_gamma_HPP
@@ -31,11 +25,14 @@
 
 // see https://en.wikipedia.org/wiki/Multivariate_gamma_function
 
+template<typename T>
 constexpr
-long double
-log_multi_gamma(const long double a, const int p)
+T
+log_multi_gamma(const T a, const int p)
 {
-    return ( p==1 ? lgamma(a) : ((p-1.0)/2.0) * GCEM_LOG_PI + lgamma(a) + log_multi_gamma(a-0.5,p-1) );
+    return ( p == 1 ? lgamma(a) : 
+             p < 1  ? GCEM_LIM<T>::quiet_NaN() :
+             T(GCEM_LOG_PI) * (p - T(1.0))/T(2.0) + lgamma(a) + log_multi_gamma(a - T(0.5),p-1) );
 }
 
 #endif

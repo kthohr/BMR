@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * compile-time find_exponent function
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_find_exponent_HPP
@@ -34,7 +28,7 @@ constexpr
 int
 find_exponent(const T x, const int exponent)
 {
-    return ( x < 1.0 ? find_exponent(x*10,exponent-1) : ( x > 10.0 ? find_exponent(x*0.1,exponent+1) : exponent ) );
+    return ( x < T(1.0) ? find_exponent(x*10,exponent-1) : ( x > T(10.0) ? find_exponent(x*0.1,exponent+1) : exponent ) );
 }
 
 #endif

@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,23 +18,17 @@
 
 /*
  * compile-time sign function
- *
- * Keith O'Hara
- * 06/15/2017
- *
- * This version:
- * 07/02/2017
  */
 
-#ifndef _gcem_sign_dbl_HPP
-#define _gcem_sign_dbl_HPP
+#ifndef _gcem_sgn_HPP
+#define _gcem_sgn_HPP
 
 template<typename T>
 constexpr
 T
-sign_dbl(const T x)
+sgn(const T x)
 {
-    return (x > 0 ? 1.0 : (x < 0 ? -1.0 : 0.0));
+    return ( x > T(0.0) ? T(1.0) : (x < T(0.0) ? T(-1.0) : T(0.0)) );
 }
 
 #endif

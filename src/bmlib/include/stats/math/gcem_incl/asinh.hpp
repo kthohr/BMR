@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -17,23 +17,18 @@
   ################################################################################*/
 
 /*
- * compile-time inverse (aka area) hyperbolic sine function
- *
- * Keith O'Hara
- * 06/28/2017
- *
- * This version:
- * 07/01/2017
+ * compile-time inverse hyperbolic sine function
  */
 
 #ifndef _gcem_asinh_HPP
 #define _gcem_asinh_HPP
 
+template<typename T>
 constexpr
-long double
-asinh(const long double x)
+T
+asinh(const T x)
 {
-    return ( x == 0 ? 0 : log( x + sqrt(x*x+1) ) );
+    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(0.0) : log( x + sqrt(x*x + T(1.0)) ) );
 }
 
 #endif

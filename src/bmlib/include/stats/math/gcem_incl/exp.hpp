@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * compile-time exponential function
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_exp_HPP
@@ -34,7 +28,7 @@ constexpr
 T
 exp_cf_int(const T x, const int depth)
 {
-    return ( depth == GCEM_EXP_MAX_ITER_SMALL ? (T)(1) : depth == 1 ? 1 - x/exp_cf_int(x,depth+1) : 1 + x/(depth - 1) - x/depth/exp_cf_int(x,depth+1) );
+    return ( depth < GCEM_EXP_MAX_ITER_SMALL ? ( depth == 1 ? T(1.0) - x/exp_cf_int(x,depth+1) : T(1.0) + x/T(depth - 1) - x/depth/exp_cf_int(x,depth+1) ) : T(1.0) );
 }
 
 template<typename T>
@@ -42,7 +36,7 @@ constexpr
 T
 exp_cf(const T x)
 {
-    return ( 1.0/exp_cf_int(x,1) );
+    return ( T(1.0)/exp_cf_int(x,1) );
 }
 
 template<typename T>
@@ -58,7 +52,7 @@ constexpr
 T
 exp(const T x)
 {
-    return ( x == 0 ? 1.0 : ( abs(x) < 2.0 ? exp_cf(x) : exp_split(x) ) );
+    return ( x == T(0.0) ? T(1.0) : ( abs(x) < T(2.0) ? exp_cf(x) : exp_split(x) ) );
 }
 
 // #ifndef GCEM_EXP_TOL

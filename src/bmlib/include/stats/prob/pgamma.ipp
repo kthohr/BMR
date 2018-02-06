@@ -63,6 +63,8 @@ pgamma(const double x, const double shape_par, const double scale_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 pgamma_int(const arma::mat& x, const double* shape_par_inp, const double* scale_par_inp, const bool log_form)
@@ -70,17 +72,22 @@ pgamma_int(const arma::mat& x, const double* shape_par_inp, const double* scale_
     const double shape_par = (shape_par_inp) ? *shape_par_inp : 1.0;
     const double scale_par = (scale_par_inp) ? *scale_par_inp : 1.0;
     
-    const int n = x.n_rows;
-    const int k = x.n_cols;
+    const uint_t n = x.n_rows;
+    const uint_t k = x.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = pgamma(x(i,j),shape_par,scale_par,log_form);
-        }
+    const double* inp_mem = x.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = pgamma(inp_mem[j],shape_par,scale_par,log_form);
     }
 
     //
@@ -115,3 +122,5 @@ pgamma(const arma::mat& x, const double shape_par, const double scale_par, const
 {
     return pgamma_int(x,&shape_par,&scale_par,log_form);
 }
+
+#endif

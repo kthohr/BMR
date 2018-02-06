@@ -269,7 +269,7 @@ dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat)
 
 template<typename T>
 arma::vec
-dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::opt_settings* settings_inp)
+dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::algo_settings* settings_inp)
 {
     dsgevar_estim_data<T> mode_data;
     mode_data.dsgevar_obj = *this;
@@ -277,7 +277,7 @@ dsgevar<T>::estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim
     //
     // optimization settings
 
-    optim::opt_settings settings;
+    optim::algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -324,7 +324,7 @@ dsgevar<T>::mcmc_objfn(const arma::vec& pars_inp, void* mcmc_data)
 
 template<typename T>
 void
-dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp)
+dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings* settings_inp)
 {
 
     dsgevar_estim_data<T> mcmc_data;
@@ -333,7 +333,7 @@ dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* setti
     //
     // MCMC settings
 
-    mcmc::mcmc_settings settings;
+    mcmc::algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;

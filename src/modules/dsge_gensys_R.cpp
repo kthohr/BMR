@@ -236,7 +236,7 @@ SEXP
 dsge_gensys_R::estim_mode_R(const arma::vec& initial_vals, bool calc_vcov)
 {
     try {
-        optim::opt_settings settings;
+        optim::algo_settings settings;
 
         if (opt_initial_lb.n_elem > 0) {
             settings.de_initial_lb = opt_initial_lb;
@@ -269,7 +269,7 @@ void
 dsge_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin)
 {
     try {
-        mcmc::mcmc_settings settings;
+        mcmc::algo_settings settings;
 
         if (mcmc_initial_lb.n_elem > 0) {
             settings.de_initial_lb = mcmc_initial_lb;

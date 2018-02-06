@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,19 +18,13 @@
 
 /*
  * Numerical Hessian, using Abramowitz and Stegun (1972, p. 884)
- *
- * Keith O'Hara
- * 01/01/2012
- *
- * This version:
- * 08/26/2017
  */
 
 inline
 arma::mat
 numerical_hessian(const arma::vec& vals_inp, const double* step_size_inp, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* objfn_data)> objfn, void* objfn_data)
 {
-    const int n_vals = vals_inp.n_elem;
+    const size_t n_vals = vals_inp.n_elem;
     const double step_size = (step_size_inp) ? *step_size_inp : 1e-04;
     const double mach_eps = std::numeric_limits<double>::epsilon();
 
@@ -40,15 +34,20 @@ numerical_hessian(const arma::vec& vals_inp, const double* step_size_inp, std::f
     arma::mat hessian_mat = arma::zeros(n_vals,n_vals);
 
     const double f_orig = -30.0*objfn(x_orig, nullptr, objfn_data);
+
     //
-    for (int i=0; i < n_vals; i++) {
-        for (int j=i; j < n_vals; j++) {
+    
+    for (size_t i=0; i < n_vals; i++) 
+    {
+        for (size_t j=i; j < n_vals; j++)
+        {
             x_term_1 = x_orig;
             x_term_2 = x_orig;
             x_term_3 = x_orig;
             x_term_4 = x_orig;
 
-            if (i==j) {
+            if (i==j)
+            {
                 x_term_1(i) += 2*step_vec(i);
                 x_term_2(i) +=   step_vec(i);
                 x_term_3(i) -=   step_vec(i);
@@ -64,7 +63,9 @@ numerical_hessian(const arma::vec& vals_inp, const double* step_size_inp, std::f
                 double denom_term = 12.0 * step_vec(i) * step_vec(i);
                 
                 hessian_mat(i,j) = (term_1 + term_2 + f_orig + term_3 + term_4) / denom_term;
-            } else {
+            }
+            else
+            {
                 x_term_1(i) += step_vec(i);
                 x_term_1(j) += step_vec(j);
 
@@ -91,6 +92,8 @@ numerical_hessian(const arma::vec& vals_inp, const double* step_size_inp, std::f
             }
         }
     }
+
     //
+
     return hessian_mat;
 }

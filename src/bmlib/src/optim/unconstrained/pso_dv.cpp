@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,40 +18,33 @@
 
 /*
  * Particle Swarm Optimization (PSO) with Differentially-Perturbed Velocity (DV)
- *
- * Keith O'Hara
- * 08/04/2016
- *
- * This version:
- * 08/14/2017
  */
 
 #include "optim.hpp"
 
 bool
-optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings* settings_inp)
+optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings* settings_inp)
 {
     bool success = false;
 
-    const double BIG_POS_VAL = OPTIM_BIG_POS_VAL;
-    const int n_vals = init_out_vals.n_elem;
+    const size_t n_vals = init_out_vals.n_elem;
 
     //
-    //
+    // PSO settings
 
-    opt_settings settings;
+    algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
     }
 
-    const int conv_failure_switch = settings.conv_failure_switch;
+    const uint_t conv_failure_switch = settings.conv_failure_switch;
     const double err_tol = settings.err_tol;
 
-    const int n_pop = (settings.pso_n_pop > 0) ? settings.pso_n_pop : 100;
-    const int n_gen = (settings.pso_n_gen > 0) ? settings.pso_n_gen : 1000;
+    const size_t n_pop = (settings.pso_n_pop > 0) ? settings.pso_n_pop : 100;
+    const size_t n_gen = (settings.pso_n_gen > 0) ? settings.pso_n_gen : 1000;
 
-    const int stag_limit = 50;
+    const uint_t stag_limit = 50;
 
     double par_w = 1.0;
     double par_beta = 0.5;
@@ -61,8 +54,8 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
 
     const double par_CR = 0.7;
 
-    const arma::vec par_initial_lb = ((int) settings.pso_initial_lb.n_elem == n_vals) ? settings.pso_initial_lb : init_out_vals - 0.5;
-    const arma::vec par_initial_ub = ((int) settings.pso_initial_ub.n_elem == n_vals) ? settings.pso_initial_ub : init_out_vals + 0.5;
+    const arma::vec par_initial_lb = (settings.pso_initial_lb.n_elem == n_vals) ? settings.pso_initial_lb : init_out_vals - 0.5;
+    const arma::vec par_initial_ub = (settings.pso_initial_ub.n_elem == n_vals) ? settings.pso_initial_ub : init_out_vals + 0.5;
 
     const bool vals_bound = settings.vals_bound;
     
@@ -71,16 +64,21 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
 
     const arma::uvec bounds_type = determine_bounds_type(vals_bound, n_vals, lower_bounds, upper_bounds);
 
+    //
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_objfn = [opt_objfn, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data) -> double {
-        //
-
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_objfn \
+    = [opt_objfn, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data) \
+    -> double 
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
             
             return opt_objfn(vals_inv_trans,nullptr,opt_data);
-        } else {
+        }
+        else
+        {
             return opt_objfn(vals_inp,nullptr,opt_data);
         }
     };
@@ -94,13 +92,14 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
 #ifdef OPTIM_USE_OMP
     #pragma omp parallel for
 #endif
-    for (int i=0; i < n_pop; i++) {
+    for (size_t i=0; i < n_pop; i++) 
+    {
         P.row(i) = par_initial_lb.t() + (par_initial_ub.t() - par_initial_lb.t())%arma::randu(1,n_vals);
 
         double prop_objfn_val = opt_objfn(P.row(i).t(),nullptr,opt_data);
 
         if (std::isnan(prop_objfn_val)) {
-            prop_objfn_val = BIG_POS_VAL;
+            prop_objfn_val = inf;
         }
         
         objfn_vals(i) = prop_objfn_val;
@@ -122,9 +121,9 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
     arma::vec stag_vec = arma::zeros(n_pop,1);
 
     //
-    //
+    // begin loop
 
-    int iter = 0;
+    uint_t iter = 0;
     double err = 2.0*err_tol;
 
     while (err > err_tol && iter < n_gen) {
@@ -136,9 +135,9 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
 #ifdef OPTIM_USE_OMP
         #pragma omp parallel for 
 #endif
-        for (int i=0; i < n_pop; i++) {
-
-            int c_1, c_2;
+        for (size_t i=0; i < n_pop; i++)
+        {
+            uint_t c_1, c_2;
 
             do { // 'r_2' in paper's notation
                 c_1 = arma::as_scalar(arma::randi(1, arma::distr_param(0, n_pop-1)));
@@ -154,9 +153,12 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
 
             arma::rowvec delta_vec = P.row(c_1) - P.row(c_2);
 
-            for (int k=0; k < n_vals; k++) {
-                if (rand_CR(k) <= par_CR) {
+            for (size_t k=0; k < n_vals; k++) 
+            {
+                if (rand_CR(k) <= par_CR) 
+                {
                     double rand_u = arma::as_scalar(arma::randu(1));
+
                     V(i,k) = par_w*V(i,k) + par_beta*delta_vec(k) + par_c_2*rand_u*(global_best_vec(k) - P(i,k));
                 }
             }
@@ -164,14 +166,18 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
             arma::rowvec TR = P.row(i) + V.row(i);
             double TR_objfn_val = box_objfn(TR.t(),nullptr,opt_data);
 
-            if (TR_objfn_val < objfn_vals(i)) {
+            if (TR_objfn_val < objfn_vals(i))
+            {
                 P.row(i) = TR;
                 objfn_vals(i) = TR_objfn_val;
-            } else {
+            }
+            else
+            {
                 stag_vec(i) += 1;
             }
 
-            if (stag_vec(i) >= stag_limit) {
+            if (stag_vec(i) >= stag_limit) 
+            {
                 P.row(i) = P_min + arma::randu(1,n_vals) % (P_max - P_min);
                 stag_vec(i) = 0;
 
@@ -184,7 +190,8 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
             // }
         }
 
-        if (objfn_vals.min() < global_best_val) {
+        if (objfn_vals.min() < global_best_val) 
+        {
             global_best_val = objfn_vals.min();
             global_best_vec = P.row( objfn_vals.index_min() );
         }
@@ -192,13 +199,17 @@ optim::pso_dv_int(arma::vec& init_out_vals, std::function<double (const arma::ve
         par_w *= par_damp;
         // par_w = std::min(0.4,par_w*par_damp);
     }
+
     //
+
     if (vals_bound) {
-	    global_best_vec = arma::trans( inv_transform(global_best_vec.t(), bounds_type, lower_bounds, upper_bounds) );
+        global_best_vec = arma::trans( inv_transform(global_best_vec.t(), bounds_type, lower_bounds, upper_bounds) );
     }
 
     error_reporting(init_out_vals,global_best_vec.t(),opt_objfn,opt_data,success,err,err_tol,iter,n_gen,conv_failure_switch,settings_inp);
+
     //
+    
     return true;
 }
 
@@ -209,7 +220,7 @@ optim::pso_dv(arma::vec& init_out_vals, std::function<double (const arma::vec& v
 }
 
 bool
-optim::pso_dv(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings& settings)
+optim::pso_dv(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings& settings)
 {
     return pso_dv_int(init_out_vals,opt_objfn,opt_data,&settings);
 }

@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,30 +18,27 @@
 
 /*
  * compile-time cosine function using tan(x/2)
+ * 
  * see eq. 5.4.8 in Numerical Recipes
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/01/2017
  */
 
 #ifndef _gcem_cos_HPP
 #define _gcem_cos_HPP
 
+template<typename T>
 constexpr
-long double
-cos_int(const long double x)
+T
+cos_int(const T x)
 {
-    return (1-x*x)/(1+x*x);
+    return (T(1.0) - x*x)/(T(1.0) + x*x);
 }
 
+template<typename T>
 constexpr
-long double
-cos(const long double x)
+T
+cos(const T x)
 {
-    return ( x == 0 ? 1 : cos_int(tan(x/2)) );
+    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(1.0) : cos_int( tan(x/T(2.0)) ) );
 }
 
 #endif

@@ -30,6 +30,7 @@
 #include "plaplace.hpp"
 #include "plogis.hpp"
 #include "pnorm.hpp"
+#include "pt.hpp"
 #include "punif.hpp"
 
 // these depend on one of the above

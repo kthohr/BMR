@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * compile-time mantissa function
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_mantissa_HPP
@@ -34,7 +28,7 @@ constexpr
 T
 mantissa(const T x)
 {
-    return ( x < 1.0 ? mantissa(x*10) : ( x > 10.0 ? mantissa(x*0.1) : x ) );
+    return ( x < T(1.0) ? mantissa(x*10) : ( x > T(10.0) ? mantissa(x*0.1) : x ) );
 }
 
 #endif

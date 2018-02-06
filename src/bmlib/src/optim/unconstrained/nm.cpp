@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,34 +18,28 @@
 
 /*
  * Nelder-Mead
- *
- * Keith O'Hara
- * 01/03/2017
- *
- * This version:
- * 08/14/2017
  */
 
 #include "optim.hpp"
 
 bool
-optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings* settings_inp)
+optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings* settings_inp)
 {
     bool success = false;
 
-    const int n_vals = init_out_vals.n_elem;
+    const size_t n_vals = init_out_vals.n_elem;
 
     //
     // NM settings
 
-    opt_settings settings;
+    algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
     }
     
-    const int conv_failure_switch = settings.conv_failure_switch;
-    const int iter_max = settings.iter_max;
+    const uint_t conv_failure_switch = settings.conv_failure_switch;
+    const uint_t iter_max = settings.iter_max;
     const double err_tol = settings.err_tol;
 
     // expansion / contraction parameters
@@ -63,9 +57,10 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_objfn = [opt_objfn, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data) -> double {
-        //
-
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* box_data)> box_objfn \
+    = [opt_objfn, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data) \
+    -> double 
+    {
         if (vals_bound) {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
             
@@ -84,12 +79,13 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
     simplex_fn_vals(0) = opt_objfn(init_out_vals,nullptr,opt_data);
     simplex_points.row(0) = init_out_vals.t();
 
-    // for (int i=1; i < n_vals + 1; i++) {
+    // for (size_t i=1; i < n_vals + 1; i++) {
     //     simplex_points.row(i) = init_out_vals.t() + 0.05*arma::trans(unit_vec(i-1,n_vals));
     //     simplex_fn_vals(i) = opt_objfn(simplex_points.row(i).t(),nullptr,opt_data);
     // }
 
-    for (int i=1; i < n_vals + 1; i++) {
+    for (size_t i=1; i < n_vals + 1; i++) 
+    {
         if (init_out_vals(i-1) != 0.0) {
             simplex_points.row(i) = init_out_vals.t() + 0.05*init_out_vals(i-1)*arma::trans(unit_vec(i-1,n_vals));
         } else {
@@ -105,16 +101,20 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
     }
 
     double min_val = simplex_fn_vals.min();
+
     //
-    int iter = 0;
+    // begin loop
+
+    uint_t iter = 0;
     double err = 2*err_tol;
     arma::uvec sort_vec;
 
     double f_r, f_e, f_oc, f_ic;
     arma::vec centroid, x_r, x_e, x_oc, x_ic;
 
-    while (err > err_tol && iter < iter_max) {
-
+    while (err > err_tol && iter < iter_max)
+    {
+        iter++;
         bool next_iter = false;
         
         // step 1
@@ -126,22 +126,22 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
 
         // step 2
 
-        centroid = arma::trans(arma::sum(simplex_points.rows(0,n_vals-1),0)) / (double) n_vals;
+        centroid = arma::trans(arma::sum(simplex_points.rows(0,n_vals-1),0)) / static_cast<double>(n_vals);
 
         x_r = centroid + par_alpha*(centroid - simplex_points.row(n_vals).t());
 
         f_r = box_objfn(x_r,nullptr,opt_data);
 
-        if (f_r >= simplex_fn_vals(0) && f_r < simplex_fn_vals(n_vals-1)) {
-            // reflected point is neither best nor worst in the new simplex
+        if (f_r >= simplex_fn_vals(0) && f_r < simplex_fn_vals(n_vals-1)) 
+        {   // reflected point is neither best nor worst in the new simplex
             simplex_points.row(n_vals) = x_r.t();
             next_iter = true;
         }
 
         // step 3
 
-        if (!next_iter && f_r < simplex_fn_vals(0)) {
-            // reflected point is better than the current best; try to go farther along this direction
+        if (!next_iter && f_r < simplex_fn_vals(0)) 
+        {   // reflected point is better than the current best; try to go farther along this direction
             x_e = centroid + par_gamma*(x_r - centroid);
 
             f_e = box_objfn(x_e,nullptr,opt_data);
@@ -157,29 +157,33 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
 
         // steps 4, 5, 6
 
-        if (!next_iter && f_r >= simplex_fn_vals(n_vals-1)) {
-            // reflected point is still worse than x_n; contract
+        if (!next_iter && f_r >= simplex_fn_vals(n_vals-1)) 
+        {   // reflected point is still worse than x_n; contract
 
-            // step 4, 5
+            // steps 4 and 5
 
-            if (f_r < simplex_fn_vals(n_vals)) {
-                // outside contraction
+            if (f_r < simplex_fn_vals(n_vals)) 
+            {   // outside contraction
                 x_oc = centroid + par_beta*(x_r - centroid);
 
                 f_oc = box_objfn(x_oc,nullptr,opt_data);
 
-                if (f_oc <= f_r) {
+                if (f_oc <= f_r)
+                {
                     simplex_points.row(n_vals) = x_oc.t();
                     next_iter = true;
                 }
-            } else { // f_r >= simplex_fn_vals(n_vals)
-                // inside contraction
+            } 
+            else 
+            {   // inside contraction: f_r >= simplex_fn_vals(n_vals)
+                
                 // x_ic = centroid - par_beta*(x_r - centroid);
                 x_ic = centroid + par_beta*(simplex_points.row(n_vals).t() - centroid);
 
                 f_ic = box_objfn(x_ic,nullptr,opt_data);
 
-                if (f_ic < simplex_fn_vals(n_vals)) {
+                if (f_ic < simplex_fn_vals(n_vals))
+                {
                     simplex_points.row(n_vals) = x_ic.t();
                     next_iter = true;
                 }
@@ -187,32 +191,40 @@ optim::nm_int(arma::vec& init_out_vals, std::function<double (const arma::vec& v
         }
 
         // step 6
-        if (!next_iter) {
-            // neither outside nor inside contraction was acceptable; shrink the simplex toward x(0)
-            for (int i=1; i < n_vals + 1; i++) {
+
+        if (!next_iter) 
+        {   // neither outside nor inside contraction was acceptable; shrink the simplex toward x(0)
+            for (size_t i=1; i < n_vals + 1; i++) {
                 simplex_points.row(i) = simplex_points.row(0) + par_delta*(simplex_points.row(i) - simplex_points.row(0));
             }
         }
 
         // check change in fn_val
-
-        for (int i=0; i < n_vals + 1; i++) {
+#ifdef OPTIM_USE_OMP
+        #pragma omp parallel for
+#endif
+        for (size_t i=0; i < n_vals + 1; i++) {
             simplex_fn_vals(i) = box_objfn(simplex_points.row(i).t(),nullptr,opt_data);
         }
+
+        //
     
         err = std::abs(min_val - simplex_fn_vals.max());
         min_val = simplex_fn_vals.min();
-        iter++;
     }
+
     //
+
     arma::vec prop_out = simplex_points.row(index_min(simplex_fn_vals)).t();
     
     if (vals_bound) {
-	    prop_out = inv_transform(prop_out, bounds_type, lower_bounds, upper_bounds);
+        prop_out = inv_transform(prop_out, bounds_type, lower_bounds, upper_bounds);
     }
 
     error_reporting(init_out_vals,prop_out,opt_objfn,opt_data,success,err,err_tol,iter,iter_max,conv_failure_switch,settings_inp);
+
     //
+    
     return success;
 }
 
@@ -223,7 +235,7 @@ optim::nm(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_
 }
 
 bool
-optim::nm(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, opt_settings& settings)
+optim::nm(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data, algo_settings& settings)
 {
     return nm_int(init_out_vals,opt_objfn,opt_data,&settings);
 }

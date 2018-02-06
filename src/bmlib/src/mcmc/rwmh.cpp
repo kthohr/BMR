@@ -18,35 +18,28 @@
  
 /*
  * Random Walk Metropolis-Hastings (RWMH) MCMC
- *
- * Keith O'Hara
- * 05/01/2012
- *
- * This version:
- * 08/12/2017
  */
 
 #include "mcmc.hpp" 
 
 bool
-mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings* settings_inp)
+mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings* settings_inp)
 {
     bool success = false;
 
-    const double BIG_NEG_VAL = MCMC_BIG_NEG_VAL;
-    const int n_vals = initial_vals.n_elem;
+    const size_t n_vals = initial_vals.n_elem;
 
     //
     // RWMH settings
 
-    mcmc_settings settings;
+    algo_settings settings;
 
     if (settings_inp) {
         settings = *settings_inp;
     }
 
-    const int n_draws_keep   = settings.rwmh_n_draws_keep;
-    const int n_draws_burnin = settings.rwmh_n_draws_burnin;
+    const size_t n_draws_keep   = settings.rwmh_n_draws;
+    const size_t n_draws_burnin = settings.rwmh_n_burnin;
 
     const double par_scale = settings.rwmh_par_scale;
 
@@ -61,13 +54,18 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
 
     // lambda function for box constraints
 
-    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) -> double {
-        //
-        if (vals_bound) {
+    std::function<double (const arma::vec& vals_inp, void* box_data)> box_log_kernel \
+    = [target_log_kernel, vals_bound, bounds_type, lower_bounds, upper_bounds] (const arma::vec& vals_inp, void* target_data) \
+    -> double 
+    {
+        if (vals_bound)
+        {
             arma::vec vals_inv_trans = inv_transform(vals_inp, bounds_type, lower_bounds, upper_bounds);
 
             return target_log_kernel(vals_inv_trans, target_data) + log_jacobian(vals_inp, bounds_type, lower_bounds, upper_bounds);
-        } else {
+        }
+        else
+        {
             return target_log_kernel(vals_inp, target_data);
         }
     };
@@ -91,61 +89,66 @@ mcmc::rwmh_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functio
     
     arma::mat cov_mcmc_sc   = par_scale * par_scale * cov_mcmc;
     arma::mat cov_mcmc_chol = arma::chol(cov_mcmc_sc,"lower");
+
     //
-    int n_accept = 0;    
-    double comp_val, rand_val;
+
+    int n_accept = 0;
     arma::vec krand(n_vals);
     
-    for (int jj = 0; jj < n_draws_keep + n_draws_burnin; jj++) {
+    for (size_t jj = 0; jj < n_draws_keep + n_draws_burnin; jj++)
+    {
 
         new_draw = prev_draw + cov_mcmc_chol * krand.randn();
         
         prop_LP = box_log_kernel(new_draw, target_data);
         
         if (!std::isfinite(prop_LP)) {
-            prop_LP = BIG_NEG_VAL;
+            prop_LP = minf;
         }
+
         //
-        comp_val = prop_LP - prev_LP;
-        
-        if (comp_val > 0.0) { // the '> exp(0)' case; works around taking exp of big values and receiving an error
+
+        double comp_val = std::min(0.0,prop_LP - prev_LP);
+        double z = arma::as_scalar(arma::randu(1));
+
+        if (z < std::exp(comp_val))
+        {
             prev_draw = new_draw;
             prev_LP = prop_LP;
 
-            if (jj >= n_draws_burnin) {
+            if (jj >= n_draws_burnin)
+            {
                 draws_out.row(jj - n_draws_burnin) = new_draw.t();
                 n_accept++;
             }
-        } else {
-            rand_val = arma::as_scalar(arma::randu(1));
-
-            if (rand_val < std::exp(comp_val)) {
-                prev_draw = new_draw;
-                prev_LP = prop_LP;
-
-                if (jj >= n_draws_burnin) {
-                    draws_out.row(jj - n_draws_burnin) = new_draw.t();
-                    n_accept++;
-                }
-            } else {
-                if (jj >= n_draws_burnin) {
-                    draws_out.row(jj - n_draws_burnin) = prev_draw.t();
-                }
+        }
+        else
+        {
+            if (jj >= n_draws_burnin) {
+                draws_out.row(jj - n_draws_burnin) = prev_draw.t();
             }
         }
     }
+
+    success = true;
+
     //
+
     if (vals_bound) {
-        for (int jj = 0; jj < n_draws_keep; jj++) {
+#ifdef MCMC_USE_OMP
+        #pragma omp parallel for
+#endif
+        for (size_t jj = 0; jj < n_draws_keep; jj++) {
             draws_out.row(jj) = arma::trans(inv_transform(draws_out.row(jj).t(), bounds_type, lower_bounds, upper_bounds));
         }
     }
-    //
+
     if (settings_inp) {
-        settings_inp->rwmh_accept_rate = (double) n_accept / (double) n_draws_keep;
+        settings_inp->rwmh_accept_rate = static_cast<double>(n_accept) / static_cast<double>(n_draws_keep);
     }
+
     //
-    success = true;
+
     return success;
 }
 
@@ -158,7 +161,7 @@ mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<do
 }
 
 bool
-mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, mcmc_settings& settings)
+mcmc::rwmh(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, void* target_data)> target_log_kernel, void* target_data, algo_settings& settings)
 {
     return rwmh_int(initial_vals,draws_out,target_log_kernel,target_data,&settings);
 }

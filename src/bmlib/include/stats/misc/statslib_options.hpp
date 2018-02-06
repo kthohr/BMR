@@ -16,20 +16,31 @@
   ##
   ################################################################################*/
 
-#ifdef USE_RCPP_ARMADILLO
-    #include <RcppArmadillo.h>
-#else
-    #ifndef ARMA_DONT_USE_WRAPPER
-        #define ARMA_DONT_USE_WRAPPER
+#ifndef STATS_NO_ARMA
+    #ifdef USE_RCPP_ARMADILLO
+        #include <RcppArmadillo.h>
+    #else
+        #ifndef ARMA_DONT_USE_WRAPPER
+            #define ARMA_DONT_USE_WRAPPER
+        #endif
+        #include "armadillo"
     #endif
-    #include "armadillo"
+
+    #ifdef STATS_NO_OMP
+        #define ARMA_DONT_USE_OPENMP
+    #endif
+#else
+    #include <limits>
+    #include <random>
 #endif
 
-#ifndef STATSLIB_GO_INLINE
+#ifndef STATS_GO_INLINE
     #define statslib_constexpr constexpr
     #define stats_math gcem
 #else
     #define statslib_constexpr inline
+    #include <cmath>
+    #define stats_math std
 #endif
 
 // #ifndef statslib_constexpr
@@ -40,15 +51,16 @@
 //     #endif
 // #endif
 
-#ifndef stats_math
-    #if __cplusplus >= 201300
-        #define stats_math gcem
-    #else
-        #include <cmath>
-        #define stats_math std
-    #endif
-#endif
+// #ifndef stats_math
+//     #if __cplusplus >= 201300
+//         #define stats_math gcem
+//     #else
+//         #include <cmath>
+//         #define stats_math std
+//     #endif
+// #endif
 
 namespace stats {
-    static const double inf = arma::datum::inf;
+    static const double inf = std::numeric_limits<double>::infinity();
+    using uint_t = unsigned int;
 }

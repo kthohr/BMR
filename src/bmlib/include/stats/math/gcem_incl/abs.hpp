@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -18,12 +18,6 @@
 
 /*
  * compile-time absolute value function
- *
- * Keith O'Hara
- * 06/25/2017
- *
- * This version:
- * 07/02/2017
  */
 
 #ifndef _gcem_abs_HPP
@@ -34,7 +28,7 @@ constexpr
 T
 abs(const T x)
 {
-    return ( x < 0.0 ? - x : x );
+    return ( x < T(0.0) ? - x : x );
 }
 
 #endif

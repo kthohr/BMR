@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -19,15 +19,6 @@
 #ifndef OPTIMLIB_INCLUDES
 #define OPTIMLIB_INCLUDES
 
-#ifdef USE_RCPP_ARMADILLO
-    #include <RcppArmadillo.h>
-#else
-    #ifndef ARMA_DONT_USE_WRAPPER
-        #define ARMA_DONT_USE_WRAPPER
-    #endif
-    #include "armadillo"
-#endif
-
 #include "misc/optim_options.hpp"
 
 namespace optim
@@ -43,7 +34,8 @@ namespace optim
 
     // unconstrained optimization
     #include "unconstrained/bfgs.hpp"
-    #include "unconstrained/lbfgs.hpp" 
+    #include "unconstrained/lbfgs.hpp"
+    #include "unconstrained/newton.hpp"
     #include "unconstrained/cg.hpp"
     #include "unconstrained/de.hpp"
     #include "unconstrained/de_prmm.hpp"

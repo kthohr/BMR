@@ -19,12 +19,21 @@
 #ifndef mcmc_structs_HPP
 #define mcmc_structs_HPP
 
-struct mcmc_settings {
+struct algo_settings {
     // general
     bool vals_bound = false;
 
     arma::vec lower_bounds;
     arma::vec upper_bounds;
+
+    // AEES
+    int aees_n_draws = 1E04;
+    int aees_n_initial_draws = 1E03;
+    int aees_n_burnin = 1E03;
+
+    arma::vec aees_temper_vec;
+    double aees_prob_par = 0.10;
+    int aees_n_rings = 5;
 
     // DE
     bool de_jumps = false;
@@ -42,9 +51,31 @@ struct mcmc_settings {
 
     double de_accept_rate; // will be returned by the function
 
+    // HMC
+    int hmc_n_draws = 1E04;
+    int hmc_n_burnin = 1E04;
+
+    double hmc_step_size = 1.0;
+    int hmc_leap_steps = 1; // number of leap frog steps
+    arma::mat hmc_precond_mat;
+
+    double hmc_accept_rate; // will be returned by the function
+
+    // RM-HMC: HMC options + below
+    int rmhmc_fp_steps = 5; // number of fixed point iteration steps
+
+    // MALA
+    int mala_n_draws = 1E04;
+    int mala_n_burnin = 1E04;
+
+    double mala_step_size = 1.0;
+    arma::mat mala_precond_mat;
+
+    double mala_accept_rate; // will be returned by the function
+
     // RWMH
-    int rwmh_n_draws_keep = 1E04;
-    int rwmh_n_draws_burnin = 1E04;
+    int rwmh_n_draws = 1E04;
+    int rwmh_n_burnin = 1E04;
 
     double rwmh_par_scale = 1.0;
     arma::mat rwmh_cov_mat;

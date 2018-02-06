@@ -95,10 +95,10 @@ class dsge
 
         arma::vec estim_mode(const arma::vec& initial_vals);
         arma::vec estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat);
-        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::opt_settings* settings_inp);
+        arma::vec estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::algo_settings* settings_inp);
 
         void estim_mcmc(const arma::vec& initial_vals);
-        void estim_mcmc(const arma::vec& initial_vals, mcmc::mcmc_settings* settings_inp);
+        void estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings* settings_inp);
 
         arma::cube IRF(const int n_irf_periods, const bool observ_irfs) const;
 

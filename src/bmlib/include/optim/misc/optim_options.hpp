@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,8 +18,17 @@
 
 #pragma once
 
-// basic settings
-
-#ifndef OPTIM_BIG_POS_VAL
-    #define OPTIM_BIG_POS_VAL 1E09;
+#ifdef USE_RCPP_ARMADILLO
+    #include <RcppArmadillo.h>
+#else
+    #ifndef ARMA_DONT_USE_WRAPPER
+        #define ARMA_DONT_USE_WRAPPER
+    #endif
+    #include "armadillo"
 #endif
+
+namespace optim
+{
+    static const double inf = std::numeric_limits<double>::infinity();
+    using uint_t = unsigned int;
+}

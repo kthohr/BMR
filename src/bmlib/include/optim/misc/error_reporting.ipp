@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the OptimLib C++ library.
   ##
@@ -18,18 +18,12 @@
 
 /*
  * Error reporting
- *
- * Keith O'Hara
- * 06/11/2016
- *
- * This version:
- * 08/14/2017
  */
 
 inline
 void
 error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data,
-                bool& success, const double err, const double err_tol, const int iter, const int iter_max, const int conv_failure_switch, opt_settings* settings_inp)
+                bool& success, const double err, const double err_tol, const int iter, const int iter_max, const int conv_failure_switch, algo_settings* settings_inp)
 {
     success = false;
 
@@ -76,7 +70,7 @@ error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<double 
 inline
 void
 error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data,
-                bool& success, const int conv_failure_switch, opt_settings* settings_inp)
+                bool& success, const int conv_failure_switch, algo_settings* settings_inp)
 {
     if (conv_failure_switch == 0 || conv_failure_switch == 1) {
         out_vals = x_p;
@@ -97,7 +91,7 @@ error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<double 
 inline
 void
 error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<arma::vec (const arma::vec& vals_inp, void* opt_data)> opt_objfn, void* opt_data,
-                bool& success, const double err, const double err_tol, const int iter, const int iter_max, const int conv_failure_switch, opt_settings* settings_inp)
+                bool& success, const double err, const double err_tol, const int iter, const int iter_max, const int conv_failure_switch, algo_settings* settings_inp)
 {
     success = false;
 
@@ -139,4 +133,22 @@ error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<arma::v
         settings_inp->opt_iter = iter;
         settings_inp->opt_err  = err;
     }
+}
+
+//
+
+inline
+void
+error_reporting(arma::vec& out_vals, const arma::vec& x_p, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, arma::mat* hess_out, void* opt_data)> opt_objfn, void* opt_data,
+                bool& success, const double err, const double err_tol, const int iter, const int iter_max, const int conv_failure_switch, algo_settings* settings_inp)
+{
+    std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> lam_objfn = [opt_objfn] (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data) 
+    -> double 
+    {
+        return opt_objfn(vals_inp,grad_out,nullptr,opt_data);
+    };
+
+    //
+
+    error_reporting(out_vals,x_p,lam_objfn,opt_data,success,err,err_tol,iter,iter_max,conv_failure_switch,settings_inp);
 }

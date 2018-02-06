@@ -23,35 +23,42 @@
 template<typename T>
 int
 rbern(const T prob_par)
-{
-	const T u = runif();
+{    
+    return (runif<T>(T(0.0),T(1.0)) <= prob_par);
+}
 
-    int ret = (u <= prob_par) ? 1 : 0;
-    
-	return ret;
+#ifndef STATS_NO_ARMA
+
+inline
+arma::mat
+rbern(const uint_t n, const double prob_par)
+{
+    return rbern(n,1,prob_par);
 }
 
 inline
 arma::mat
-rbern(const int n, const double prob_par)
+rbern(const uint_t n, const uint_t k, const double prob_par)
 {
-	return rbern(n,1,prob_par);
-}
-
-inline
-arma::mat
-rbern(const int n, const int k, const double prob_par)
-{
-    arma::mat ret(n,k);
     const arma::mat u = runif(n,k,0.0,1.0);
-    
-	for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = (u(i,j) <= prob_par) ? 1 : 0;
-        }
+    arma::mat ret(n,k);
+
+    //
+
+    const double* inp_mem = u.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = (inp_mem[j] <= prob_par) ? 1 : 0;
     }
 
     //
     
-	return ret;
+    return ret;
 }
+
+#endif

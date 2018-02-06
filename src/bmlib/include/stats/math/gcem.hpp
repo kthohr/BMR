@@ -1,6 +1,6 @@
 /*################################################################################
   ##
-  ##   Copyright (C) 2016-2017 Keith O'Hara
+  ##   Copyright (C) 2016-2018 Keith O'Hara
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
@@ -31,7 +31,7 @@ namespace gcem {
     #include "gcem_incl/pow.hpp"
     #include "gcem_incl/sqrt.hpp"
 
-    #include "gcem_incl/sign_dbl.hpp"
+    #include "gcem_incl/sgn.hpp"
     #include "gcem_incl/find_exponent.hpp"
     #include "gcem_incl/find_fraction.hpp"
     #include "gcem_incl/find_whole.hpp"

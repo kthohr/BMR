@@ -28,7 +28,7 @@ statslib_constexpr
 T
 qlaplace_int(const T p, const T mu_par, const T sigma_par)
 {
-    return ( mu_par - sigma_par*gcem::sign_dbl(p - 0.5)*stats_math::log(1.0 - 2.0*stats_math::abs(p - 0.5)) );
+    return ( mu_par - sigma_par*gcem::sgn(p - 0.5)*stats_math::log(1.0 - 2.0*stats_math::abs(p - 0.5)) );
 }
 
 template<typename T>
@@ -62,6 +62,8 @@ qlaplace(const double p, const double mu_par, const double sigma_par)
 
 //
 // matrix/vector input
+
+#ifndef STATS_NO_ARMA
 
 inline
 arma::mat
@@ -110,3 +112,5 @@ qlaplace(const arma::mat& p, const double mu_par, const double sigma_par, const 
 {
     return qlaplace_int(p,&mu_par,&sigma_par,log_form);
 }
+
+#endif

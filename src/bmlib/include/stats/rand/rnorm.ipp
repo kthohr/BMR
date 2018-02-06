@@ -27,7 +27,11 @@ template<typename T>
 T
 rnorm(const T mu_par, const T sigma_par)
 {
-	return mu_par + sigma_par*arma::as_scalar(arma::randn(1));
+    std::mt19937_64 engine(std::random_device{}());
+    std::normal_distribution<double> norm_dist(0.0,1.0);
+
+    // return mu_par + sigma_par*arma::as_scalar(arma::randn(1));
+    return mu_par + sigma_par*norm_dist(engine);
 }
 
 inline
@@ -37,16 +41,20 @@ rnorm()
     return rnorm(0.0,1.0);
 }
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
-rnorm(const int n, const double mu_par, const double sigma_par)
+rnorm(const uint_t n, const double mu_par, const double sigma_par)
 {
-	return rnorm(n,1,mu_par,sigma_par);
+    return rnorm(n,1,mu_par,sigma_par);
 }
 
 inline
 arma::mat
-rnorm(const int n, const int k, const double mu_par, const double sigma_par)
+rnorm(const uint_t n, const uint_t k, const double mu_par, const double sigma_par)
 {
-	return ( mu_par + sigma_par*arma::randn(n,k) );
+    return ( mu_par + sigma_par*arma::randn(n,k) );
 }
+
+#endif

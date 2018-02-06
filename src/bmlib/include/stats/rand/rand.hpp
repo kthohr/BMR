@@ -37,5 +37,6 @@
 #include "rlogis.hpp"
 #include "rmultinom.hpp"
 #include "rmvnorm.hpp"
+#include "rt.hpp"
 
 #endif

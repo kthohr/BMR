@@ -28,7 +28,7 @@ statslib_constexpr
 T
 plaplace_int(const T x, const T mu_par, const T sigma_par)
 {
-    return ( 0.5 + 0.5*gcem::sign_dbl(x - mu_par)*(1.0 - stats_math::exp(-stats_math::abs(x - mu_par) / sigma_par)) );
+    return ( 0.5 + 0.5*gcem::sgn(x - mu_par)*(1.0 - stats_math::exp(-stats_math::abs(x - mu_par) / sigma_par)) );
 }
 
 template<typename T>
@@ -63,6 +63,8 @@ plaplace(const double x, const double mu_par, const double sigma_par)
 //
 // matrix/vector input
 
+#ifndef STATS_NO_ARMA
+
 inline
 arma::mat
 plaplace_int(const arma::mat& x, const double* mu_par_inp, const double* sigma_par_inp, const bool log_form)
@@ -70,17 +72,22 @@ plaplace_int(const arma::mat& x, const double* mu_par_inp, const double* sigma_p
     const double mu_par = (mu_par_inp) ? *mu_par_inp : 0.0;
     const double sigma_par = (sigma_par_inp) ? *sigma_par_inp : 1.0;
     
-    const int n = x.n_rows;
-    const int k = x.n_cols;
+    const uint_t n = x.n_rows;
+    const uint_t k = x.n_cols;
 
     //
 
     arma::mat ret(n,k);
 
-    for (int j=0; j < k; j++) {
-        for (int i=0; i < n; i++) {
-            ret(i,j) = plaplace(x(i,j),mu_par,sigma_par,log_form);
-        }
+    const double* inp_mem = x.memptr();
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = plaplace(inp_mem[j],mu_par,sigma_par,log_form);
     }
 
     //
@@ -115,3 +122,5 @@ plaplace(const arma::mat& x, const double mu_par, const double sigma_par, const 
 {
     return plaplace_int(x,&mu_par,&sigma_par,log_form);
 }
+
+#endif
