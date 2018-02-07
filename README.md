@@ -37,12 +37,19 @@ library("BMR")
 
 data(BMRMCData)
 
+# create bvarm object
 bvar_obj <- new(bvarm) 
 
+# add data; add a constant; and set lags (p) = 2
 bvar_obj$build(bvarMCdata,TRUE,2)
-bvar_obj$prior(c(0.5,0.5),1,1,0.5,0.5,100.0,1.0)
+
+# prior of 0.5 on own-first-lags, and take default values for the hyperparameters
+bvar_obj$prior(c(0.5,0.5))
+
+# draw from the posterior distribution
 bvar_obj$gibbs(10000)
 
+# plot IRFs
 IRF(bvar_obj,20,save=FALSE)
 ```
 
