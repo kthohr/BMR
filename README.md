@@ -49,6 +49,10 @@ bvar_obj$prior(c(0.5,0.5))
 # draw from the posterior distribution
 bvar_obj$gibbs(10000)
 
+# posterior mean and variance
+bvar_obj$alpha_pt_mean
+bvar_obj$alpha_pt_var
+
 # plot IRFs
 IRF(bvar_obj,20,save=FALSE)
 ```
