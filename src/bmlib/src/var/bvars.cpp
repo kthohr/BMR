@@ -118,8 +118,41 @@ bm::bvars::reset_draws()
 //
 // prior
 
+arma::mat
+bm::bvars::minn_pr_var()
+{
+    arma::vec sigma(M);
+
+    arma::vec Y_AR(n-p), alpha_AR;
+    arma::mat X_AR(n-p, c_int+p);
+
+    if (cons_term) {
+        X_AR.col(0).fill(1);
+    }
+
+    for (int i=0; i < M; i++)
+    {
+        Y_AR = Y.col(i);
+
+        for (int j=0; j < p; j++) {
+            X_AR.col(c_int + j) = X.col(i + j*M);
+        }
+
+        alpha_AR = arma::solve(X_AR.t()*X_AR,X_AR.t()*Y_AR);
+
+        // ML estimate of the variance (no bias adjustment)
+
+        arma::vec err_vec = Y_AR - X_AR*alpha_AR;
+        sigma(i) = arma::dot(err_vec,err_vec) / static_cast<double>(n-p);
+    }
+
+    return arma::diagmat(sigma);
+}
+
 void
-bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_2, const arma::mat& Psi_prior, const double Xi_psi, const int gamma)
+bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_2, 
+                 const arma::mat& Psi_prior, const double Xi_psi, const int gamma,
+                 const bool full_cov_prior)
 {
     arma::mat Z = arma::join_rows(X,d);
 
@@ -154,12 +187,20 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
 
     alpha_pr_mean = arma::vectorise(beta_pr_mean);
 
+    //
+
+    arma::mat Sigma_hat_pr = Sigma_hat;
+
+    if (!full_cov_prior) {
+        Sigma_hat_pr = minn_pr_var();
+    }
+
     arma::mat beta_pr_var = arma::zeros(K,M);
 
     for (int i=0; i < p; i++) {
         for (int j=0; j < M; j++) {
             for (int k=0; k < M; k++) {
-                beta_pr_var(i*M + k,j) = HP_2*Sigma_hat(j,j) / (std::pow(i+1,2)*Sigma_hat(k,k));
+                beta_pr_var(i*M + k,j) = HP_2*Sigma_hat_pr(j,j) / (std::pow(i+1,2)*Sigma_hat_pr(k,k));
             }
             beta_pr_var(i*M + j,j) = HP_1 / std::pow(i+1,2);
         }
@@ -169,7 +210,7 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
 
     //
 
-    Sigma_pr_scale = Sigma_hat;
+    Sigma_pr_scale = Sigma_hat_pr;
     Sigma_pr_dof   = gamma;
 }
 

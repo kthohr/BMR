@@ -28,7 +28,8 @@ class bvarm_R : public bm::bvarm
         void reset_draws_R();
 
         void prior_R(const arma::vec& coef_prior);
-        void prior_R(const arma::vec& coef_prior, int var_type_inp, int decay_type_inp, double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp);
+        void prior_R(const arma::vec& coef_prior, int var_type_inp, int decay_type_inp, 
+                     double HP_1_inp, double HP_2_inp, double HP_3_inp, double HP_4_inp);
 
         void gibbs_R(int n_draws);
 
@@ -46,7 +47,9 @@ class bvars_R : public bm::bvars
 
         void reset_draws_R();
 
-        void prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, const arma::mat& Psi_prior, double Xi_Psi, int gamma);
+        void prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, 
+                     const arma::mat& Psi_prior, double Xi_Psi, int gamma,
+                     bool full_cov_prior);
 
         void gibbs_R(int n_draws, int n_burnin);
 

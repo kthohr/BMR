@@ -30,7 +30,7 @@ RCPP_MODULE(bvars_module)
     void (bvars_R::*build_1)(const arma::mat&, bool, int) = &bvars_R::build_R;
     void (bvars_R::*build_2)(const arma::mat&, const arma::mat&, bool, int) = &bvars_R::build_R;
 
-    void (bvars_R::*prior_3)(const arma::vec&, double, double, const arma::mat&, double, int) = &bvars_R::prior_R;
+    void (bvars_R::*prior_3)(const arma::vec&, double, double, const arma::mat&, double, int, bool) = &bvars_R::prior_R;
 
     SEXP (bvars_R::*forecast_1)(int, bool) = &bvars_R::forecast_R;
     SEXP (bvars_R::*forecast_2)(const arma::mat&, int, bool) = &bvars_R::forecast_R;
@@ -131,10 +131,12 @@ void bvars_R::reset_draws_R()
     }
 }
 
-void bvars_R::prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, const arma::mat& Psi_prior, double Xi_psi, int gamma)
+void bvars_R::prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, 
+                      const arma::mat& Psi_prior, double Xi_psi, int gamma,
+                      bool full_cov_prior)
 {
     try {
-        this->prior(coef_prior,HP_1,HP_2,Psi_prior,Xi_psi,gamma);
+        this->prior(coef_prior,HP_1,HP_2,Psi_prior,Xi_psi,gamma,full_cov_prior);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {
