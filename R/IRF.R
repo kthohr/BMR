@@ -16,24 +16,24 @@
 ##
 ################################################################################
 
-IRF.Rcpp_bvarm <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
+IRF.Rcpp_bvarm <- function(obj,periods=10,cumulative=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
-    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,cumulative,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvars <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
+IRF.Rcpp_bvars <- function(obj,periods=10,cumulative=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
-    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,cumulative,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_bvarw <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
+IRF.Rcpp_bvarw <- function(obj,periods=10,cumulative=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
-    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,cumulative,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
-IRF.Rcpp_cvar <- function(obj,periods=10,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
+IRF.Rcpp_cvar <- function(obj,periods=10,cumulative=FALSE,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
 {
-    .irf_var(obj,periods,var_names,percentiles,which_shock,which_response,save,height,width)
+    .irf_var(obj,periods,cumulative,var_names,percentiles,which_shock,which_response,save,height,width)
 }
 
 IRF.Rcpp_bvartvp <- function(obj,periods=10,which_irfs=NULL,var_names=NULL,percentiles=c(.05,.50,.95),which_shock=NULL,which_response=NULL,save=FALSE,height=13,width=13,...)
@@ -73,7 +73,7 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
 
 #
 
-.irf_var <- function(obj, periods=10, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=FALSE, height=13, width=13)
+.irf_var <- function(obj, periods=10, cumulative=FALSE, var_names=NULL, percentiles=c(.05,.50,.95), which_shock=NULL, which_response=NULL, save=FALSE, height=13, width=13)
 {
     #
     
@@ -133,10 +133,15 @@ IRF.Rcpp_dsgevar_uhlig <- function(obj,periods,var_names=NULL,percentiles=c(.05,
     #
 
     plot_vals <- array(NA,dim=c(periods,4,M,M))
+    IRFPData <- 0
 
     for (i in 1:M) {
         for (k in 1:M) {
-            IRFPData <- data.frame(irf_tess[,k,irf_lower,i],irf_tess[,k,irf_mid,i],irf_tess[,k,irf_upper,i],1:(periods))
+            if (cumulative==TRUE) {
+                IRFPData <- data.frame(cumsum(irf_tess[,k,irf_lower,i]),cumsum(irf_tess[,k,irf_mid,i]),cumsum(irf_tess[,k,irf_upper,i]),1:(periods))
+            } else {
+                IRFPData <- data.frame(irf_tess[,k,irf_lower,i],irf_tess[,k,irf_mid,i],irf_tess[,k,irf_upper,i],1:(periods))
+            }
             IRFPData <- as.matrix(IRFPData)
             plot_vals[,,k,i] <- IRFPData
         }
