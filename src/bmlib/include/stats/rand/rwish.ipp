@@ -16,38 +16,35 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/* 
+ * Sample from a Wishart distribution
+ */
 
-#ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
+inline
+arma::mat
+rwish(const arma::mat& Psi_par, const int nu_par)
+{
+    const int K = Psi_par.n_rows;
+    
+    arma::mat chol_Psi = arma::chol(Psi_par,"lower");
 
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
-#endif
+    //
 
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
+    arma::mat A = arma::zeros(K,K);
 
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
+    for (int i=1; i < K; i++) {
+        for (int j=0; j < i; j++) {
+            A(i,j) = rnorm();
+        }
+    }
+    
+    for (int i=0; i < K; i++) {
+        A(i,i) = std::sqrt(rchisq(nu_par-i));
+    }
+
+    chol_Psi = chol_Psi*A;
+
+    //
+    
+    return chol_Psi * chol_Psi.t();
 }

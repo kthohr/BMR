@@ -30,6 +30,7 @@
 #include "rcauchy.hpp"
 #include "rchisq.hpp"
 #include "rexp.hpp"
+#include "rf.hpp"
 #include "rinvgamma.hpp"
 #include "rinvwish.hpp"
 #include "rlaplace.hpp"
@@ -37,6 +38,8 @@
 #include "rlogis.hpp"
 #include "rmultinom.hpp"
 #include "rmvnorm.hpp"
+#include "rpois.hpp"
 #include "rt.hpp"
+#include "rwish.hpp"
 
 #endif

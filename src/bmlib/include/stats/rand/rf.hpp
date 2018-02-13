@@ -16,38 +16,21 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/* 
+ * Sample from a F distribution
+ */
+
+#ifndef _statslib_rf_HPP
+#define _statslib_rf_HPP
+
+template<typename T>
+T rf(const T df1_par, const T df2_par);
 
 #ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
-
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
+arma::mat rf(const uint_t n, const double df1_par, const double df2_par);
+arma::mat rf(const uint_t n, const uint_t k, const double df1_par, const double df2_par);
 #endif
 
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
+#include "rf.ipp"
 
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
-}
+#endif

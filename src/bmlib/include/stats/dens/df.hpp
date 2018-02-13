@@ -17,30 +17,30 @@
   ################################################################################*/
 
 /*
- * quantile function of the Binomial distribution
+ * pdf of the F distribution
  */
 
-#ifndef _statslib_qbinom_HPP
-#define _statslib_qbinom_HPP
+#ifndef _statslib_df_HPP
+#define _statslib_df_HPP
 
 // single input
 template<typename T>
-statslib_constexpr int qbinom(const T p, const int n_trials_inp, const T prob_par, const bool log_form);
+statslib_constexpr T df(const T x, const T df1_par, const T df2_par, const bool log_form);
 
-statslib_constexpr int qbinom(const double p);
-statslib_constexpr int qbinom(const double p, const bool log_form);
-statslib_constexpr int qbinom(const double p, const int n_trials, const double prob_par);
+statslib_constexpr double df(const double x);
+statslib_constexpr double df(const double x, const bool log_form);
+statslib_constexpr double df(const double x, const double df1_par, const double df2_par);
 
 // matrix/vector input
 #ifndef STATS_NO_ARMA
-arma::mat qbinom_int(const arma::mat& p, const int* n_trials, const double* prob_par_inp, bool log_form);
+arma::mat df_int(const arma::mat& x, const double* df1_par_inp, const double* df2_par_inp, const bool log_form);
 
-arma::mat qbinom(const arma::mat& p);
-arma::mat qbinom(const arma::mat& p, const bool log_form);
-arma::mat qbinom(const arma::mat& p, const int n_trials, const double prob_par);
-arma::mat qbinom(const arma::mat& p, const int n_trials, const double prob_par, const bool log_form);
+arma::mat df(const arma::mat& x);
+arma::mat df(const arma::mat& x, const bool log_form);
+arma::mat df(const arma::mat& x, const double df1_par, const double df2_par);
+arma::mat df(const arma::mat& x, const double df1_par, const double df2_par, const bool log_form);
 #endif
 
-#include "qbinom.ipp"
+#include "df.ipp"
 
 #endif

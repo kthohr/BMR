@@ -16,38 +16,31 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/*
+ * quantile function of the Poisson distribution
+ */
 
+#ifndef _statslib_qpois_HPP
+#define _statslib_qpois_HPP
+
+// single input
+template<typename T>
+statslib_constexpr int qpois(const T p, const T rate_par, const bool log_form);
+
+statslib_constexpr int qpois(const double p);
+statslib_constexpr int qpois(const double p, const bool log_form);
+statslib_constexpr int qpois(const double p, const double rate_par);
+
+// matrix/vector input
 #ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
+arma::mat qpois_int(const arma::mat& p, const double* rate_par_inp, bool log_form);
 
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
+arma::mat qpois(const arma::mat& p);
+arma::mat qpois(const arma::mat& p, const bool log_form);
+arma::mat qpois(const arma::mat& p, const double rate_par);
+arma::mat qpois(const arma::mat& p, const double rate_par, const bool log_form);
 #endif
 
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
+#include "qpois.ipp"
 
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
-}
+#endif

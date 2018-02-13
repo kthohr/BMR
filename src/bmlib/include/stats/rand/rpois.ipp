@@ -16,38 +16,33 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/* 
+ * Sample from a Poisson distribution
+ */
+
+template<typename T>
+T
+rpois(const T rate_par)
+{
+    return qpois(runif<T>(T(0.0),T(1.0)),rate_par,false);
+}
 
 #ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
 
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
-#endif
-
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
-
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
+inline
+arma::mat
+rpois(const uint_t n, const double rate_par)
+{
+    return rpois(n,1,rate_par);
 }
+
+inline
+arma::mat
+rpois(const uint_t n, const uint_t k, const double rate_par)
+{
+    arma::mat U = runif(n,k,0.0,1.0);
+
+    return qpois(U,rate_par);
+}
+
+#endif

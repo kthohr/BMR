@@ -25,11 +25,13 @@
 #include "qcauchy.hpp"
 #include "qchisq.hpp"
 #include "qexp.hpp"
+#include "qf.hpp"
 #include "qgamma.hpp"
 #include "qinvgamma.hpp"
 #include "qlaplace.hpp"
 #include "qlogis.hpp"
 #include "qnorm.hpp"
+#include "qpois.hpp"
 #include "qt.hpp"
 #include "qunif.hpp"
 

@@ -16,38 +16,52 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/*
+ * Sample from a F distribution
+ */
+
+template<typename T>
+T
+rf(const T df1_par, const T df2_par)
+{
+    const T X = rchisq(df1_par);
+    const T Y = rchisq(df2_par);
+
+    //
+    
+    return (df2_par / df1_par) * X / Y;
+}
 
 #ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
 
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
-#endif
-
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
-
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
+inline
+arma::mat
+rf(const uint_t n, const double df1_par, const double df2_par)
+{
+    return rf(n,1,df1_par,df2_par);
 }
+
+inline
+arma::mat
+rf(const uint_t n, const uint_t k, const double df1_par, const double df2_par)
+{
+    arma::mat ret(n,k);
+    
+    //
+
+    double* ret_mem = ret.memptr();
+
+#ifndef STATS_NO_OMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=0; j < n*k; j++)
+    {
+        ret_mem[j] = rf(df1_par,df2_par);
+    }
+
+    //
+
+    return ret;
+}
+
+#endif

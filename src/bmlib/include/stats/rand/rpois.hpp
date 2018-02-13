@@ -16,38 +16,21 @@
   ##
   ################################################################################*/
 
-#if !defined(_OPENMP) && !defined(STATS_NO_OMP)
-    #define STATS_NO_OMP
-#endif
+/* 
+ * Sample from a Poisson distribution
+ */
+
+#ifndef _statslib_rpois_HPP
+#define _statslib_rpois_HPP
+
+template<typename T>
+T rpois(const T rate_par);
 
 #ifndef STATS_NO_ARMA
-    #ifdef USE_RCPP_ARMADILLO
-        #include <RcppArmadillo.h>
-    #else
-        #ifndef ARMA_DONT_USE_WRAPPER
-            #define ARMA_DONT_USE_WRAPPER
-        #endif
-        #include "armadillo"
-    #endif
-
-    #ifdef STATS_NO_OMP
-        #define ARMA_DONT_USE_OPENMP
-    #endif
-#else
-    #include <limits>
-    #include <random>
+arma::mat rpois(const uint_t n, const double rate_par);
+arma::mat rpois(const uint_t n, const uint_t k, const double rate_par);
 #endif
 
-#ifndef STATS_GO_INLINE
-    #define statslib_constexpr constexpr
-    #define stats_math gcem
-#else
-    #define statslib_constexpr inline
-    #include <cmath>
-    #define stats_math std
-#endif
+#include "rpois.ipp"
 
-namespace stats {
-    static const double inf = std::numeric_limits<double>::infinity();
-    using uint_t = unsigned int;
-}
+#endif
