@@ -35,6 +35,8 @@ class cvar
         int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
+        bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
+
         arma::mat Y;    // Y = X beta + e
         arma::mat X;
 

@@ -1,5 +1,5 @@
 #
-# BVAR with normal-inverse-Wishart prior
+# BVAR with independent normal-inverse-Wishart prior
 # 
 
 rm(list=ls())

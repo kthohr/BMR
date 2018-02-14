@@ -212,6 +212,19 @@ bm::cvar::IRF(const int n_irf_periods)
 
         //
 
+        if (irfs_lr_restrict)
+        {   // long-run restrictions
+            arma::mat poly_mat = arma::eye(M,M);
+            for (int i=1; i<=p; i++) {
+                poly_mat -= arma::trans(beta_b.rows(M*(i-1), M*i - 1));
+            }
+
+            arma::mat M_mat = arma::inv(poly_mat);
+            impact_mat = poly_mat * arma::chol(M_mat*Sigma_b*M_mat.t(),"lower");
+        }
+
+        //
+
         impact_mat_b.zeros();
         impact_mat_b.rows(0,M-1) = impact_mat;
 

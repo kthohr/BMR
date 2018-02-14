@@ -38,6 +38,9 @@ class bvarw
         int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
+        bool only_stationary_draws = false; // discard non-stationary draws
+        bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
+
         arma::mat Y; // Y = X beta + e
         arma::mat X;
         // arma::mat Z; // vec(Y) = Z alpha + vec(e)

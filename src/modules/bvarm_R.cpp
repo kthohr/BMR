@@ -44,6 +44,9 @@ RCPP_MODULE(bvarm_module)
         .field( "cons_term", &bm::bvarm::cons_term )
         .field( "p", &bm::bvarm::p )
 
+        .field( "only_stationary_draws", &bm::bvarm::only_stationary_draws )
+        .field( "irfs_lr_restrict", &bm::bvarm::irfs_lr_restrict )
+
         // read only objects
         .field_readonly( "var_type", &bm::bvarm::var_type )
         .field_readonly( "decay_type", &bm::bvarm::decay_type )

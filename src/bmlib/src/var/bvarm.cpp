@@ -253,14 +253,43 @@ bm::bvarm::gibbs(const int n_draws)
 
     alpha_pt_var = arma::inv_sympd(inv_alpha_pr_var + arma::kron(inv_Sigma_hat,X.t()*X));
     alpha_pt_mean = alpha_pt_var * (inv_alpha_pr_var*alpha_pr_mean + arma::vectorise(X.t() * Y * inv_Sigma_hat));
-    
-    //
 
     arma::mat chol_alpha_pt_var = arma::chol(alpha_pt_var); // upper triangular
 
-    // no need for burnin
-    for (int i=0; i < n_draws; i++) {
-        beta_draws.slice(i) = arma::reshape( stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true) ,K,M);
+    //
+
+    if (only_stationary_draws)
+    {
+        for (int i=0; i < n_draws; i++)
+        {
+            bool loop_flag = true;
+            arma::mat beta_draw = arma::reshape( stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true) ,K,M);
+
+            while (loop_flag)
+            {
+                arma::mat poly_mat = arma::zeros(M,M);
+                for (int i=1; i<=p; i++) {
+                    poly_mat += arma::trans(beta_draw.rows(c_int + M*(i-1), c_int + M*i - 1));
+                }
+
+                arma::cx_vec eigvals = arma::eig_gen(poly_mat);
+
+                if (arma::abs(eigvals).max() < 1.0) {
+                    loop_flag = false; // escape
+                }
+                else {
+                    beta_draw = arma::reshape( stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true) ,K,M);
+                }
+            }
+
+            beta_draws.slice(i) = beta_draw;
+        }
+    }
+    else
+    {
+        for (int i=0; i < n_draws; i++) {
+            beta_draws.slice(i) = arma::reshape( stats::rmvnorm(alpha_pt_mean, chol_alpha_pt_var, true) ,K,M);
+        }
     }
 }
 
@@ -291,11 +320,32 @@ bm::bvarm::IRF_int(const int n_irf_periods, const arma::mat* impact_mat_inp)
 
     //
 
+    arma::mat Sigma_mat(M,M);
+    if (irfs_lr_restrict) {
+        Sigma_mat = (impact_mat_inp) ? impact_mat * impact_mat.t() : Sigma_hat;
+    }
+
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
 
     for (int j=1; j<=n_draws; j++) {
         arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1));
+
+        //
+
+        if (irfs_lr_restrict)
+        {   // long-run restrictions
+            arma::mat poly_mat = arma::eye(M,M);
+            for (int i=1; i<=p; i++) {
+                poly_mat -= arma::trans(beta_b.rows(M*(i-1), M*i - 1));
+            }
+
+            arma::mat M_mat = arma::inv(poly_mat);
+
+            impact_mat = poly_mat * arma::chol(M_mat*Sigma_mat*M_mat.t(),"lower");
+        }
+
+        //
 
         impact_mat_b.zeros();
         impact_mat_b.rows(0,M-1) = impact_mat;

@@ -39,6 +39,9 @@ class bvars
         int K;          // M*p
         int n_ext_vars; // number of 'external' variables
 
+        bool only_stationary_draws = false; // discard non-stationary draws
+        bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
+
         arma::mat Y;   // beta(L) (Y_t - Psi*d_t) = e_t
         arma::mat X;   // Lags of Y
 

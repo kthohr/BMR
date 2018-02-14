@@ -41,6 +41,9 @@ class bvarm
         int var_type;   // variance type (1 or 2)
         int decay_type; // decay type (1 or 2, for geometric and harmonic, resp.)
 
+        bool only_stationary_draws = false; // discard non-stationary draws
+        bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
+
         // 'hyper' parameters
         double HP_1;
         double HP_2;

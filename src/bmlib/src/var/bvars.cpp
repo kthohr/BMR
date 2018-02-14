@@ -163,7 +163,7 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
 
     arma::mat poly_mat = arma::eye(M,M);
     for (int i=1; i<=p; i++) {
-        poly_mat -= beta_hat.rows(M*(i-1),M*i-1);
+        poly_mat -= beta_hat.rows(M*(i-1), M*i - 1);
     }
 
     alpha_hat = arma::vectorise(beta_hat);
@@ -269,6 +269,28 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
 
     beta_b = arma::reshape( stats::rmvnorm(alpha_pt_mean_b, alpha_pt_var_b), K,M);
 
+    if (only_stationary_draws)
+    {
+        bool loop_flag = true;
+
+        while (loop_flag)
+        {
+            arma::mat poly_mat = arma::zeros(M,M);
+            for (int i=1; i<=p; i++) {
+                poly_mat += arma::trans(beta_b.rows(M*(i-1), M*i - 1));
+            }
+
+            arma::cx_vec eigvals = arma::eig_gen(poly_mat);
+
+            if (arma::abs(eigvals).max() < 1.0) {
+                loop_flag = false; // escape
+            }
+            else {
+                beta_b = arma::reshape( stats::rmvnorm(alpha_pt_mean_b, alpha_pt_var_b), K,M);
+            }
+        }
+    }
+
     //
     // Sigma
 
@@ -359,6 +381,19 @@ bm::bvars::IRF(const int n_irf_periods)
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
         arma::mat impact_mat = arma::chol(Sigma_b,"lower");
+
+        //
+
+        if (irfs_lr_restrict)
+        {   // long-run restrictions
+            arma::mat poly_mat = arma::eye(M,M);
+            for (int i=1; i<=p; i++) {
+                poly_mat -= arma::trans(beta_b.rows(M*(i-1), M*i - 1));
+            }
+
+            arma::mat M_mat = arma::inv(poly_mat);
+            impact_mat = poly_mat * arma::chol(M_mat*Sigma_b*M_mat.t(),"lower");
+        }
 
         //
 

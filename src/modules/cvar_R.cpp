@@ -41,6 +41,8 @@ RCPP_MODULE(cvar_module)
         .field( "cons_term", &bm::cvar::cons_term )
         .field( "p", &bm::cvar::p )
 
+        .field( "irfs_lr_restrict", &bm::cvar::irfs_lr_restrict )
+
         // read only objects
         .field_readonly( "c_int", &bm::cvar::c_int )
         .field_readonly( "n", &bm::cvar::n )

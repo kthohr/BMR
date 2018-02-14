@@ -43,6 +43,9 @@ RCPP_MODULE(bvarw_module)
         .field( "cons_term", &bm::bvarw::cons_term )
         .field( "p", &bm::bvarw::p )
 
+        .field( "only_stationary_draws", &bm::bvarw::only_stationary_draws )
+        .field( "irfs_lr_restrict", &bm::bvarw::irfs_lr_restrict )
+
         // read only objects
         .field_readonly( "c_int", &bm::bvarw::c_int )
         .field_readonly( "n", &bm::bvarw::n )

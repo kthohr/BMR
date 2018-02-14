@@ -19,29 +19,21 @@
   ##
   ################################################################################*/
 
-#ifndef _bmlib_misc_HPP
-#define _bmlib_misc_HPP
+/*
+ * build a companion form matrix
+ */
 
-#include "bm_options.hpp"
-
-#include "optim/optim.hpp"
-#include "mcmc/mcmc.hpp"
-#include "stats/stats.hpp"
-
-namespace bm
+inline
+arma::mat
+form_companion_matrix(const arma::mat& A, const int K, const int p)
 {
-    #include "bind.hpp"
-    #include "byrow.hpp"
-    #include "cube_to_mat.hpp"
-    #include "embed.hpp"
-    #include "form_companion_matrix.hpp"
-    #include "inside_trans.hpp"
-    #include "log_GPR.hpp"
-    #include "lyapunov_dbl.hpp"
-    #include "uvec_linspace.hpp"
-    #include "zero_rows.hpp"
+    arma::mat A_comp;
 
-    #include "tictoc.hpp"
+    if (p > 1) {
+        A_comp = arma::join_cols(arma::trans(A), arma::join_rows(arma::eye(K*(p-1),K*(p-1)), arma::zeros(K*(p-1), K)));
+    } else {
+        A_comp = A;
+    }
+
+    return A_comp;
 }
-
-#endif
