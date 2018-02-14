@@ -378,7 +378,7 @@ dsgevar<T>::gibbs()
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_USE_OMP
+#ifndef BM_NO_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int i=0; i < n_draws; i++) {
@@ -458,7 +458,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_USE_OMP
+#ifndef BM_NO_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=1; j <= n_draws; j++) {

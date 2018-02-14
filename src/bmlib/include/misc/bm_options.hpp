@@ -38,7 +38,11 @@
     #define STATS_GO_INLINE
 #endif
 
-#ifdef BM_USE_OMP
+#if !defined(_OPENMP) && !defined(BM_NO_OMP)
+    #define BM_NO_OMP
+#endif
+
+#ifndef BM_NO_OMP
     #ifndef OPTIM_USE_OMP
         #define OPTIM_USE_OMP
     #endif

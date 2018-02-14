@@ -376,7 +376,11 @@ bm::bvars::IRF(const int n_irf_periods)
     arma::mat impact_mat_b(K_adj,M);
     arma::mat impact_mat_h(M,M);
 
-    for (int j=1; j <= n_draws; j++) {
+#ifndef BM_NO_OMP
+    #pragma omp parallel for firstprivate(impact_mat_b,impact_mat_h)
+#endif
+    for (int j=1; j <= n_draws; j++)
+    {
         arma::mat beta_b = beta_draws(arma::span(0,K_adj-1),arma::span(),arma::span(j-1,j-1));
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);

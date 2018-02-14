@@ -313,11 +313,11 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_USE_OMP
+#ifndef BM_NO_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
-    for (int j=0; j < n_draws; j++) {
-        
+    for (int j=0; j < n_draws; j++)
+    {    
         dsge_obj_copy.solve_to_state_space(dsge_draws.row(j).t());
 
         arma::cube irf_mats = dsge_obj_copy.lrem_obj.IRF(n_irf_periods);
@@ -361,7 +361,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_USE_OMP
+#ifndef BM_NO_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++) {
@@ -429,7 +429,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifdef BM_USE_OMP
+#ifndef BM_NO_OMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++) {

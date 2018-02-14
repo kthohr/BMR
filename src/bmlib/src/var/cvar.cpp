@@ -133,29 +133,28 @@ bm::cvar::boot(const int n_draws)
     // this might have to be changed to center the residuals
     // in case a constant wasn't included in the model
 
-    arma::ivec sampling_vec = arma::randi(n - p, arma::distr_param(0,n-p-1));
-    arma::uvec eps_sample = arma::conv_to<arma::uvec>::from(sampling_vec);
-
-    arma::mat epsilon_b = epsilon_hat.rows(eps_sample);
-
     arma::mat Y_b = Y;
     arma::mat X_b = X;
-
-    arma::mat X_t_block;
 
     //
     // begin loop
 
-    for (int i=0; i < n_draws; i++) {
-        sampling_vec = arma::randi(n - p, arma::distr_param(0,n-p-1));
-        eps_sample = arma::conv_to<arma::uvec>::from(sampling_vec);
-        epsilon_b = epsilon_hat.rows(eps_sample);
+#ifndef BM_NO_OMP
+    #pragma omp parallel for firstprivate(X_b,Y_b)
+#endif
+    for (int i=0; i < n_draws; i++)
+    {
+        arma::ivec sampling_vec = arma::randi(n - p, arma::distr_param(0,n-p-1));
+        arma::uvec eps_sample   = arma::conv_to<arma::uvec>::from(sampling_vec);
+
+        arma::mat epsilon_b = epsilon_hat.rows(eps_sample);
         
-        X_t_block = X.row(0);
+        arma::rowvec X_t_block = X.row(0);
 
         //
 
-        for (int j=0; j < (n - p); j++) {
+        for (int j=0; j < (n - p); j++)
+        {
             X_b.row(j) = X_t_block;
             Y_b.row(j) = X_t_block * beta_hat + epsilon_b.row(j);
 
@@ -184,7 +183,6 @@ bm::cvar::boot(const int n_draws)
         beta_draws.slice(i)  = std::move(beta_b);
         Sigma_draws.slice(i) = std::move(Sigma_b);
     }
-    //
 }
 
 //
@@ -203,8 +201,11 @@ bm::cvar::IRF(const int n_irf_periods)
     arma::mat impact_mat_b(K_adj-c_int,M);
     arma::mat impact_mat_h(M,M);
 
-
-    for (int j=1; j<=n_draws; j++) {
+#ifndef BM_NO_OMP
+    #pragma omp parallel for firstprivate(impact_mat_b,impact_mat_h)
+#endif
+    for (int j=1; j<=n_draws; j++)
+    {
         arma::mat beta_b = beta_draws(arma::span(c_int,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
