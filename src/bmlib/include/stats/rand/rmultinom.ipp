@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the StatsLib C++ library.
   ##
-  ##   StatsLib is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   StatsLib is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -20,30 +22,39 @@
  * Sample from a multinomial distribution
  */
 
-inline
-arma::colvec
-rmultinom(const arma::vec& prob)
+template<typename mT, typename eT>
+mT
+rmultinom(const mT& prob)
 {
-    const int nprob = prob.n_elem;
-    int n_j = nprob;
-    double p_j = 1;
+    const uint_t n_prob = mat_ops::n_elem(prob);
 
-    arma::colvec ret(nprob);
-    const arma::vec prob_csum = arma::cumsum(prob);
+    uint_t n_j = n_prob;
 
-    p_j = prob(0);
-    ret(0) = rbinom(n_j,p_j);
     //
-    int ret_sum = arma::as_scalar(ret(0));
+
+    eT p_j = 1.0;
+
+    mT ret(n_prob,1);
+    const mT prob_csum = mat_ops::cumsum(prob);
+
+    p_j = prob(0,0);
+    ret(0,0) = rbinom(n_j,p_j);
+
+    //
+
+    uint_t ret_sum = ret(0,0);
     
-    for (int j = 1; j < nprob; j++) {
-        p_j = prob(j)/(1 - arma::as_scalar(prob_csum(j-1)));
-        n_j = nprob - ret_sum;
+    for (uint_t j = 1U; j < n_prob; j++)
+    {
+        p_j = prob(j,0) / (eT(1.0) - prob_csum(j-1,0));
+        n_j = n_prob - ret_sum;
         
-        ret(j) = rbinom(n_j,p_j);
-        //
-        ret_sum += arma::as_scalar(ret(j));
+        ret(j,0) = rbinom(n_j,p_j);
+        
+        ret_sum += ret(j,0);
     }
+
     //
+
     return ret;
 }

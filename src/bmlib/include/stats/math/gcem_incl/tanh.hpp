@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
-  ##   GCE-Math is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   GCE-Math is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -28,7 +30,11 @@ constexpr
 T
 tanh_cf(const T xx, const int depth)
 {
-    return ( depth < GCEM_TANH_MAX_ITER ? (2*depth - 1) + xx/tanh_cf(xx,depth+1) : T(2*depth - 1) );
+    return ( depth < GCEM_TANH_MAX_ITER ? \
+             // if
+                (2*depth - 1) + xx/tanh_cf(xx,depth+1) :
+             // else
+                T(2*depth - 1) );
 }
 
 template<typename T>
@@ -44,7 +50,10 @@ constexpr
 T
 tanh(const T x)
 {
-    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(0.0) : ( x < T(0.0) ? -tanh_int(-x) : tanh_int(x) ) );
+    return ( // indistinguishable from zero
+             GCLIM<T>::epsilon() > abs(x) ? T(0.0) :
+             // else
+             x < T(0.0) ? -tanh_int(-x) : tanh_int(x) );
 }
 
 #endif

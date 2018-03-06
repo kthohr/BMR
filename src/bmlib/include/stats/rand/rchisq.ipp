@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the StatsLib C++ library.
   ##
-  ##   StatsLib is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   StatsLib is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -20,62 +22,35 @@
  * Sample from a Chi-Squared distribution
  */
 
-inline
-double
-rchisq(const int dof_par)
+template<typename T>
+T
+rchisq(const T dof_par)
 {
-    double ret = 0;
-    
-    //
-    
-    if (dof_par < 50) { // sum of squared (standard) normals
-        // arma::mat X = rnorm(dof_par,1,0.0,1.0);
-        // ret = arma::as_scalar(X.t() * X);
-
-        for (int i=0; i < dof_par; i++) {
-            double norm_val = rnorm();
-            ret += norm_val*norm_val;
-        }
-
-    } else { // Fisher's asymptotic approximation
-        ret = 0.5 * std::pow(rnorm() + std::sqrt(static_cast<double>(2*dof_par - 1)), 2);
-    }
-    
-    //
-
-    return ret;
+    return rgamma<T>(dof_par/T(2.0),T(2.0));
 }
 
-#ifndef STATS_NO_ARMA
-
-inline
-arma::mat
-rchisq(const uint_t n, const int dof_par)
+template<typename T>
+void
+rchisq_int(const T dof_par, T* vals_out, const uint_t num_elem)
 {
-    return rchisq(n,1,dof_par);
-}
-
-inline
-arma::mat
-rchisq(const uint_t n, const uint_t k, const int dof_par)
-{
-    arma::mat ret(n,k);
-    
-    //
-
-    double* ret_mem = ret.memptr();
-
-#ifndef STATS_NO_OMP
+#ifdef STATS_USE_OPENMP
     #pragma omp parallel for
 #endif
-    for (uint_t j=0; j < n*k; j++)
+    for (uint_t j=0U; j < num_elem; j++)
     {
-        ret_mem[j] = rchisq(dof_par);
+        vals_out[j] = rchisq(dof_par);
     }
-    
-    //
-
-    return ret;
 }
 
+#ifdef STATS_WITH_MATRIX_LIB
+template<typename mT, typename eT>
+mT
+rchisq(const uint_t n, const uint_t k, const eT dof_par)
+{
+    mT mat_out(n,k);
+
+    rchisq_int(dof_par,mat_ops::get_mem_ptr(mat_out),n*k);
+
+    return mat_out;
+}
 #endif

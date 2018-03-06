@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
-  ##   GCE-Math is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   GCE-Math is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -28,7 +30,12 @@ constexpr
 T
 exp_cf_int(const T x, const int depth)
 {
-    return ( depth < GCEM_EXP_MAX_ITER_SMALL ? ( depth == 1 ? T(1.0) - x/exp_cf_int(x,depth+1) : T(1.0) + x/T(depth - 1) - x/depth/exp_cf_int(x,depth+1) ) : T(1.0) );
+    return ( depth < GCEM_EXP_MAX_ITER_SMALL ? \
+             // if
+                depth == 1 ? T(1.0) - x/exp_cf_int(x,depth+1) : 
+                             T(1.0) + x/T(depth - 1) - x/depth/exp_cf_int(x,depth+1) : 
+             // else
+                T(1.0) );
 }
 
 template<typename T>
@@ -44,7 +51,7 @@ constexpr
 T
 exp_split(const T x)
 {
-    return ( pow(GCEM_E,find_whole(x)) * exp_cf(find_fraction(x)) );
+    return ( pow_integral(GCEM_E,find_whole(x)) * exp_cf(find_fraction(x)) );
 }
 
 template<typename T>
@@ -52,7 +59,9 @@ constexpr
 T
 exp(const T x)
 {
-    return ( x == T(0.0) ? T(1.0) : ( abs(x) < T(2.0) ? exp_cf(x) : exp_split(x) ) );
+    return ( GCLIM<T>::epsilon() > abs(x) ? T(1.0) : 
+             //
+             abs(x) < T(2.0) ? exp_cf(x) : exp_split(x) );
 }
 
 // #ifndef GCEM_EXP_TOL

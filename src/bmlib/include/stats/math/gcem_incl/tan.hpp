@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
-  ##   GCE-Math is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   GCE-Math is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -28,7 +30,11 @@ constexpr
 T
 tan_cf_recur(const T xx, const int depth, const int max_depth)
 {
-    return ( depth < max_depth ? T(2*depth - 1) - xx/tan_cf_recur(xx,depth+1,max_depth) : T(2*depth - 1) );
+    return ( depth < max_depth ? \
+             // if
+                T(2*depth - 1) - xx/tan_cf_recur(xx,depth+1,max_depth) :
+             // else
+                T(2*depth - 1) );
 }
 
 template<typename T>
@@ -36,7 +42,8 @@ constexpr
 T
 tan_cf_main(const T x)
 {
-    return ( x > 1.0 ? x/tan_cf_recur(x*x,1,35) : x/tan_cf_recur(x*x,1,25) );
+    return ( x > T(1.0) ? x/tan_cf_recur(x*x,1,35) :
+                          x/tan_cf_recur(x*x,1,25) );
 }
 
 template<typename T>
@@ -44,7 +51,11 @@ constexpr
 T
 tan_int(const T x)
 { // tan(x) = tan(x + pi)
-    return ( x > T(GCEM_PI) ? tan_int( x - T(GCEM_PI) * int(x/T(GCEM_PI)) ) : tan_cf_main(x) );
+    return ( x > T(GCEM_PI) ? \
+             // if
+                tan_int( x - T(GCEM_PI) * int(x/T(GCEM_PI)) ) :
+             // else 
+                tan_cf_main(x) );
 }
 
 template<typename T>
@@ -52,7 +63,9 @@ constexpr
 T
 tan(const T x)
 {
-    return ( GCEM_LIM<T>::epsilon() > abs(x) ? T(0.0) : ( x < T(0.0) ? -tan_int(-x) : tan_int(x) ) );
+    return ( GCLIM<T>::epsilon() > abs(x) ? T(0.0) :
+             //
+             x < T(0.0) ? -tan_int(-x) : tan_int(x) );
 }
 
 #endif

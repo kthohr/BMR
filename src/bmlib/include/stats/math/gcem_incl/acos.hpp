@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the GCE-Math C++ library.
   ##
-  ##   GCE-Math is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   GCE-Math is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -28,10 +30,13 @@ constexpr
 T
 acos_int(const T x)
 {
-    return ( abs(x) > T(1.0)                           ? GCEM_LIM<T>::quiet_NaN() :       // only defined on [-1,1]
-             GCEM_LIM<T>::epsilon() > abs(x -  T(1.0)) ? T(0.0) :                         // indistinguishable from 1
-             GCEM_LIM<T>::epsilon() > abs(x)           ? T(GCEM_HALF_PI) :                // indistinguishable from 0
-                                                         atan( sqrt(T(1.0) - x*x)/x ) );
+    return ( // only defined on [-1,1]
+             abs(x) > T(1.0)                        ? GCLIM<T>::quiet_NaN() :
+             // indistinguishable from one or zero
+             GCLIM<T>::epsilon() > abs(x -  T(1.0)) ? T(0.0) :
+             GCLIM<T>::epsilon() > abs(x)           ? T(GCEM_HALF_PI) :
+             // else
+             atan( sqrt(T(1.0) - x*x)/x ) );
 }
 
 template<typename T>

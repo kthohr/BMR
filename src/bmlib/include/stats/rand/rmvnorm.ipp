@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the StatsLib C++ library.
   ##
-  ##   StatsLib is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   StatsLib is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
 
@@ -20,129 +22,55 @@
  * Sample from a multivariate normal distribution
  */
 
-inline
-arma::vec
-rmvnorm_int(const arma::mat* mu_inp, const arma::mat* Sigma_inp, const bool pre_chol)
+template<typename T>
+T
+rmvnorm(const T& mu_par, const T& Sigma_par, const bool pre_chol)
 {
-    int K = 0;
-    arma::vec ret;
+    T ret;
 
-    if (mu_inp) {
-        K = mu_inp->n_elem;
-    } else if (Sigma_inp) {
-        K = Sigma_inp->n_rows;
-    } else {
-        printf("rmvnorm: missing both mu and Sigma.\n");
-        
+    const uint_t K = mat_ops::n_rows(Sigma_par);
+
+    if (mat_ops::n_elem(mu_par) != K)
+    {
+        printf("rmvnorm: dimensions of mu and Sigma don't agree.\n");
         return ret;
     }
 
     //
 
-    const arma::vec mu = (mu_inp) ? *mu_inp : arma::zeros(K,1);
+    const T A = (pre_chol) ? Sigma_par : mat_ops::chol(Sigma_par); // should be lower-triangular
 
-    if (Sigma_inp) {
-        arma::mat A = (pre_chol) ? *Sigma_inp : arma::chol(*Sigma_inp);
-        ret = mu + A.t() * arma::randn(K,1); // transpose A to be lower triangular
-    } else {
-        ret = mu + arma::randn(K,1); // A = eye(K,K)
-    }
+    ret = mu_par + A * rnorm<T>(K,1);
 
     //
     
     return ret;
-}
-
-inline
-arma::vec
-rmvnorm(const arma::mat& Sigma)
-{
-    return rmvnorm_int(nullptr,&Sigma,false);
-}
-
-inline
-arma::vec
-rmvnorm(const arma::mat& Sigma, const bool pre_chol)
-{
-    return rmvnorm_int(nullptr,&Sigma,pre_chol);
-}
-
-inline
-arma::vec
-rmvnorm(const arma::mat& mu, const arma::mat& Sigma)
-{
-   return rmvnorm_int(&mu,&Sigma,false);
-}
-
-inline
-arma::vec
-rmvnorm(const arma::mat& mu, const arma::mat& Sigma, const bool pre_chol)
-{
-   return rmvnorm_int(&mu,&Sigma,pre_chol);
 }
 
 //
-// n-samples
+// n-samples: results will be an n x K matrix
 
-inline
-arma::mat
-rmvnorm_int(const uint_t n, const arma::mat* mu_inp, const arma::mat* Sigma_inp, const bool pre_chol)
+template<typename T>
+T
+rmvnorm(const uint_t n, const T& mu_par, const T& Sigma_par, const bool pre_chol)
 {
-    int K = 0;
-    arma::mat ret;
+    T ret;
 
-    if (mu_inp) {
-        K = mu_inp->n_elem;
-    } else if (Sigma_inp) {
-        K = Sigma_inp->n_rows;
-    } else {
-        printf("rmvnorm: missing both mu and Sigma.\n");
-        
+    const uint_t K = mat_ops::n_rows(Sigma_par);
+
+    if (mat_ops::n_elem(mu_par) != K)
+    {
+        printf("rmvnorm: dimensions of mu and Sigma don't agree.\n");
         return ret;
     }
 
     //
 
-    if (Sigma_inp) {
-        const arma::mat A = (pre_chol) ? *Sigma_inp : arma::chol(*Sigma_inp);
-        ret = arma::randn(n,K) * A;
-    } else {
-        ret = arma::randn(n,K); // A = eye(K,K)
-    }
+    const T A = (pre_chol) ? Sigma_par : mat_ops::chol(Sigma_par); // should be lower-triangular
 
-    if (mu_inp) {
-        ret += arma::repmat((*mu_inp).t(),n,1);
-    }
+    ret = mat_ops::repmat(mat_ops::trans(mu_par),n,1) + rnorm<T>(n,K) * mat_ops::trans(A);
 
     //
     
     return ret;
-}
-
-inline
-arma::mat
-rmvnorm(const uint_t n, const arma::mat& Sigma)
-{
-    return rmvnorm_int(n,nullptr,&Sigma,false);
-}
-
-inline
-arma::mat
-rmvnorm(const uint_t n, const arma::mat& Sigma, const bool pre_chol)
-{
-    return rmvnorm_int(n,nullptr,&Sigma,pre_chol);
-}
-
-inline
-arma::mat
-rmvnorm(const uint_t n, const arma::mat& mu, const arma::mat& Sigma)
-{
-   return rmvnorm_int(n,&mu,&Sigma,false);
-}
-
-inline
-arma::mat
-rmvnorm(const uint_t n, const arma::mat& mu, const arma::mat& Sigma, const bool pre_chol)
-{
-   return rmvnorm_int(n,&mu,&Sigma,pre_chol);
 }
