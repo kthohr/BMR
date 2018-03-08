@@ -93,6 +93,7 @@ RCPP_MODULE(bvars_module)
         .method( "prior", prior_3 )
         .method( "gibbs", &bvars_R::gibbs_R )
         .method( "IRF", &bvars_R::IRF_R )
+        .method( "FEVD", &bvars_R::FEVD_R )
         .method( "forecast", forecast_1 )
         .method( "forecast", forecast_2 )
     ;
@@ -164,6 +165,20 @@ SEXP bvars_R::IRF_R(int n_irf_periods)
         arma::cube irf_vals = this->IRF(n_irf_periods);
 
         return Rcpp::List::create(Rcpp::Named("irf_vals") = irf_vals);
+    } catch( std::exception &ex ) {
+        forward_exception_to_r( ex );
+    } catch(...) {
+        ::Rf_error( "BMR: C++ exception (unknown reason)" );
+    }
+    return R_NilValue;
+}
+
+SEXP bvars_R::FEVD_R(int n_periods)
+{
+    try {
+        arma::cube fevd_vals = this->FEVD(n_periods);
+
+        return Rcpp::List::create(Rcpp::Named("fevd_vals") = fevd_vals);
     } catch( std::exception &ex ) {
         forward_exception_to_r( ex );
     } catch(...) {

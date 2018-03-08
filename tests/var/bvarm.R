@@ -28,6 +28,7 @@ bvar_obj$gibbs(10000)
 IRF(bvar_obj,20,var_names=colnames(USMacroData),save=FALSE)
 plot(bvar_obj,var_names=colnames(USMacroData),save=FALSE)
 forecast(bvar_obj,shocks=TRUE,var_names=colnames(USMacroData),back_data=10,save=FALSE)
+FEVD(bvar_obj,20,var_names=colnames(bvar_data),save=FALSE)
 
 # p = 2
 

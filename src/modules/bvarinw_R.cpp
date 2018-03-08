@@ -85,6 +85,7 @@ RCPP_MODULE(bvarinw_module)
         .method( "prior", prior_3 )
         .method( "gibbs", &bvarinw_R::gibbs_R )
         .method( "IRF", &bvarinw_R::IRF_R )
+        .method( "FEVD", &bvarinw_R::FEVD_R )
         .method( "forecast", forecast_1 )
         .method( "forecast", forecast_2 )
     ;

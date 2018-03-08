@@ -218,7 +218,7 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
 // posterior sampler
 
 void
-bm::bvars::gibbs(const int n_draws, const int n_burnin)
+bm::bvars::gibbs(const uint_t n_draws, const uint_t n_burnin)
 {
     Psi_draws.set_size(q, M, n_draws);
     beta_draws.set_size(K, M, n_draws);
@@ -301,7 +301,8 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
     //
     // begin loop
 
-    for (int i=0; i < (n_draws + n_burnin); i++) {
+    for (uint_t i=0; i < (n_draws + n_burnin); i++) 
+    {
         beta_b_trans = beta_b.t();
         inv_Sigma_b = arma::inv_sympd(Sigma_b);
 
@@ -341,7 +342,8 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
 
         //
 
-        if (i >= n_burnin) {
+        if (i >= n_burnin)
+        {
             Psi_draws.slice(i-n_burnin)   = Psi_b;
             beta_draws.slice(i-n_burnin)  = beta_b;
             Sigma_draws.slice(i-n_burnin) = Sigma_b;
@@ -364,7 +366,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
 // IRFs
 
 arma::cube
-bm::bvars::IRF(const int n_irf_periods)
+bm::bvars::IRF(const uint_t n_irf_periods)
 {
     const int n_draws = beta_draws.n_slices;
     const int K_adj = K;
@@ -379,17 +381,17 @@ bm::bvars::IRF(const int n_irf_periods)
 #ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(impact_mat_b,impact_mat_h)
 #endif
-    for (int j=1; j <= n_draws; j++)
+    for (uint_t j=1; j <= n_draws; j++)
     {
         arma::mat beta_b = beta_draws(arma::span(0,K_adj-1),arma::span(),arma::span(j-1,j-1));
 
         arma::mat Sigma_b = Sigma_draws.slice(j-1);
         arma::mat impact_mat = arma::chol(Sigma_b,"lower");
 
-        //
+        // long-run restrictions
 
         if (irfs_lr_restrict)
-        {   // long-run restrictions
+        {
             arma::mat poly_mat = arma::eye(M,M);
             for (int i=1; i<=p; i++) {
                 poly_mat -= arma::trans(beta_b.rows(M*(i-1), M*i - 1));
@@ -406,15 +408,19 @@ bm::bvars::IRF(const int n_irf_periods)
 
         irfs.slice((j-1)*n_irf_periods) = impact_mat;
 
-        for (int i=2; i<=n_irf_periods; i++) {
-            impact_mat_h = beta_b.t()*impact_mat_b;
-            irfs.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
+        if (n_irf_periods > 1)
+        {
+            for (uint_t i=2; i <= n_irf_periods; i++)
+            {
+                impact_mat_h = beta_b.t()*impact_mat_b;
+                irfs.slice((j-1)*n_irf_periods + (i-1)) = impact_mat_h;
 
-            if(K_adj > M){
-                impact_mat_b.rows(M,K_adj-1) = impact_mat_b.rows(0,K_adj-M-1);
+                if (K_adj > M) {
+                    impact_mat_b.rows(M,K_adj-1) = impact_mat_b.rows(0,K_adj-M-1);
+                }
+
+                impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
             }
-
-            impact_mat_b.rows(0,M-1) = std::move(impact_mat_h);
         }
     }
 
@@ -427,9 +433,9 @@ bm::bvars::IRF(const int n_irf_periods)
 // FEVD
 
 arma::cube
-bm::bvars::FEVD(const int n_periods)
+bm::bvars::FEVD(const uint_t n_periods)
 {
-    const int n_draws = beta_draws.n_slices;
+    const uint_t n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
 
     arma::cube mse_cube(M, M, n_periods*n_draws);
@@ -472,20 +478,23 @@ bm::bvars::FEVD(const int n_periods)
 
         mse_cube.slice((j-1)*n_periods) = mse_slice;
 
-        for (int i=2; i <= n_periods; i++)
+        if (n_periods > 1)
         {
-            iter_mat = poly_mat*iter_mat;
+            for (uint_t i=2; i <= n_periods; i++)
+            {
+                iter_mat = poly_mat*iter_mat;
 
-            mse_mat += iter_mat * iter_mat.t();
+                mse_mat += iter_mat * iter_mat.t();
 
-            for (int j=0; j < M; j++) {
-                for (int k=0; k < M; k++) {
-                    fevd_mat(j,k) += std::pow(iter_mat(j,k),2);
-                    mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
+                for (int j=0; j < M; j++) {
+                    for (int k=0; k < M; k++) {
+                        fevd_mat(j,k) += std::pow(iter_mat(j,k),2);
+                        mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
+                    }
                 }
-            }
 
-            mse_cube.slice((j-1)*n_periods + (i-1)) = mse_slice;
+                mse_cube.slice((j-1)*n_periods + (i-1)) = mse_slice;
+            }
         }
     }
 
@@ -498,26 +507,25 @@ bm::bvars::FEVD(const int n_periods)
 // forecasting
 
 arma::cube
-bm::bvars::forecast(const int horizon, const bool incl_shocks)
+bm::bvars::forecast(const uint_t horizon, const bool incl_shocks)
 {
     return this->forecast_int(nullptr,horizon,incl_shocks);
 }
 
 arma::cube
-bm::bvars::forecast(const arma::mat& X_T, const int horizon, const bool incl_shocks)
+bm::bvars::forecast(const arma::mat& X_T, const uint_t horizon, const bool incl_shocks)
 {
     return this->forecast_int(&X_T,horizon,incl_shocks);
 }
 
 arma::cube
-bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool incl_shocks)
+bm::bvars::forecast_int(const arma::mat* X_T_inp, const uint_t horizon, const bool incl_shocks)
 {
-    const int n_draws = beta_draws.n_slices;
+    const uint_t n_draws = beta_draws.n_slices;
     const int K_adj = K;
 
-    arma::mat Psi_b(q,M), beta_b(K_adj,M), Sigma_b(M,M);       // bth draw
-
     arma::mat X_T;
+
     if (X_T_inp) {
         X_T = *X_T_inp;
     } else {
@@ -529,29 +537,32 @@ bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool 
 
         X_T.cols(0,M-1) = Y.row(Y.n_rows-1);
     }
-    
-    arma::mat X_Th = X_T;
 
     arma::mat D_T = D.row(D.n_rows-1);
 
-    arma::mat Y_forecast(horizon,M);
     arma::cube forecast_mat(horizon, M, n_draws);
 
     //
 
-    if (incl_shocks) {
-        for (int i=0; i<n_draws; i++) {
-            Psi_b   = Psi_draws.slice(i);
-            beta_b  = beta_draws.slice(i);
-            Sigma_b = Sigma_draws.slice(i);
+    if (incl_shocks)
+    {
+#ifdef BM_USE_OPENMP
+        #pragma omp parallel for 
+#endif
+        for (uint_t i=0; i < n_draws; i++)
+        {
+            arma::mat Psi_b   = Psi_draws.slice(i);
+            arma::mat beta_b  = beta_draws.slice(i);
+            arma::mat Sigma_b = Sigma_draws.slice(i);
 
             // arma::mat D_term = D_T*arma::kron(arma::eye(q*(p+1),q*(p+1)),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b); // Keith: check this
             arma::mat D_term = D_T*arma::kron(arma::eye(p+1,p+1),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b); // Keith: check this
 
-            Y_forecast.zeros();
-            X_Th = X_T;
+            arma::mat Y_forecast = arma::zeros(horizon,M);
+            arma::mat X_Th = X_T;
 
-            for (int j=1; j<=horizon; j++) {
+            for (uint_t j=1; j <= horizon; j++)
+            {
                 Y_forecast.row(j-1) = X_Th*beta_b + D_term + arma::trans(stats::rmvnorm<arma::mat>(arma::zeros(M,1),Sigma_b));
 
                 if (K_adj > M) {
@@ -560,20 +571,29 @@ bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool 
 
                 X_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
             }
+
             //
+
             forecast_mat.slice(i) = Y_forecast;
         }
-    } else {
-        for (int i=0; i<n_draws; i++) {
-            Psi_b  = Psi_draws.slice(i);
-            beta_b = beta_draws.slice(i);
+    }
+    else
+    {
+#ifdef BM_USE_OPENMP
+        #pragma omp parallel for
+#endif
+        for (uint_t i=0; i < n_draws; i++)
+        {
+            arma::mat Psi_b  = Psi_draws.slice(i);
+            arma::mat beta_b = beta_draws.slice(i);
 
             arma::mat D_term = D_T*arma::kron(arma::eye(p+1,p+1),Psi_b)*arma::join_cols(arma::eye(M,M),beta_b);
 
-            Y_forecast.zeros();
-            X_Th = X_T;
+            arma::mat Y_forecast = arma::zeros(horizon,M);
+            arma::mat X_Th = X_T;
 
-            for (int j=1; j<=horizon; j++) {
+            for (uint_t j=1; j<=horizon; j++)
+            {
                 Y_forecast.row(j-1) = X_Th*beta_b + D_term;
 
                 if (K_adj > M) {
@@ -582,10 +602,14 @@ bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool 
 
                 X_Th(0,arma::span(0,M-1)) = Y_forecast.row(j-1);
             }
+
             //
+
             forecast_mat.slice(i) = Y_forecast;
         }
     }
+
     //
+
     return forecast_mat;
 }

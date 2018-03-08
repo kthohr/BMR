@@ -103,18 +103,18 @@ class bvars
                    const arma::mat& Psi_prior, const double Xi_psi, const int gamma, 
                    const bool full_cov_prior = true);
 
-        void gibbs(const int n_draws, const int n_burnin);
+        void gibbs(const uint_t n_draws, const uint_t n_burnin);
 
-        arma::cube IRF(const int n_irf_periods);
-        arma::cube FEVD(const int n_periods);
+        arma::cube IRF(const uint_t n_irf_periods);
+        arma::cube FEVD(const uint_t n_periods);
 
-        arma::cube forecast(const int horizon, const bool incl_shocks);
-        arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);
+        arma::cube forecast(const uint_t horizon, const bool incl_shocks);
+        arma::cube forecast(const arma::mat& Y_T, const uint_t horizon, const bool incl_shocks);
 
     private:
         void build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp);
         arma::mat minn_pr_var();
-        arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
+        arma::cube forecast_int(const arma::mat* Y_T_inp, const uint_t horizon, const bool incl_shocks);
 };
 
 #endif
