@@ -233,9 +233,13 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
         SSE_Q += Delta_alpha.row(i).t()*Delta_alpha.row(i);
     }
 
+    arma::mat running_draw_mat = SSE_Q + Q_pr_scale;
+
     double scale_val = arma::abs(arma::diagvec(SSE_Q + Q_pr_scale)).min();
 
-    Q_draw = stats::rinvwish((SSE_Q + Q_pr_scale) / scale_val, Q_pt_dof);
+    running_draw_mat /= scale_val;
+
+    Q_draw = stats::rinvwish<arma::mat>(running_draw_mat, Q_pt_dof);
     Q_draw = Q_draw * scale_val;
     Q_chol = arma::chol(Q_draw,"lower");
 
@@ -251,9 +255,13 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
         SSE_S += epsilon_mat.col(i)*epsilon_mat.col(i).t();
     }
 
-    scale_val = arma::abs(arma::diagvec(SSE_S + Sigma_pr_scale)).min();
+    running_draw_mat = SSE_S + Sigma_pr_scale;
 
-    Sigma_draw = stats::rinvwish((SSE_S + Sigma_pr_scale) / scale_val, Sigma_pt_dof);
+    scale_val = arma::abs(arma::diagvec(running_draw_mat)).min();
+
+    running_draw_mat /= scale_val;
+
+    Sigma_draw = stats::rinvwish<arma::mat>(running_draw_mat, Sigma_pt_dof);
 
     Sigma_chol = std::sqrt(scale_val)*arma::chol(Sigma_draw,"lower");
     Sigma_draw = scale_val*Sigma_draw;
@@ -308,10 +316,14 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
             SSE_Q += Delta_alpha.row(i).t()*Delta_alpha.row(i);
         }
 
-        // scale_val = arma::abs(arma::diagvec(SSE_Q + Q_pr_scale)).min();
-        scale_val = arma::nonzeros(arma::abs(SSE_Q + Q_pr_scale)).min(); // Q generally has conditioning issues, so we need to use a rescaling
+        running_draw_mat = SSE_Q + Q_pr_scale;
 
-        Q_draw = stats::rinvwish((SSE_Q + Q_pr_scale) / scale_val, Q_pt_dof);
+        // scale_val = arma::abs(arma::diagvec(SSE_Q + Q_pr_scale)).min();
+        scale_val = arma::nonzeros(arma::abs(running_draw_mat)).min(); // Q generally has conditioning issues, so we need to use a rescaling
+
+        running_draw_mat /= scale_val;
+
+        Q_draw = stats::rinvwish<arma::mat>(running_draw_mat, Q_pt_dof);
         Q_draw = Q_draw * scale_val;
         Q_draw = (Q_draw + Q_draw.t()) / 2.0;
         Q_chol = arma::chol(Q_draw,"lower");
@@ -327,10 +339,14 @@ bm::bvartvp::gibbs(const int n_draws, const int n_burnin)
             SSE_S += epsilon_mat.col(i)*epsilon_mat.col(i).t();
         }
 
-        scale_val = arma::abs(arma::diagvec(SSE_S + Sigma_pr_scale)).min();
+        running_draw_mat = SSE_S + Sigma_pr_scale;
+
+        scale_val = arma::abs(arma::diagvec(running_draw_mat)).min();
         // scale_val = arma::abs(SSE_S + Sigma_pr_scale).min(); // bad idea
 
-        Sigma_draw = stats::rinvwish((SSE_S + Sigma_pr_scale) / scale_val, Sigma_pt_dof);
+        running_draw_mat /= scale_val;
+
+        Sigma_draw = stats::rinvwish<arma::mat>(running_draw_mat, Sigma_pt_dof);
         Sigma_draw = scale_val*Sigma_draw;
         Sigma_chol = arma::chol(Sigma_draw,"lower");
 

@@ -20,13 +20,13 @@
   ################################################################################*/
 
 /*
- * bvarw class
+ * bvarcnw class
  */
 
-#ifndef _bmlib_bvarw_HPP
-#define _bmlib_bvarw_HPP
+#ifndef _bmlib_bvarcnw_HPP
+#define _bmlib_bvarcnw_HPP
 
-class bvarw
+class bvarcnw
 {
     public:
         bool cons_term; // if there is a constant (intercept) in the model
@@ -37,6 +37,8 @@ class bvarw
         int M;          // number of endogenous variables
         int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
+
+        int p_AR = -1;  // AR order for Minnesota style prior
 
         bool only_stationary_draws = false; // discard non-stationary draws
         bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
@@ -58,10 +60,15 @@ class bvarw
         arma::mat Sigma_pr_scale; // prior scale matrix
         int Sigma_pr_dof;         // prior degrees of freedom
 
+        double HP_1 = 0.01;
+        double HP_3 = 100.0;
+        arma::mat beta_pr_var;
+        arma::mat beta_pr_mean;
+
         // posterior data
 
         arma::mat alpha_pt_mean;  // posterior mean
-        arma::mat alpha_pt_var;  // posterior mean
+        arma::mat alpha_pt_var;   // posterior mean
 
         int Sigma_pt_dof;         // posterior degrees of freedom
         arma::mat Sigma_pt_mean;  // posterior mean
@@ -74,32 +81,35 @@ class bvarw
         //
         // member functions
 
-        ~bvarw() = default;
-         bvarw() = default;
+        ~bvarcnw() = default;
+         bvarcnw() = default;
 
-        bvarw(const bvarw&) = default;
-        bvarw& operator=(const bvarw&) = default;
+        bvarcnw(const bvarcnw&) = default;
+        bvarcnw& operator=(const bvarcnw&) = default;
 
-        bvarw(bvarw&&) = default;
-        bvarw& operator=(bvarw&&) = default;
+        bvarcnw(bvarcnw&&) = default;
+        bvarcnw& operator=(bvarcnw&&) = default;
 
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
         void reset_draws();
 
-        void prior(const arma::vec& coef_prior, const double Xi_beta, const double Xi_Sigma, const int gamma);
-        void prior(const arma::vec& coef_prior, const arma::mat& Xi_beta, const arma::mat& Xi_Sigma, const int gamma);
+        void prior(const arma::vec& coef_prior, const int gamma);
+        void prior(const arma::vec& coef_prior, double HP_1_inp, double HP_3_inp, const int gamma,
+                   const bool full_cov_prior = true);
 
-        void gibbs(const int n_draws, const int n_burnin);
+        void gibbs(const int n_draws);
 
         arma::cube IRF(const int n_irf_periods);
+        arma::cube FEVD(const int n_periods);
 
         arma::cube forecast(const int horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);
 
     protected:
         void build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp);
+        arma::mat minn_pr_var();
         arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
 };
 

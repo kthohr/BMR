@@ -313,7 +313,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++)
@@ -361,7 +361,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++) {
@@ -389,7 +389,7 @@ const
             state_n = dsge_obj_copy.kalman_mat_F * state_n;
 
             if (incl_shocks) {
-                state_n += G_state*stats::rmvnorm(chol_shocks_cov,true);
+                state_n += G_state*stats::rmvnorm<arma::mat>(arma::zeros(chol_shocks_cov.n_rows,1),chol_shocks_cov,true);
             }
 
             forecast_mat.row(i) = arma::trans( dsge_obj_copy.kalman_mat_C + dsge_obj_copy.kalman_mat_H.t() * state_n );
@@ -429,7 +429,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=0; j < n_draws; j++) {

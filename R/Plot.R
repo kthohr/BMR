@@ -26,7 +26,12 @@ plot.Rcpp_bvars <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=1
     .plotbvar(x,type,var_names,save,height,width)
 }
 
-plot.Rcpp_bvarw <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
+plot.Rcpp_bvarcnw <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
+{
+    .plotbvar(x,type,var_names,save,height,width)
+}
+
+plot.Rcpp_bvarinw <- function(x,type=1,var_names=NULL,save=FALSE,height=13,width=13,...)
 {
     .plotbvar(x,type,var_names,save,height,width)
 }

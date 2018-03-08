@@ -97,6 +97,8 @@ class bvarm
         arma::cube IRF(const int n_irf_periods);
         arma::cube IRF(const int n_irf_periods, const arma::mat& impact_mat);
 
+        arma::cube FEVD(const int n_periods);
+
         arma::cube forecast(const int n_horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& X_T, const int n_horizon, const bool incl_shocks);
 

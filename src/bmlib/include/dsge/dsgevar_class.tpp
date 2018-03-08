@@ -378,7 +378,7 @@ dsgevar<T>::gibbs()
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int i=0; i < n_draws; i++) {
@@ -409,13 +409,13 @@ dsgevar<T>::gibbs()
 
             arma::mat Sigma_eps = Gamma_bar_YY - Gamma_bar_YX.t()*beta_hat;
 
-            Sigma_draw = stats::rinvwish((1+lambda)*(n-p)*Sigma_eps, Sigma_pt_dof);
+            Sigma_draw = stats::rinvwish<arma::mat,double,int>((1+lambda)*(n-p)*Sigma_eps, Sigma_pt_dof);
 
             // draw beta
 
             arma::mat alpha_pt_var_b  = arma::kron(Sigma_eps,arma::inv_sympd(lambda*Gamma_XX + XX) / (double) (n-p));
 
-            beta_draw = arma::reshape( stats::rmvnorm(arma::vectorise(beta_hat), alpha_pt_var_b), K,M);
+            beta_draw = arma::reshape( stats::rmvnorm<arma::mat>(arma::vectorise(beta_hat), alpha_pt_var_b), K,M);
 
         } else {
 
@@ -458,7 +458,7 @@ const
     dsge_obj_copy.estim_data.reset();
     dsge_obj_copy.dsge_draws.reset();
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(dsge_obj_copy)
 #endif
     for (int j=1; j <= n_draws; j++) {
@@ -574,13 +574,13 @@ dsgevar<T>::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool
             beta_b  = beta_draws.slice(i);
             Sigma_b = Sigma_draws.slice(i);
 
-            chol_shock_cov = arma::chol(Sigma_b);
+            chol_shock_cov = arma::chol(Sigma_b,"lower");
 
             Y_forecast.zeros();
             X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = X_Th*beta_b + arma::trans(stats::rmvnorm(chol_shock_cov,true));
+                Y_forecast.row(j-1) = X_Th*beta_b + arma::trans(stats::rmvnorm<arma::mat>(arma::zeros(Sigma_b.n_rows,1),chol_shock_cov,true));
 
                 if (K_adj > M + c_int) {
                     X_Th(0,arma::span(M+c_int,K_adj-1)) = X_Th(0,arma::span(c_int,K_adj-M-1));

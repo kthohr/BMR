@@ -34,6 +34,7 @@ class bvarm_R : public bm::bvarm
         void gibbs_R(int n_draws);
 
         SEXP IRF_R(int n_irf_periods);
+        SEXP FEVD_R(int n_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -54,12 +55,34 @@ class bvars_R : public bm::bvars
         void gibbs_R(int n_draws, int n_burnin);
 
         SEXP IRF_R(int n_irf_periods);
+        SEXP FEVD_R(int n_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
 };
 
-class bvarw_R : public bm::bvarw
+class bvarcnw_R : public bm::bvarcnw
+{
+    public:
+        void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
+        void build_R(const arma::mat& data_raw, const arma::mat& data_ext, bool cons_term_inp, int p_inp);
+
+        void reset_draws_R();
+
+        void prior_R(const arma::vec& coef_prior, double HP_1_inp, double HP_3_inp, int gamma);
+        void prior_R(const arma::vec& coef_prior, double HP_1_inp, double HP_3_inp, int gamma,
+                     bool full_cov_prior);
+
+        void gibbs_R(int n_draws);
+
+        SEXP IRF_R(int n_irf_periods);
+        SEXP FEVD_R(int n_periods);
+
+        SEXP forecast_R(int n_horizon, bool incl_shocks);
+        SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
+};
+
+class bvarinw_R : public bm::bvarinw
 {
     public:
         void build_R(const arma::mat& data_raw, bool cons_term_inp, int p_inp);
@@ -72,6 +95,7 @@ class bvarw_R : public bm::bvarw
         void gibbs_R(int n_draws, int n_burnin);
 
         SEXP IRF_R(int n_irf_periods);
+        SEXP FEVD_R(int n_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);
@@ -107,6 +131,7 @@ class cvar_R : public bm::cvar
         void boot_R(int n_draws);
 
         SEXP IRF_R(int n_irf_periods);
+        SEXP FEVD_R(int n_periods);
 
         SEXP forecast_R(int n_horizon, bool incl_shocks);
         SEXP forecast_R(const arma::mat& Y_T, int n_horizon, bool incl_shocks);

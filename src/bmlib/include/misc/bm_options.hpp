@@ -38,11 +38,15 @@
     #define STATS_GO_INLINE
 #endif
 
-#if !defined(_OPENMP) && !defined(BM_NO_OMP)
-    #define BM_NO_OMP
+#ifndef STATS_USE_ARMA
+    #define STATS_USE_ARMA
 #endif
 
-#ifndef BM_NO_OMP
+#if defined(_OPENMP) && !defined(BM_NO_OPENMP) && !defined(BM_USE_OPENMP)
+    #define BM_USE_OPENMP
+#endif
+
+#ifdef BM_USE_OPENMP
     #ifndef OPTIM_USE_OMP
         #define OPTIM_USE_OMP
     #endif
@@ -57,5 +61,6 @@
 #endif
 
 namespace bm {
-    static const double inf = arma::datum::inf;
+    using uint_t = unsigned int;
+    static const double inf = std::numeric_limits<double>::infinity();
 }

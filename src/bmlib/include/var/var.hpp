@@ -28,7 +28,8 @@ namespace bm
 
     #include "bvarm.hpp"
     #include "bvars.hpp"
-    #include "bvarw.hpp"
+    #include "bvarcnw.hpp"
+    #include "bvarinw.hpp"
     #include "cvar.hpp"
 
     #include "bvartvp.hpp"

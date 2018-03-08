@@ -32,9 +32,17 @@ IRF.Rcpp_bvars <- function(obj,periods=10,cumulative=FALSE,cumul_inds=NULL,var_n
              save,save_format,save_title,height,width)
 }
 
-IRF.Rcpp_bvarw <- function(obj,periods=10,cumulative=FALSE,cumul_inds=NULL,var_names=NULL,percentiles=c(.05,.50,.95),
-                           which_shock=NULL,which_response=NULL,shocks_row_order=TRUE,save=FALSE,save_format=c("pdf","eps"),
-                           save_title=NULL,height=13,width=13,...)
+IRF.Rcpp_bvarcnw <- function(obj,periods=10,cumulative=FALSE,cumul_inds=NULL,var_names=NULL,percentiles=c(.05,.50,.95),
+                             which_shock=NULL,which_response=NULL,shocks_row_order=TRUE,save=FALSE,save_format=c("pdf","eps"),
+                             save_title=NULL,height=13,width=13,...)
+{
+    .irf_var(obj,periods,cumulative,cumul_inds,var_names,percentiles,which_shock,which_response,shocks_row_order,
+             save,save_format,save_title,height,width)
+}
+
+IRF.Rcpp_bvarinw <- function(obj,periods=10,cumulative=FALSE,cumul_inds=NULL,var_names=NULL,percentiles=c(.05,.50,.95),
+                             which_shock=NULL,which_response=NULL,shocks_row_order=TRUE,save=FALSE,save_format=c("pdf","eps"),
+                             save_title=NULL,height=13,width=13,...)
 {
     .irf_var(obj,periods,cumulative,cumul_inds,var_names,percentiles,which_shock,which_response,shocks_row_order,
              save,save_format,save_title,height,width)

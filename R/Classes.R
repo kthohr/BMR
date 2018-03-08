@@ -16,6 +16,7 @@
 ##
 ################################################################################
 
+FEVD <- function(obj, ...) UseMethod("FEVD")
 forecast <- function(obj, ...) UseMethod("forecast")
 IRF <- function(obj, ...) UseMethod("IRF")
 

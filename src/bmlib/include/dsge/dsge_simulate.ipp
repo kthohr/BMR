@@ -31,7 +31,7 @@ dsge_simulate(const arma::mat& F_state, const arma::mat& G_state, const arma::ma
 
     arma::mat dsge_sim_mat(sim_periods+burnin,F_state.n_cols);
 
-    arma::mat shocks = stats::rmvnorm(sim_periods + burnin, shocks_cov);
+    arma::mat shocks = stats::rmvnorm<arma::mat>(sim_periods + burnin, arma::zeros(shocks_cov.n_rows,1), shocks_cov);
 
     //
 

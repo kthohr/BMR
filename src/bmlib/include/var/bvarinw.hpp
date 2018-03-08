@@ -20,88 +20,76 @@
   ################################################################################*/
 
 /*
- * bvars class
+ * bvarinw class
  */
 
-#ifndef _bmlib_bvars_HPP
-#define _bmlib_bvars_HPP
+#ifndef _bmlib_bvarinw_HPP
+#define _bmlib_bvarinw_HPP
 
-class bvars
+class bvarinw
 {
     public:
         bool cons_term; // if there is a constant (intercept) in the model
 
         int c_int;      // = 1 if cons_term == true
         int n;          // sample length (aka, 'T')
-        int p;          // number of lags; 'k' in Villani's notation
-        int q;          // number of external variables + c_int
-        int M;          // number of endogenous variables; 'p' in Villani's notation
-        int K;          // M*p
+        int p;          // number of lags
+        int M;          // number of endogenous variables
+        int K;          // number of coefficients in each
         int n_ext_vars; // number of 'external' variables
 
         bool only_stationary_draws = false; // discard non-stationary draws
         bool irfs_lr_restrict = false;      // impose long-run restictions on IRFs
 
-        arma::mat Y;   // beta(L) (Y_t - Psi*d_t) = e_t
-        arma::mat X;   // Lags of Y
-
-        arma::mat d;   // [d_t]
-        arma::mat d_X; // [d_{t-1},...,d_{t-p}]
-
-        arma::mat D;   // 'exogeneous' variables (including a constant), D = [d_t, - d_{t-1}, ..., -d_{t-p}]
+        arma::mat Y; // Y = X beta + e
+        arma::mat X;
+        // arma::mat Z; // vec(Y) = Z alpha + vec(e)
 
         // ML-type estimates
 
-        arma::mat psi_hat;
-        arma::mat alpha_hat;       // OLS estimate of beta
+        arma::mat alpha_hat;      // OLS estimate of alpha
         arma::mat Sigma_hat;      // OLS-based estimation of covariance matrix of 'e'
 
         // prior data
 
-        arma::mat psi_pr_mean;    // psi = vec(Psi)
-        arma::mat psi_pr_var;
-
-        arma::mat alpha_pr_mean;  // prior mean of alpha
-        arma::mat alpha_pr_var;   // prior variance of alpha
+        arma::mat alpha_pr_mean;  // prior mean
+        arma::mat alpha_pr_var;   // prior variance
 
         arma::mat Sigma_pr_scale; // prior scale matrix
         int Sigma_pr_dof;         // prior degrees of freedom
 
         // posterior data
 
-        arma::vec psi_pt_mean;    // posterior mean of psi = vec(Psi)
-        arma::mat psi_pt_var;     // posterior variance of psi
-
-        arma::vec alpha_pt_mean;  // posterior mean of alpha
-        arma::mat alpha_pt_var;   // posterior variance of alpha
+        arma::mat alpha_pt_mean;  // posterior mean
+        arma::mat alpha_pt_var;  // posterior mean
 
         int Sigma_pt_dof;         // posterior degrees of freedom
         arma::mat Sigma_pt_mean;  // posterior mean
 
-        arma::cube Psi_draws;     // posterior draws of Psi
         arma::cube beta_draws;    // posterior draws of beta
         arma::cube Sigma_draws;   // posterior draws of Sigma
+
+        arma::cube irfs;          // irfs based on the posterior draws
 
         //
         // member functions
 
-        ~bvars() = default;
-         bvars() = default;
+        ~bvarinw() = default;
+         bvarinw() = default;
 
-        bvars(const bvars&) = default;
-        bvars& operator=(const bvars&) = default;
+        bvarinw(const bvarinw&) = default;
+        bvarinw& operator=(const bvarinw&) = default;
 
-        bvars(bvars&&) = default;
-        bvars& operator=(bvars&&) = default;
-        
+        bvarinw(bvarinw&&) = default;
+        bvarinw& operator=(bvarinw&&) = default;
+
         void build(const arma::mat& data_raw, const bool cons_term_inp, const int p_inp);
         void build(const arma::mat& data_raw, const arma::mat& data_ext, const bool cons_term_inp, const int p_inp);
 
         void reset_draws();
 
-        void prior(const arma::vec& coef_prior, const double HP_1, const double HP_2, 
-                   const arma::mat& Psi_prior, const double Xi_psi, const int gamma, 
-                   const bool full_cov_prior = true);
+        void prior(const arma::vec& coef_prior, const double Xi_beta, const double Xi_Sigma, const int gamma);
+        void prior(const arma::vec& coef_prior, const arma::mat& Xi_beta, const arma::mat& Xi_Sigma, const int gamma);
 
         void gibbs(const int n_draws, const int n_burnin);
 
@@ -111,9 +99,8 @@ class bvars
         arma::cube forecast(const int horizon, const bool incl_shocks);
         arma::cube forecast(const arma::mat& Y_T, const int horizon, const bool incl_shocks);
 
-    private:
+    protected:
         void build_int(const arma::mat& data_raw, const arma::mat* data_ext, const bool cons_term_inp, const int p_inp);
-        arma::mat minn_pr_var();
         arma::cube forecast_int(const arma::mat* Y_T_inp, const int horizon, const bool incl_shocks);
 };
 

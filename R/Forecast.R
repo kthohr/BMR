@@ -26,7 +26,12 @@ forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percen
     return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvarw <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_bvarcnw <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+{
+    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+}
+
+forecast.Rcpp_bvarinw <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
     return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
 }

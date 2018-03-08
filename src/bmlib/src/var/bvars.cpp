@@ -256,7 +256,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
     arma::mat psi_pt_var_b  = arma::inv(U.t()*arma::kron(D.t()*D,inv_Sigma_b)*U + inv_psi_pr_var);
     arma::mat psi_pt_mean_b = psi_pt_var_b*(U.t()*arma::vectorise(inv_Sigma_b*xi.t()*D) + inv_psi_pr_var*psi_pr_mean);
 
-    arma::mat Psi_b = arma::trans(arma::reshape( stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b), M,q));
+    arma::mat Psi_b = arma::trans(arma::reshape( stats::rmvnorm<arma::mat>(psi_pt_mean_b, psi_pt_var_b), M,q));
 
     //
     // beta
@@ -267,7 +267,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
     arma::mat alpha_pt_var_b  = arma::inv_sympd(inv_alpha_pr_var + arma::kron(inv_Sigma_b,X_d.t()*X_d));
     arma::vec alpha_pt_mean_b = alpha_pt_var_b * (inv_alpha_pr_var*alpha_pr_mean + arma::vectorise(X_d.t()*Y_d * inv_Sigma_b));
 
-    beta_b = arma::reshape( stats::rmvnorm(alpha_pt_mean_b, alpha_pt_var_b), K,M);
+    beta_b = arma::reshape( stats::rmvnorm<arma::mat>(alpha_pt_mean_b, alpha_pt_var_b), K,M);
 
     if (only_stationary_draws)
     {
@@ -286,7 +286,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
                 loop_flag = false; // escape
             }
             else {
-                beta_b = arma::reshape( stats::rmvnorm(alpha_pt_mean_b, alpha_pt_var_b), K,M);
+                beta_b = arma::reshape( stats::rmvnorm<arma::mat>(alpha_pt_mean_b, alpha_pt_var_b), K,M);
             }
         }
     }
@@ -296,7 +296,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
 
     arma::mat epsilon = Y_d - X_d * beta_b;
 
-    Sigma_b = stats::rinvwish(Sigma_pr_scale + epsilon.t() * epsilon, Sigma_pt_dof);
+    Sigma_b = stats::rinvwish<arma::mat,double,int>(Sigma_pr_scale + epsilon.t() * epsilon, Sigma_pt_dof);
 
     //
     // begin loop
@@ -321,7 +321,7 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
         psi_pt_var_b  = arma::inv(U.t()*arma::kron(D.t()*D,inv_Sigma_b)*U + inv_psi_pr_var);
         psi_pt_mean_b = psi_pt_var_b*(U.t()*arma::vectorise(inv_Sigma_b*xi.t()*D) + inv_psi_pr_var*psi_pr_mean);
 
-        Psi_b = arma::trans(arma::reshape( stats::rmvnorm(psi_pt_mean_b, psi_pt_var_b), M,q));
+        Psi_b = arma::trans(arma::reshape( stats::rmvnorm<arma::mat>(psi_pt_mean_b, psi_pt_var_b), M,q));
 
         //
 
@@ -331,13 +331,13 @@ bm::bvars::gibbs(const int n_draws, const int n_burnin)
         alpha_pt_var_b  = arma::inv_sympd(inv_alpha_pr_var + arma::kron(inv_Sigma_b,X_d.t()*X_d));
         alpha_pt_mean_b = alpha_pt_var_b * (inv_alpha_pr_var*alpha_pr_mean + arma::vectorise(X_d.t()*Y_d * inv_Sigma_b));
 
-        beta_b = arma::reshape( stats::rmvnorm(alpha_pt_mean_b, alpha_pt_var_b), K,M);
+        beta_b = arma::reshape( stats::rmvnorm<arma::mat>(alpha_pt_mean_b, alpha_pt_var_b), K,M);
 
         //
 
         epsilon = Y_d - X_d * beta_b;
 
-        Sigma_b = stats::rinvwish(Sigma_pr_scale + epsilon.t() * epsilon, Sigma_pt_dof);
+        Sigma_b = stats::rinvwish<arma::mat,double,int>(Sigma_pr_scale + epsilon.t() * epsilon, Sigma_pt_dof);
 
         //
 
@@ -376,7 +376,7 @@ bm::bvars::IRF(const int n_irf_periods)
     arma::mat impact_mat_b(K_adj,M);
     arma::mat impact_mat_h(M,M);
 
-#ifndef BM_NO_OMP
+#ifdef BM_USE_OPENMP
     #pragma omp parallel for firstprivate(impact_mat_b,impact_mat_h)
 #endif
     for (int j=1; j <= n_draws; j++)
@@ -421,6 +421,77 @@ bm::bvars::IRF(const int n_irf_periods)
     //
 
     return irfs;
+}
+
+//
+// FEVD
+
+arma::cube
+bm::bvars::FEVD(const int n_periods)
+{
+    const int n_draws = beta_draws.n_slices;
+    const int K_adj = K - n_ext_vars;
+
+    arma::cube mse_cube(M, M, n_periods*n_draws);
+
+    //
+
+#ifdef BM_USE_OPENMP
+    #pragma omp parallel for
+#endif
+    for (uint_t j=1; j <= n_draws; j++)
+    {
+        arma::mat beta_b = beta_draws(arma::span(0,K_adj-1),arma::span(),arma::span(j-1,j-1)); // b'th draw, minus coefficients on any external variables
+
+        arma::mat Sigma_b = Sigma_draws.slice(j-1);
+        arma::mat impact_mat = arma::chol(Sigma_b,"lower");
+
+        arma::mat poly_mat = arma::zeros(M,M);
+        for (int i=1; i<=p; i++) {
+            poly_mat += arma::trans(beta_b.rows(M*(i-1), M*i - 1));
+        }
+
+        if (irfs_lr_restrict)
+        {   // long-run restrictions
+            arma::mat M_mat = arma::inv(arma::eye(M,M) - poly_mat);
+
+            impact_mat = (arma::eye(M,M) - poly_mat) * arma::chol(M_mat*Sigma_b*M_mat.t(),"lower");
+        }
+
+        arma::mat mse_mat = Sigma_b;
+        arma::mat fevd_mat = arma::pow(impact_mat,2);
+        arma::mat iter_mat = impact_mat;
+
+        arma::mat mse_slice = arma::zeros(M,M);
+
+        for (int j=0; j < M; j++) {
+            for (int k=0; k < M; k++) {
+                mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
+            }
+        }
+
+        mse_cube.slice((j-1)*n_periods) = mse_slice;
+
+        for (int i=2; i <= n_periods; i++)
+        {
+            iter_mat = poly_mat*iter_mat;
+
+            mse_mat += iter_mat * iter_mat.t();
+
+            for (int j=0; j < M; j++) {
+                for (int k=0; k < M; k++) {
+                    fevd_mat(j,k) += std::pow(iter_mat(j,k),2);
+                    mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
+                }
+            }
+
+            mse_cube.slice((j-1)*n_periods + (i-1)) = mse_slice;
+        }
+    }
+
+    //
+
+    return mse_cube;
 }
 
 //
@@ -481,7 +552,7 @@ bm::bvars::forecast_int(const arma::mat* X_T_inp, const int horizon, const bool 
             X_Th = X_T;
 
             for (int j=1; j<=horizon; j++) {
-                Y_forecast.row(j-1) = X_Th*beta_b + D_term + arma::trans(stats::rmvnorm(Sigma_b));
+                Y_forecast.row(j-1) = X_Th*beta_b + D_term + arma::trans(stats::rmvnorm<arma::mat>(arma::zeros(M,1),Sigma_b));
 
                 if (K_adj > M) {
                     X_Th(0,arma::span(M,K_adj-1)) = X_Th(0,arma::span(0,K_adj-M-1));

@@ -65,7 +65,7 @@ var_sim(const arma::mat& var_coefs, const bool cons_term, const int n_out, const
             Y.row(i) += Y.row(i-j-1) * var_coefs.rows(c_int + j*M, (j+1)*M);
         }
 
-        Y.row(i) += arma::trans(stats::rmvnorm(arma::zeros(M,1),arma::eye(M,M),true));
+        Y.row(i) += arma::trans(stats::rmvnorm<arma::mat,double>(arma::zeros(M,1),arma::eye(M,M),true));
     }
     
     Y.shed_rows(0,n_burnin-1);
