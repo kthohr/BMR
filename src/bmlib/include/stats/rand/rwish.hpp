@@ -18,7 +18,7 @@
   ##
   ################################################################################*/
 
-/* 
+/*
  * Sample from a Wishart distribution
  */
 
@@ -27,8 +27,19 @@
 
 #ifdef STATS_WITH_MATRIX_LIB
 
-template<typename mT, typename eT>
-mT rwish(const mT& Psi_par, const eT nu_par, const bool pre_chol = false);
+#ifdef STATS_USE_ARMA
+template<typename mT, typename pT,
+         typename std::enable_if<!(std::is_same<mT,arma::mat>::value)>::type* = nullptr>
+#else
+template<typename mT, typename pT>
+#endif
+mT rwish(const mT& Psi_par, const pT nu_par, const bool pre_chol = false);
+
+// specializations
+#ifdef STATS_USE_ARMA
+template<typename mT, typename eT, typename pT>
+mT rwish(const ArmaMat<eT>& Psi_par, const pT nu_par, const bool pre_chol = false);
+#endif
 
 #include "rwish.ipp"
 

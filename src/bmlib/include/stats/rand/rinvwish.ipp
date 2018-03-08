@@ -22,10 +22,16 @@
  * Sample from an inverse-Wishart distribution
  */
 
-template<typename mT, typename eT>
+#ifdef STATS_USE_ARMA
+template<typename mT, typename pT,
+         typename std::enable_if<!(std::is_same<mT,arma::mat>::value)>::type*>
+#else
+template<typename mT, typename pT>
+#endif
 mT
-rinvwish(const mT& Psi_par, const eT nu_par, const bool pre_chol)
+rinvwish(const mT& Psi_par, const pT nu_par, const bool pre_chol)
 {
+    typedef return_t<pT> eT;
     const uint_t K = mat_ops::n_rows(Psi_par);
     
     mT chol_Psi_inv;
@@ -47,7 +53,7 @@ rinvwish(const mT& Psi_par, const eT nu_par, const bool pre_chol)
     }
     
     for (uint_t i=0U; i < K; i++) {
-        A(i,i) = std::sqrt(rchisq<eT>(nu_par-i));
+        A(i,i) = std::sqrt(rchisq<eT>(eT(nu_par-i)));
     }
 
     chol_Psi_inv = chol_Psi_inv*A;
@@ -58,3 +64,34 @@ rinvwish(const mT& Psi_par, const eT nu_par, const bool pre_chol)
     
     return mat_ops::inv( mat_out_inv );
 }
+
+#ifdef STATS_USE_ARMA
+template<typename mT, typename eT, typename pT>
+mT
+rinvwish(const ArmaMat<eT>& Psi_par, const pT nu_par, const bool pre_chol)
+{
+    const uint_t K = Psi_par.n_rows;
+    
+    ArmaMat<eT> chol_Psi = (pre_chol) ? Psi_par : arma::chol(arma::inv(Psi_par),"lower"); // should be lower-triangular
+
+    //
+
+    ArmaMat<eT> A = arma::zeros(K,K);
+
+    for (uint_t i=1U; i < K; i++) {
+        for (uint_t j=0U; j < i; j++) {
+            A(i,j) = rnorm<eT>();
+        }
+    }
+    
+    for (uint_t i=0U; i < K; i++) {
+        A(i,i) = std::sqrt(rchisq<eT>(eT(nu_par-i)));
+    }
+
+    chol_Psi = chol_Psi*A;
+
+    //
+    
+    return arma::inv(chol_Psi * chol_Psi.t());
+}
+#endif
