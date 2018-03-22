@@ -368,7 +368,7 @@ bm::bvars::gibbs(const uint_t n_draws, const uint_t n_burnin)
 arma::cube
 bm::bvars::IRF(const uint_t n_irf_periods)
 {
-    const int n_draws = beta_draws.n_slices;
+    const uint_t n_draws = beta_draws.n_slices;
     const int K_adj = K;
 
     arma::cube irfs(M, M, n_irf_periods*n_draws);

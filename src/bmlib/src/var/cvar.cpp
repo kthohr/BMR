@@ -259,7 +259,7 @@ bm::cvar::IRF(const uint_t n_irf_periods)
 arma::cube
 bm::cvar::FEVD(const uint_t n_periods)
 {
-    const int n_draws = beta_draws.n_slices;
+    const uint_t n_draws = beta_draws.n_slices;
     const int K_adj = K - n_ext_vars;
 
     arma::cube mse_cube(M, M, n_periods*n_draws);
@@ -310,8 +310,8 @@ bm::cvar::FEVD(const uint_t n_periods)
 
                 mse_mat += iter_mat * iter_mat.t();
 
-                for (uint_t j=0; j < M; j++) {
-                    for (uint_t k=0; k < M; k++) {
+                for (int j=0; j < M; j++) {
+                    for (int k=0; k < M; k++) {
                         fevd_mat(j,k) += std::pow(iter_mat(j,k),2);
                         mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
                     }

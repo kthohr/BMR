@@ -426,8 +426,8 @@ bm::bvarm::FEVD(const uint_t n_periods)
 
         arma::mat mse_slice = arma::zeros(M,M);
 
-        for (uint_t j=0; j < M; j++) {
-            for (uint_t k=0; k < M; k++) {
+        for (int j=0; j < M; j++) {
+            for (int k=0; k < M; k++) {
                 mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
             }
         }
@@ -442,8 +442,8 @@ bm::bvarm::FEVD(const uint_t n_periods)
 
                 mse_mat += iter_mat * iter_mat.t();
 
-                for (uint_t j=0; j < M; j++) {
-                    for (uint_t k=0; k < M; k++) {
+                for (int j=0; j < M; j++) {
+                    for (int k=0; k < M; k++) {
                         fevd_mat(j,k) += std::pow(iter_mat(j,k),2);
                         mse_slice(j,k) = fevd_mat(j,k) / mse_mat(j,j);
                     }
