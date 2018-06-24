@@ -20,15 +20,14 @@
   ################################################################################*/
 
 /*
- * Embed a matrix
+ * bind methods; mimics R's rbind and cbind
  */
 
-#ifndef _bmlib_embed_HPP
-#define _bmlib_embed_HPP
+#ifndef _bmlib_seqvec_HPP
+#define _bmlib_seqvec_HPP
 
-arma::mat embed(const arma::mat& X, const int p);
-void embed(arma::mat &X, arma::mat &Y, const int p);
+arma::vec seqvec(const double a, const double b, const int n);
 
-#include "embed.ipp"
+#include "seqvec.ipp"
 
 #endif

@@ -46,6 +46,10 @@
     #define BM_USE_OPENMP
 #endif
 
+#ifdef BM_USE_FFTW
+    #include <fftw3.h>
+#endif
+
 #ifdef BM_USE_OPENMP
     #ifndef OPTIM_USE_OMP
         #define OPTIM_USE_OMP

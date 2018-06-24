@@ -32,12 +32,14 @@ namespace bm
 {
     #include "bind.hpp"
     #include "byrow.hpp"
+    #include "companion_form_matrix.hpp"
     #include "cube_to_mat.hpp"
     #include "embed.hpp"
-    #include "form_companion_matrix.hpp"
     #include "inside_trans.hpp"
     #include "log_GPR.hpp"
     #include "lyapunov_dbl.hpp"
+    #include "rmvnorm_trunc.hpp"
+    #include "seqvec.hpp"
     #include "uvec_linspace.hpp"
     #include "zero_rows.hpp"
 

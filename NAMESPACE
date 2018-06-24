@@ -17,7 +17,7 @@ exportClasses("Rcpp_uhlig")
 exportClasses("Rcpp_dsge_gensys")
 exportClasses("Rcpp_dsgevar_gensys")
 
-export(FEVD,IRF,forecast,mode_check,prior,gtsplot)
+export(FEVD,IRF,IRFcomp,forecast,mode_check,prior,gtsplot)
 
 exportPattern("^[[:alpha:]]+")
 

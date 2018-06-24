@@ -20,15 +20,31 @@
   ################################################################################*/
 
 /*
- * Embed a matrix
+ * build a companion form matrix: Y = A X + e
  */
 
-#ifndef _bmlib_embed_HPP
-#define _bmlib_embed_HPP
+inline
+arma::mat
+companion_form_matrix(const arma::mat& mat_inp)
+{
+    const uint_t M = mat_inp.n_cols;
+    const uint_t p = mat_inp.n_rows / M; // note that 3/2, etc cases, will default to 'floor'
 
-arma::mat embed(const arma::mat& X, const int p);
-void embed(arma::mat &X, arma::mat &Y, const int p);
+    arma::mat A_comp;
 
-#include "embed.ipp"
+    if (p > 1) {
+        const uint_t Mpm1 = M*(p-1);
+        A_comp = arma::join_cols(mat_inp.t(), arma::join_rows(arma::eye(Mpm1,Mpm1), arma::zeros(Mpm1,M)));
+    } else {
+        A_comp = mat_inp.t();
+    }
 
-#endif
+    return A_comp;
+}
+
+inline
+arma::mat
+companion_form_matrix(const arma::mat& mat_inp, const int c_int, const int K)
+{
+    return companion_form_matrix(mat_inp.rows(c_int,K-1));
+}

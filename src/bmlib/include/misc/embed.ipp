@@ -42,3 +42,25 @@ embed(const arma::mat& X, const int p)
 
     return ret;
 }
+
+inline
+void
+embed(arma::mat &X, arma::mat &Y, const int p)
+{
+	int n = X.n_rows;
+	int K = X.n_cols;
+
+    //
+	
+	arma::mat Z(n-p,K*(p+1));
+
+	for (int j=0; j <= p; j++)
+    {
+		Z.cols(j*K,(j+1)*K-1) = X.rows(p-j,n-1-j);
+	}
+
+	//
+    
+	Y = Z.cols(0,K-1);
+	X = Z.cols(K,K*(p+1)-1);
+}

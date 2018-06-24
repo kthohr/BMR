@@ -60,6 +60,7 @@ bm::bvarcnw::build_int(const arma::mat& data_raw, const arma::mat* data_ext, con
     n_ext_vars = (data_ext) ? data_ext->n_cols : 0;
 
     K = c_int + M*p + n_ext_vars;
+    K_adj = c_int + M*p;
 
     //
 
@@ -191,6 +192,12 @@ bm::bvarcnw::prior(const arma::vec& coef_prior, double HP_1_inp, double HP_3_inp
         }
     }
 
+    if (n_ext_vars > 0) {
+        for (int j=K_adj; j < K; j++) {
+            beta_pr_var(j,j) = HP_1 * HP_3;
+        }
+    }
+
     alpha_pr_var = beta_pr_var;
 
     //
@@ -225,7 +232,7 @@ bm::bvarcnw::gibbs(const uint_t n_draws)
     arma::mat beta_pt_mean = invQa_hat * (inv_beta_pr_var*beta_pr_mean + XpY);
     arma::mat alpha_hat = arma::vectorise(beta_pt_mean);
 
-    arma::mat Qe_hat_adj = arma::inv( Sigma_pr_dof*Sigma_pr_scale + beta_pr_mean*inv_beta_pr_var*beta_pr_mean.t() \
+    arma::mat Qe_hat_adj = arma::inv( Sigma_pr_dof*Sigma_pr_scale + beta_pr_mean.t()*inv_beta_pr_var*beta_pr_mean \
                                         + Y.t()*Y - beta_pt_mean.t() * Qa_hat * beta_pt_mean );
 
     arma::mat chol_Qe_hat_adj = arma::chol(Qe_hat_adj,"lower");
@@ -259,12 +266,14 @@ bm::bvarcnw::gibbs(const uint_t n_draws)
 
             while (loop_flag)
             {
-                arma::mat poly_mat = arma::zeros(M,M);
-                for (int i=1; i<=p; i++) {
-                    poly_mat += arma::trans(beta_draw.rows(c_int + M*(i-1), c_int + M*i - 1));
-                }
+                // arma::mat poly_mat = arma::zeros(M,M);
+                // for (int i=1; i<=p; i++) {
+                //     poly_mat += arma::trans(beta_draw.rows(c_int + M*(i-1), c_int + M*i - 1));
+                // }
 
-                arma::cx_vec eigvals = arma::eig_gen(poly_mat);
+                // arma::cx_vec eigvals = arma::eig_gen(poly_mat);
+
+                arma::cx_vec eigvals = arma::eig_gen(companion_form_matrix(beta_draw,c_int,K_adj));
 
                 if (arma::abs(eigvals).max() < 1.0) {
                     loop_flag = false; // escape
@@ -295,7 +304,6 @@ arma::cube
 bm::bvarcnw::IRF(const uint_t n_irf_periods)
 {
     const uint_t n_draws = beta_draws.n_slices;
-    const int K_adj = K - n_ext_vars;
 
     arma::cube irfs(M, M, n_irf_periods*n_draws);
 

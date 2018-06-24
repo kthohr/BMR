@@ -163,7 +163,8 @@ bm::bvarm::prior_int(const arma::vec& coef_prior, const int* var_type_inp, const
         X_AR.col(0).fill(1);
     }
 
-    for (int i=0; i < M; i++) {
+    for (int i=0; i < M; i++)
+    {
         Y_AR = Y.col(i);
 
         for (int j=0; j < p; j++) {

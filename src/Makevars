@@ -27,7 +27,8 @@ MCMC_SRC_DIR = $(BM_SRC_DIR)/mcmc
 SOURCES_MCMC= $(MCMC_SRC_DIR)/de.cpp
 OBJECTS_MCMC= $(SOURCES_MCMC:.cpp=.o)
 
-SOURCES_OPTIM= $(OPTIM_SRC_DIR)/unconstrained/de.cpp
+SOURCES_OPTIM= $(OPTIM_SRC_DIR)/line_search/more_thuente.cpp $(OPTIM_SRC_DIR)/unconstrained/bfgs.cpp \
+               $(OPTIM_SRC_DIR)/unconstrained/de.cpp
 OBJECTS_OPTIM= $(SOURCES_OPTIM:.cpp=.o)
 
 # core BM files
@@ -42,7 +43,8 @@ OBJECTS_BM_LRES= $(SOURCES_BM_LRES:.cpp=.o)
 
 OBJECTS_BM= $(OBJECTS_OPTIM) $(OBJECTS_MCMC) $(OBJECTS_BM_VAR) $(OBJECTS_BM_FILT) $(OBJECTS_BM_LRES)
 
-SOURCES_MODULES= ./modules/bvarm_R.cpp ./modules/bvars_R.cpp ./modules/bvarinw_R.cpp ./modules/bvarcnw_R.cpp \
+SOURCES_MODULES= ./modules/bvarm_R.cpp ./modules/bvars_R.cpp \
+                 ./modules/bvarinw_R.cpp ./modules/bvarcnw_R.cpp \
                  ./modules/bvartvp_R.cpp ./modules/cvar_R.cpp \
                  ./modules/gensys_R.cpp ./modules/uhlig_R.cpp \
                  ./modules/dsge_gensys_R.cpp ./modules/dsge_uhlig_R.cpp \

@@ -20,20 +20,15 @@
   ################################################################################*/
 
 /*
- * build a companion form matrix
+ * build a companion form matrix: Y = A X + e
  */
 
-inline
-arma::mat
-form_companion_matrix(const arma::mat& A, const int K, const int p)
-{
-    arma::mat A_comp;
+#ifndef _bmlib_companion_form_matrix_HPP
+#define _bmlib_companion_form_matrix_HPP
 
-    if (p > 1) {
-        A_comp = arma::join_cols(arma::trans(A), arma::join_rows(arma::eye(K*(p-1),K*(p-1)), arma::zeros(K*(p-1), K)));
-    } else {
-        A_comp = A;
-    }
+arma::mat companion_form_matrix(const arma::mat& mat_inp);
+arma::mat companion_form_matrix(const arma::mat& mat_inp, const int c_int, const int K);
 
-    return A_comp;
-}
+#include "companion_form_matrix.ipp"
+
+#endif

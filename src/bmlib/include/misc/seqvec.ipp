@@ -20,15 +20,48 @@
   ################################################################################*/
 
 /*
- * Embed a matrix
+ * Generate a sequence (of length n) from a to b.
+ * Return size is n x 1 (column vector).
  */
 
-#ifndef _bmlib_embed_HPP
-#define _bmlib_embed_HPP
+inline
+arma::vec
+seqvec(const double a, const double b, const int n)
+{
+    if (n <= 1) {
+        printf("seqvec: n needs to be > 1\n.");
+        arma::vec X;
 
-arma::mat embed(const arma::mat& X, const int p);
-void embed(arma::mat &X, arma::mat &Y, const int p);
+        return X;
+    }
 
-#include "embed.ipp"
+    //
 
-#endif
+    arma::vec X(n);
+
+    if (n == 2) {
+        arma::vec X(2);
+
+        if (b >= a) {
+            X(0) = a; X(1) = b;
+        } else {
+            X(0) = b; X(1) = a;
+        }
+
+        return X;
+    }
+
+    if (b != a) {
+        double seqby = (b - a)/(n-1);
+        //
+        for(int ll = 0; ll < n; ll++){
+            X(ll) = a + ll*seqby;
+        }
+    } else {
+        X.fill(a);
+    }
+
+    //
+
+    return X;
+}
