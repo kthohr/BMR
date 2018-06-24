@@ -20,8 +20,8 @@
  * pdf of the Multivariate Normal distribution
  */
 
-#ifndef _statslib_dmvnorm_HPP
-#define _statslib_dmvnorm_HPP
+#ifndef _mcmc_statslib_dmvnorm_HPP
+#define _mcmc_statslib_dmvnorm_HPP
 
 #ifndef GCEM_LOG_2PI
     #define GCEM_LOG_2PI 1.83787706640934548356L
