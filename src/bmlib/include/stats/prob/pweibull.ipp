@@ -30,26 +30,35 @@ statslib_constexpr
 T
 pweibull_int(const T x, const T shape_par, const T scale_par)
 {
-    return ( T(1.0) - stmath::exp(-stmath::pow(x,shape_par)) );
+    return ( T(1) - stmath::exp(-stmath::pow(x,shape_par)) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-pweibull(const T x, const T shape_par, const T scale_par, const bool log_form)
+pweibull_check(const T x, const T shape_par, const T scale_par, const bool log_form)
 {
     return ( ( (shape_par < STLIM<T>::epsilon()) || (scale_par < STLIM<T>::epsilon()) ) ? STLIM<T>::quiet_NaN() :
              //
-             x < STLIM<T>::epsilon() ? (log_form == false ? T(0.0) : - STLIM<T>::infinity()) :
+             x < STLIM<T>::epsilon() ? (log_form == false ? T(0) : - STLIM<T>::infinity()) :
              //
              log_form == false ? pweibull_int(x/scale_par,shape_par,scale_par) : 
                                  stmath::log(pweibull_int(x/scale_par,shape_par,scale_par)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+pweibull(const Ta x, const Tb mu_par, const Tb sigma_par, const bool log_form)
+{
+    return pweibull_check<return_t<Ta>>(x,mu_par,sigma_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 pweibull_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb scale_par, const bool log_form, 
                    Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -65,6 +74,7 @@ pweibull_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, c
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 pweibull(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {
@@ -78,12 +88,13 @@ pweibull(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par, const boo
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 pweibull(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    pweibull_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,log_form,mat_out.data(),X.rows()*X.columns());
+    pweibull_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -91,6 +102,7 @@ pweibull(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par, const
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 pweibull(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {

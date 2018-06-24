@@ -28,7 +28,7 @@
 template<typename T>
 statslib_constexpr
 T
-dpois_int(const int x, const T rate_par)
+dpois_int(const uint_t x, const T rate_par)
 {
     return ( x * stmath::log(rate_par) - rate_par - stmath::log( T(gcem::factorial(x)) ) );
 }
@@ -36,15 +36,24 @@ dpois_int(const int x, const T rate_par)
 template<typename T>
 statslib_constexpr
 T
-dpois(const int x, const T rate_par, const bool log_form)
+dpois_check(const uint_t x, const T rate_par, const bool log_form)
 {
     return ( log_form == true ? dpois_int(x,rate_par) : stmath::exp(dpois_int(x,rate_par)) );
+}
+
+template<typename T>
+statslib_constexpr
+return_t<T>
+dpois(const uint_t x, const T rate_par, const bool log_form)
+{
+    return dpois_check<return_t<T>>(x,rate_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dpois_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const bool log_form, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -54,12 +63,13 @@ dpois_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const
 #endif
     for (uint_t j=0U; j < num_elem; j++)
     {
-        vals_out[j] = dpois(vals_in[j],rate_par,log_form);
+        vals_out[j] = dpois(uint_t(vals_in[j]),rate_par,log_form);
     }
 }
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dpois(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 {
@@ -73,12 +83,13 @@ dpois(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dpois(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dpois_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dpois_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -86,6 +97,7 @@ dpois(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dpois(const EigMat<Ta,iTr,iTc>& X, const Tb rate_par, const bool log_form)
 {

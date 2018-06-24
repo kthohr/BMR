@@ -25,30 +25,49 @@
 #ifndef _gcem_acos_HPP
 #define _gcem_acos_HPP
 
+namespace internal
+{
+
 template<typename T>
 constexpr
 T
-acos_int(const T x)
+acos_compute(const T x)
 {
-    return ( // only defined on [-1,1]
-             abs(x) > T(1.0)                        ? GCLIM<T>::quiet_NaN() :
-             // indistinguishable from one or zero
-             GCLIM<T>::epsilon() > abs(x -  T(1.0)) ? T(0.0) :
-             GCLIM<T>::epsilon() > abs(x)           ? T(GCEM_HALF_PI) :
-             // else
-             atan( sqrt(T(1.0) - x*x)/x ) );
+    return( // only defined on [-1,1]
+            abs(x) > T(1) ? \
+                GCLIM<T>::quiet_NaN() :
+            // indistinguishable from one or zero
+            GCLIM<T>::epsilon() > abs(x -  T(1)) ? \
+                T(0) :
+            GCLIM<T>::epsilon() > abs(x) ? \
+                T(GCEM_HALF_PI) :
+            // else
+                atan( sqrt(T(1) - x*x)/x ) );
 }
+
+template<typename T>
+constexpr
+T
+acos_check(const T x)
+{
+    return( x > T(0) ? \
+            // if
+                acos_compute(x) :
+            // else 
+                T(GCEM_PI) - acos_compute(-x) );
+}
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 acos(const T x)
 {
-    return ( x > T(0.0) ? \
-             // if
-                acos_int(return_t<T>(x)) :
-             // else 
-                return_t<T>(GCEM_PI) - acos_int(-return_t<T>(x)) );
+    return internal::acos_check<return_t<T>>(x);
 }
 
 #endif

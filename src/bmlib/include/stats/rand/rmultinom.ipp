@@ -23,6 +23,7 @@
  */
 
 template<typename mT, typename eT>
+statslib_inline
 mT
 rmultinom(const mT& prob)
 {
@@ -32,12 +33,10 @@ rmultinom(const mT& prob)
 
     //
 
-    eT p_j = 1.0;
-
     mT ret(n_prob,1);
     const mT prob_csum = mat_ops::cumsum(prob);
 
-    p_j = prob(0,0);
+    eT p_j = prob(0,0);
     ret(0,0) = rbinom(n_j,p_j);
 
     //
@@ -46,7 +45,7 @@ rmultinom(const mT& prob)
     
     for (uint_t j = 1U; j < n_prob; j++)
     {
-        p_j = prob(j,0) / (eT(1.0) - prob_csum(j-1,0));
+        p_j = prob(j,0) / (eT(1) - prob_csum(j-1,0));
         n_j = n_prob - ret_sum;
         
         ret(j,0) = rbinom(n_j,p_j);

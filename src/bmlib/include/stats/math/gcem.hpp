@@ -25,8 +25,9 @@
 
 namespace gcem
 {
+    #include "gcem_incl/quadrature/gauss_legendre_50.hpp"
+
     #include "gcem_incl/abs.hpp"
-    #include "gcem_incl/factorial.hpp"
     #include "gcem_incl/is_odd.hpp"
     #include "gcem_incl/max.hpp"
     #include "gcem_incl/min.hpp"
@@ -62,6 +63,7 @@ namespace gcem
     #include "gcem_incl/binomial_coef.hpp"
     #include "gcem_incl/lgamma.hpp"
     #include "gcem_incl/tgamma.hpp"
+    #include "gcem_incl/factorial.hpp"
     #include "gcem_incl/lbeta.hpp"
     #include "gcem_incl/beta.hpp"
     #include "gcem_incl/log_multi_gamma.hpp"

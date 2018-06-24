@@ -28,16 +28,25 @@
 template<typename T>
 statslib_constexpr
 T
-dlnorm(const T x, const T mu_par, const T sigma_par, const bool log_form)
+dlnorm_check(const T x, const T mu_par, const T sigma_par, const bool log_form)
 {
     return ( log_form == true ? dnorm(stmath::log(x),mu_par,sigma_par,true) - stmath::log(x) :
                                 dnorm(stmath::log(x),mu_par,sigma_par,false) / x );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dlnorm(const Ta x, const Tb mu_par, const Tb sigma_par, const bool log_form)
+{
+    return dlnorm_check<return_t<Ta>>(x,mu_par,sigma_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dlnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, const bool log_form, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -53,6 +62,7 @@ dlnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dlnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
@@ -66,12 +76,13 @@ dlnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool log
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dlnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dlnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dlnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -79,6 +90,7 @@ dlnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const bool
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dlnorm(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {

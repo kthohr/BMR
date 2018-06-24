@@ -28,6 +28,9 @@
 #ifndef _gcem_lgamma_HPP
 #define _gcem_lgamma_HPP
 
+namespace internal
+{
+
 // P. Godfrey's coefficients:
 //
 //  0.99999999999999709182
@@ -50,7 +53,7 @@ constexpr
 long double
 lgamma_coef_term(const long double x)
 {
-    return (    0.99999999999999709182L             + 57.156235665862923517L      / (x+1)  \
+    return(     0.99999999999999709182L             + 57.156235665862923517L      / (x+1)  \
              - 59.597960355475491248L      / (x+2)  + 14.136097974741747174L      / (x+3)  \
              -  0.49191381609762019978L    / (x+4)  +   .33994649984811888699e-4L / (x+5)  \
              +   .46523628927048575665e-4L / (x+6)  -   .98374475304879564677e-4L / (x+7)  \
@@ -65,7 +68,7 @@ constexpr
 T
 lgamma_term_2(const T x)
 { //
-    return ( T(GCEM_LOG_SQRT_2PI) + log(T(lgamma_coef_term(x))) );
+    return( T(GCEM_LOG_SQRT_2PI) + log(T(lgamma_coef_term(x))) );
 }
 
 template<typename T>
@@ -73,15 +76,15 @@ constexpr
 T
 lgamma_term_1(const T x)
 {   // note: 607/128 + 0.5 = 5.2421875
-    return ( (x + T(0.5))*log(x + T(5.2421875L)) - (x + T(5.2421875L)) );
+    return( (x + T(0.5))*log(x + T(5.2421875L)) - (x + T(5.2421875L)) );
 }
 
 template<typename T>
 constexpr
 T
-lgamma_int(const T x)
+lgamma_begin(const T x)
 {   // returns lngamma(x+1)
-    return ( lgamma_term_1(x) + lgamma_term_2(x) );
+    return( lgamma_term_1(x) + lgamma_term_2(x) );
 }
 
 template<typename T>
@@ -89,19 +92,26 @@ constexpr
 T
 lgamma_check(const T x)
 {
-    return ( // indistinguishable from one or zero
-             GCLIM<T>::epsilon() > abs(x - T(1.0)) ? T(0.0) :
-             GCLIM<T>::epsilon() > abs(x)          ? GCLIM<T>::infinity() :
-             //
-             lgamma_int(x - T(1.0)) );
+    return( // indistinguishable from one or <= zero
+            GCLIM<T>::epsilon() > abs(x - T(1)) ? \
+                T(0) :
+            GCLIM<T>::epsilon() > x ? \
+                GCLIM<T>::infinity() :
+            // else
+                lgamma_begin(x - T(1)) );
 }
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 lgamma(const T x)
 {
-    return lgamma_check(return_t<T>(x));
+    return internal::lgamma_check<return_t<T>>(x);
 }
 
 #endif

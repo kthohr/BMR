@@ -30,7 +30,7 @@ statslib_constexpr
 T
 qf_int_adj(const T I_inv_val, const T ab_ratio)
 {
-    return ( I_inv_val / (ab_ratio*(T(1.0) - I_inv_val)) ) ;
+    return ( I_inv_val / (ab_ratio*(T(1) - I_inv_val)) ) ;
 }
 
 template<typename T>
@@ -44,17 +44,26 @@ qf_int(const T p, const T a_par, const T b_par)
 template<typename T>
 statslib_constexpr
 T
-qf(const T p, const T df1_par, const T df2_par)
+qf_check(const T p, const T df1_par, const T df2_par)
 {
-    return ( STLIM<T>::epsilon() > p ? T(0.0) :
+    return ( STLIM<T>::epsilon() > p ? T(0) :
              //
-             qf_int(p,df1_par/T(2.0),df2_par/T(2.0)) );
+             qf_int(p,df1_par/T(2),df2_par/T(2)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+Ta
+qf(const Ta p, const Tb df1_par, const Tb df2_par)
+{
+    return qf_check<Ta>(p,df1_par,df2_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qf_int(const Ta* __stats_pointer_settings__ vals_in, const Tb df1_par, const Tb df2_par, 
              Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -70,6 +79,7 @@ qf_int(const Ta* __stats_pointer_settings__ vals_in, const Tb df1_par, const Tb 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qf(const ArmaMat<Ta>& X, const Tb df1_par, const Tb df2_par)
 {
@@ -83,12 +93,13 @@ qf(const ArmaMat<Ta>& X, const Tb df1_par, const Tb df2_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qf(const BlazeMat<Ta,To>& X, const Tb df1_par, const Tb df2_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qf_int<Ta,Tb,Tc>(X.data(),df1_par,df2_par,mat_out.data(),X.rows()*X.columns());
+    qf_int<Ta,Tb,Tc>(X.data(),df1_par,df2_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -96,6 +107,7 @@ qf(const BlazeMat<Ta,To>& X, const Tb df1_par, const Tb df2_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qf(const EigMat<Ta,iTr,iTc>& X, const Tb df1_par, const Tb df2_par)
 {

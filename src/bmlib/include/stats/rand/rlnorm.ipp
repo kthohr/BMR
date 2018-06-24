@@ -23,33 +23,70 @@
  */
 
 template<typename T>
+statslib_inline
 T
-rlnorm(const T mu_par, const T sigma_par)
+rlnorm_int(const T mu_par, const T sigma_par, rand_engine_t& engine)
 {
-    return stmath::exp( rnorm(mu_par,sigma_par) );
+    return stmath::exp( rnorm(mu_par,sigma_par,engine) );
 }
 
 template<typename T>
+statslib_inline
+return_t<T>
+rlnorm(const T mu_par, const T sigma_par, rand_engine_t& engine)
+{
+    return rlnorm_int<return_t<T>>(mu_par,sigma_par,engine);
+}
+
+template<typename T>
+statslib_inline
+return_t<T>
+rlnorm(const T mu_par, const T sigma_par, uint_t seed_val)
+{
+    rand_engine_t engine(seed_val);
+    return rlnorm_int<return_t<T>>(mu_par,sigma_par,engine);
+}
+
+template<typename T>
+statslib_inline
 void
 rlnorm_int(const T mu_par, const T sigma_par, T* vals_out, const uint_t num_elem)
 {
 #ifdef STATS_USE_OPENMP
+    uint_t n_threads = omp_get_max_threads();
+
+    std::vector<rand_engine_t> engines;
+
+    for (uint_t k=0; k < n_threads; k++)
+    {
+        engines.push_back(rand_engine_t(std::random_device{}()));
+    }
+
     #pragma omp parallel for
-#endif
     for (uint_t j=0U; j < num_elem; j++)
     {
-        vals_out[j] = rlnorm(mu_par,sigma_par);
+        uint_t thread_id = omp_get_thread_num();
+        vals_out[j] = rlnorm(mu_par,sigma_par,engines[thread_id]);
     }
+#else
+    rand_engine_t engine(std::random_device{}());
+
+    for (uint_t j=0U; j < num_elem; j++)
+    {
+        vals_out[j] = rlnorm(mu_par,sigma_par,engine);
+    }
+#endif
 }
 
 #ifdef STATS_WITH_MATRIX_LIB
 template<typename mT, typename eT>
+statslib_inline
 mT
 rlnorm(const uint_t n, const uint_t k, const eT mu_par, const eT sigma_par)
 {
     mT mat_out(n,k);
 
-    rlnorm_int(mu_par,sigma_par,mat_ops::get_mem_ptr(mat_out),n*k);
+    rlnorm_int(mu_par,sigma_par,mat_ops::get_mem_ptr(mat_out),n*mat_ops::spacing(mat_out));
 
     return mat_out;
 }

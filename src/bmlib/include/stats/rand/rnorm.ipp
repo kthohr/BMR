@@ -26,43 +26,80 @@
 // single draw
 
 template<typename T>
+statslib_inline
 T
-rnorm(const T mu_par, const T sigma_par)
+rnorm_int(const T mu_par, const T sigma_par, rand_engine_t& engine)
 {
-    std::mt19937_64 engine(std::random_device{}());
-    std::normal_distribution<T> norm_dist(T(0.0),T(1.0));
+    std::normal_distribution<T> norm_dist(T(0),T(1));
 
     return mu_par + sigma_par*norm_dist(engine);
 }
 
 template<typename T>
-T
-rnorm()
+statslib_inline
+return_t<T>
+rnorm(const T mu_par, const T sigma_par, rand_engine_t& engine)
 {
-    return rnorm(T(0.0),T(1.0));
+    return rnorm_int<return_t<T>>(mu_par,sigma_par,engine);
 }
 
 template<typename T>
+statslib_inline
+return_t<T>
+rnorm(const T mu_par, const T sigma_par, uint_t seed_val)
+{
+    rand_engine_t engine(seed_val);
+    return rnorm_int<return_t<T>>(mu_par,sigma_par,engine);
+}
+
+template<typename T>
+statslib_inline
+T
+rnorm()
+{
+    return rnorm(T(0),T(1));
+}
+
+template<typename T>
+statslib_inline
 void
 rnorm_int(const T mu_par, const T sigma_par, T* vals_out, const uint_t num_elem)
 {
 #ifdef STATS_USE_OPENMP
+    uint_t n_threads = omp_get_max_threads();
+
+    std::vector<rand_engine_t> engines;
+
+    for (uint_t k=0; k < n_threads; k++)
+    {
+        engines.push_back(rand_engine_t(std::random_device{}()));
+    }
+
     #pragma omp parallel for
-#endif
     for (uint_t j=0U; j < num_elem; j++)
     {
-        vals_out[j] = rnorm(mu_par,sigma_par);
+        uint_t thread_id = omp_get_thread_num();
+        vals_out[j] = rnorm(mu_par,sigma_par,engines[thread_id]);
     }
+#else
+    rand_engine_t engine(std::random_device{}());
+
+    for (uint_t j=0U; j < num_elem; j++)
+    {
+        vals_out[j] = rnorm(mu_par,sigma_par,engine);
+    }
+#endif
 }
 
 #ifdef STATS_WITH_MATRIX_LIB
 template<typename mT, typename eT>
+statslib_inline
 mT
 rnorm(const uint_t n, const uint_t k, const eT mu_par, const eT sigma_par)
 {
     mT mat_out(n,k);
 
-    rnorm_int(mu_par,sigma_par,mat_ops::get_mem_ptr(mat_out),n*k);
+    rnorm_int(mu_par,sigma_par,mat_ops::get_mem_ptr(mat_out),n*mat_ops::spacing(mat_out));
 
     return mat_out;
 }

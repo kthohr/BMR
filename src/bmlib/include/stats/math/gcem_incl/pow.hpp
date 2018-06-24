@@ -34,16 +34,17 @@ pow_dbl(const T base, const T exp_term)
 }
 
 //
+// main function
 
 template<typename Ta, typename Tb>
 constexpr
 Ta
 pow(const Ta base, const Tb exp_term)
 {
-    return ( std::is_integral<Tb>::value ? \
-             // if
+    return( std::is_integral<Tb>::value ? \
+            // if
                 pow_integral(base,exp_term) :
-             // else
+            // else
                 pow_dbl(base,Ta(exp_term)) );
 }
 

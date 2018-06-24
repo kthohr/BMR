@@ -20,19 +20,20 @@
 
 /*
  * compile-time cosine function using tan(x/2)
- * 
- * see eq. 5.4.8 in Numerical Recipes
  */
 
 #ifndef _gcem_cos_HPP
 #define _gcem_cos_HPP
 
+namespace internal
+{
+
 template<typename T>
 constexpr
 T
-cos_int(const T x)
+cos_compute(const T x)
 {
-    return (T(1.0) - x*x)/(T(1.0) + x*x);
+    return( T(1) - x*x)/(T(1) + x*x );
 }
 
 template<typename T>
@@ -40,18 +41,24 @@ constexpr
 T
 cos_check(const T x)
 {
-    return ( // indistinguishable from 0
-             GCLIM<T>::epsilon() > abs(x) ? T(1.0) :
-             // else
-             cos_int( tan(x/T(2.0)) ) );
+    return( // indistinguishable from 0
+            GCLIM<T>::epsilon() > abs(x) ? 
+                T(1) :
+            // else
+                cos_compute( tan(x/T(2)) ) );
 }
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 cos(const T x)
 {
-    return cos_check(return_t<T>(x));
+    return internal::cos_check<return_t<T>>(x);
 }
 
 #endif

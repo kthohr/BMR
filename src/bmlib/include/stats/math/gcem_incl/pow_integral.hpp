@@ -25,29 +25,44 @@
 #ifndef _gcem_pow_integral_HPP
 #define _gcem_pow_integral_HPP
 
+namespace internal
+{
+
 // integral-valed powers
 
 template<typename Ta, typename Tb>
 constexpr
 Ta
-pow_integral_int(const Ta base, const Tb exp_term)
+pow_integral_compute(const Ta base, const Tb exp_term)
 {
-    return ( exp_term == Tb(1) ? base : 
-             exp_term == Tb(0) ? Ta(1.0) : 
-             //
-             exp_term == GCLIM<Tb>::min() ? Ta(0.0) :
-             exp_term == GCLIM<Tb>::max() ? GCLIM<Ta>::infinity() :
-             //
-             exp_term < Tb(0) ? Ta(1.0) / pow_integral_int(base, - exp_term) : 
-                                base*pow_integral_int(base, exp_term - 1) );
+    return( exp_term == Tb(1) ? \
+                base :
+            exp_term == Tb(0) ? \
+                Ta(1) :
+            // overflow
+            exp_term == GCLIM<Tb>::min() ? \
+                Ta(0) :
+            exp_term == GCLIM<Tb>::max() ? \
+                GCLIM<Ta>::infinity() :
+            // else
+                exp_term < Tb(0) ? \
+                //
+                    Ta(1) / pow_integral_compute(base, - exp_term) : 
+                //
+                    base*pow_integral_compute(base, exp_term - 1) );
 }
+
+}
+
+//
+// main function
 
 template<typename Ta, typename Tb>
 constexpr
 return_t<Ta>
 pow_integral(const Ta base, const Tb exp_term)
 {
-    return pow_integral_int(return_t<Ta>(base),exp_term);
+    return internal::pow_integral_compute(return_t<Ta>(base),exp_term);
 }
 
 #endif

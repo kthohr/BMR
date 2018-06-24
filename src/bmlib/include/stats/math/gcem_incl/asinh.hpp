@@ -25,23 +25,32 @@
 #ifndef _gcem_asinh_HPP
 #define _gcem_asinh_HPP
 
+namespace internal
+{
+
 template<typename T>
 constexpr
 T
-asinh_int(const T x)
+asinh_compute(const T x)
 {
-    return ( // indistinguishable from zero
-             GCLIM<T>::epsilon() > abs(x) ? T(0.0) :
-             // else
-             log( x + sqrt(x*x + T(1.0)) ) );
+    return( // indistinguishable from zero
+            GCLIM<T>::epsilon() > abs(x) ? \
+                T(0) :
+            // else
+                log( x + sqrt(x*x + T(1)) ) );
 }
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 asinh(const T x)
 {
-    return asinh_int(return_t<T>(x));
+    return internal::asinh_compute<return_t<T>>(x);
 }
 
 

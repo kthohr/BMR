@@ -30,13 +30,14 @@ statslib_constexpr
 Tb
 qbern(const Ta p, const Ta prob_par)
 {
-    return ( p > (Ta(1.0) - prob_par) ? Tb(1) : Tb(0) );
+    return ( p > (Ta(1) - prob_par) ? Tb(1) : Tb(0) );
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qbern_int(const Ta* __stats_pointer_settings__ vals_in, const Tb prob_par,
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -52,6 +53,7 @@ qbern_int(const Ta* __stats_pointer_settings__ vals_in, const Tb prob_par,
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qbern(const ArmaMat<Ta>& X, const Tb prob_par)
 {
@@ -65,12 +67,13 @@ qbern(const ArmaMat<Ta>& X, const Tb prob_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qbern(const BlazeMat<Ta,To>& X, const Tb prob_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qbern_int<Ta,Tb,Tc>(X.data(),prob_par,mat_out.data(),X.rows()*X.columns());
+    qbern_int<Ta,Tb,Tc>(X.data(),prob_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -78,6 +81,7 @@ qbern(const BlazeMat<Ta,To>& X, const Tb prob_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qbern(const EigMat<Ta,iTr,iTc>& X, const Tb prob_par)
 {

@@ -31,22 +31,31 @@ T
 dchisq_int(const T x, const T dof_par)
 {
     return ( - stmath::lgamma(0.5*dof_par) - T(0.5)*dof_par*GCEM_LOG_2 \
-                + (T(0.5)*dof_par - T(1.0))*stmath::log(x) - x / 2.0 );
+                + (T(0.5)*dof_par - T(1))*stmath::log(x) - x / 2.0 );
 }
 
 template<typename T>
 statslib_constexpr
 T
-dchisq(const T x, const T dof_par, const bool log_form)
+dchisq_check(const T x, const T dof_par, const bool log_form)
 {
     return ( log_form == true ? dchisq_int(x,dof_par) : 
                                 stmath::exp(dchisq_int(x,dof_par)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dchisq(const Ta x, const Tb dof_par, const bool log_form)
+{
+    return dchisq_check<return_t<Ta>>(x,dof_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dchisq_int(const Ta* __stats_pointer_settings__ vals_in, const Tb dof_par, const bool log_form, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -62,6 +71,7 @@ dchisq_int(const Ta* __stats_pointer_settings__ vals_in, const Tb dof_par, const
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dchisq(const ArmaMat<Ta>& X, const Tb dof_par, const bool log_form)
 {
@@ -75,12 +85,13 @@ dchisq(const ArmaMat<Ta>& X, const Tb dof_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dchisq(const BlazeMat<Ta,To>& X, const Tb dof_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dchisq_int<Ta,Tb,Tc>(X.data(),dof_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dchisq_int<Ta,Tb,Tc>(X.data(),dof_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -88,6 +99,7 @@ dchisq(const BlazeMat<Ta,To>& X, const Tb dof_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dchisq(const EigMat<Ta,iTr,iTc>& X, const Tb dof_par, const bool log_form)
 {

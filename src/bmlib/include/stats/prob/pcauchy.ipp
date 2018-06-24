@@ -36,16 +36,25 @@ pcauchy_int(const T z)
 template<typename T>
 statslib_constexpr
 T
-pcauchy(const T x, const T mu_par, const T sigma_par, const bool log_form)
+pcauchy_check(const T x, const T mu_par, const T sigma_par, const bool log_form)
 {
     return ( log_form == true ? stmath::log(pcauchy_int((x-mu_par)/sigma_par)) :
                                 pcauchy_int((x-mu_par)/sigma_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+pcauchy(const Ta x, const Tb mu_par, const Tb sigma_par, const bool log_form)
+{
+    return pcauchy_check<return_t<Ta>>(x,mu_par,sigma_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 pcauchy_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, const bool log_form, 
                   Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ pcauchy_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 pcauchy(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ pcauchy(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool lo
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 pcauchy(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    pcauchy_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.columns());
+    pcauchy_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ pcauchy(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const boo
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 pcauchy(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {

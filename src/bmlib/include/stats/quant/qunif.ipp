@@ -33,18 +33,19 @@ qunif_int(const T p, const T a_par, const T b_par)
     return ( a_par + p*(b_par-a_par) );
 }
 
-template<typename T>
+template<typename Ta, typename Tb>
 statslib_constexpr
-T
-qunif(const T p, const T a_par, const T b_par)
+Ta
+qunif(const Ta p, const Tb a_par, const Tb b_par)
 {
-    return ( qunif_int(p,a_par,b_par) );
+    return qunif_int<Ta>(p,a_par,b_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qunif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb b_par, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -60,6 +61,7 @@ qunif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qunif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par)
 {
@@ -73,12 +75,13 @@ qunif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qunif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qunif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,mat_out.data(),X.rows()*X.columns());
+    qunif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -86,6 +89,7 @@ qunif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qunif(const EigMat<Ta,iTr,iTc>& X, const Tb a_par, const Tb b_par)
 {

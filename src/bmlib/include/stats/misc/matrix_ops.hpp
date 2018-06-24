@@ -30,6 +30,7 @@ namespace mat_ops {
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 T*
 get_mem_ptr(arma::Mat<T>& X)
 {
@@ -40,6 +41,7 @@ get_mem_ptr(arma::Mat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta*
 get_mem_ptr(BlazeMat<Ta,Tb>& X)
 {
@@ -50,6 +52,7 @@ get_mem_ptr(BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta*
 get_mem_ptr(EigMat<Ta,iTr,iTc>& X)
 {
@@ -63,6 +66,7 @@ get_mem_ptr(EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 uint_t
 n_cols(const ArmaMat<T>& X)
 {
@@ -72,6 +76,7 @@ n_cols(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 uint_t
 n_cols(const BlazeMat<Ta,Tb>& X)
 {
@@ -81,6 +86,7 @@ n_cols(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 uint_t
 n_cols(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -93,6 +99,7 @@ n_cols(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 uint_t
 n_rows(const ArmaMat<T>& X)
 {
@@ -102,6 +109,7 @@ n_rows(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 uint_t
 n_rows(const BlazeMat<Ta,Tb>& X)
 {
@@ -111,6 +119,7 @@ n_rows(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 uint_t
 n_rows(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -123,6 +132,7 @@ n_rows(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 uint_t
 n_elem(const ArmaMat<T>& X)
 {
@@ -132,6 +142,7 @@ n_elem(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 uint_t
 n_elem(const BlazeMat<Ta,Tb>& X)
 {
@@ -141,6 +152,7 @@ n_elem(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 uint_t
 n_elem(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -149,10 +161,79 @@ n_elem(const EigMat<Ta,iTr,iTc>& X)
 #endif
 
 //
+// get the spacing dimensions
+
+#ifdef STATS_USE_ARMA
+template<typename T>
+statslib_inline
+uint_t
+spacing(const ArmaMat<T>& X)
+{
+    return n_cols(X);
+}
+#endif
+
+#ifdef STATS_USE_BLAZE
+template<typename Ta, bool Tb>
+statslib_inline
+uint_t
+spacing(const BlazeMat<Ta,Tb>& X)
+{
+    return X.spacing();
+}
+#endif
+
+#ifdef STATS_USE_EIGEN
+template<typename Ta, int iTr, int iTc>
+statslib_inline
+uint_t
+spacing(const EigMat<Ta,iTr,iTc>& X)
+{
+    return n_cols(X);
+}
+#endif
+
+//
+// row access
+
+#ifdef STATS_USE_ARMA
+template<typename T>
+statslib_inline
+arma::Row<T>
+get_row(const ArmaMat<T>& X, uint_t i)
+{
+    return X.row(i);
+}
+#endif
+
+#ifdef STATS_USE_BLAZE
+template<typename Ta, bool Tb>
+statslib_inline
+BlazeMat<Ta,Tb>
+get_row(const BlazeMat<Ta,Tb>& X, uint_t i)
+{
+    BlazeMat<Ta,Tb> out(1,X.columns());
+    row(out,0) = row(X,i); 
+    return out;
+}
+#endif
+
+#ifdef STATS_USE_EIGEN
+template<typename Ta, int iTr, int iTc>
+statslib_inline
+EigMat<Ta,1,iTc>
+get_row(const EigMat<Ta,iTr,iTc>& X, uint_t i)
+{
+    return X.row(i);
+}
+#endif
+
+//
 // Cholesky decomposition (lower triangular)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 chol(const ArmaMat<T>& X)
 {
@@ -162,6 +243,7 @@ chol(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 chol(const BlazeMat<Ta,Tb>& X)
 {
@@ -173,6 +255,7 @@ chol(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTr,iTc>
 chol(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -185,6 +268,7 @@ chol(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 cumsum(const ArmaMat<T>& X)
 {
@@ -194,6 +278,7 @@ cumsum(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 cumsum(const BlazeMat<Ta,Tb>& X)
 {
@@ -212,6 +297,7 @@ cumsum(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTr,iTc>
 cumsum(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -233,6 +319,7 @@ cumsum(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 T
 det(const ArmaMat<T>& X)
 {
@@ -242,6 +329,7 @@ det(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 det(const BlazeMat<Ta,Tb>& X)
 {
@@ -251,6 +339,7 @@ det(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta
 det(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -263,6 +352,7 @@ det(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 void
 fill(ArmaMat<T>& X, const T fill_val)
 {
@@ -272,6 +362,7 @@ fill(ArmaMat<T>& X, const T fill_val)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 void
 fill(BlazeMat<Ta,Tb>& X, const Ta fill_val)
 {
@@ -281,6 +372,7 @@ fill(BlazeMat<Ta,Tb>& X, const Ta fill_val)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 void
 fill(EigMat<Ta,iTr,iTc>& X, const Ta fill_val)
 {
@@ -293,6 +385,7 @@ fill(EigMat<Ta,iTr,iTc>& X, const Ta fill_val)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 void
 eye(ArmaMat<T>& X, const uint_t n)
 {
@@ -302,6 +395,7 @@ eye(ArmaMat<T>& X, const uint_t n)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 void
 eye(BlazeMat<Ta,Tb>& X, const uint_t n)
 {
@@ -315,6 +409,7 @@ eye(BlazeMat<Ta,Tb>& X, const uint_t n)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 void
 eye(EigMat<Ta,iTr,iTc>& X, const uint_t n)
 {
@@ -328,6 +423,7 @@ eye(EigMat<Ta,iTr,iTc>& X, const uint_t n)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 inv(const ArmaMat<T>& X)
 {
@@ -337,6 +433,7 @@ inv(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 inv(const BlazeMat<Ta,Tb>& X)
 {
@@ -346,6 +443,7 @@ inv(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTr,iTc>
 inv(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -358,6 +456,7 @@ inv(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 repmat(const ArmaMat<T>& X, uint_t N, uint_t K)
 {
@@ -367,6 +466,7 @@ repmat(const ArmaMat<T>& X, uint_t N, uint_t K)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 repmat(const BlazeMat<Ta,Tb>& X, uint_t N, uint_t K)
 {
@@ -391,6 +491,7 @@ repmat(const BlazeMat<Ta,Tb>& X, uint_t N, uint_t K)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTr,iTc>
 repmat(const EigMat<Ta,iTr,iTc>& X, uint_t N, uint_t K)
 {
@@ -403,6 +504,7 @@ repmat(const EigMat<Ta,iTr,iTc>& X, uint_t N, uint_t K)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 T
 trace(const ArmaMat<T>& X)
 {
@@ -412,6 +514,7 @@ trace(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 trace(const BlazeMat<Ta,Tb>& X)
 {
@@ -421,6 +524,7 @@ trace(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta
 trace(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -433,6 +537,7 @@ trace(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 solve(const ArmaMat<T>& A, const ArmaMat<T>& B)
 {
@@ -442,6 +547,7 @@ solve(const ArmaMat<T>& A, const ArmaMat<T>& B)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 solve(const BlazeMat<Ta,Tb>& A, const BlazeMat<Ta,Tb>& B)
 {
@@ -451,6 +557,7 @@ solve(const BlazeMat<Ta,Tb>& A, const BlazeMat<Ta,Tb>& B)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTr,iTc>
 solve(const EigMat<Ta,iTr,iTc>& A, const EigMat<Ta,iTr,iTc> B)
 {
@@ -463,6 +570,7 @@ solve(const EigMat<Ta,iTr,iTc>& A, const EigMat<Ta,iTr,iTc> B)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 sum(const BlazeMat<Ta,Tb>& X)
 {
@@ -475,6 +583,7 @@ sum(const BlazeMat<Ta,Tb>& X)
 }
 
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 sqsum(const BlazeMat<Ta,Tb>& X)
 {
@@ -489,6 +598,7 @@ sqsum(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta
 sqsum(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -506,6 +616,7 @@ sqsum(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 ArmaMat<T>
 trans(const ArmaMat<T>& A)
 {
@@ -515,6 +626,7 @@ trans(const ArmaMat<T>& A)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 BlazeMat<Ta,Tb>
 trans(const BlazeMat<Ta,Tb>& X)
 {
@@ -524,6 +636,7 @@ trans(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 EigMat<Ta,iTc,iTr>
 trans(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -536,6 +649,7 @@ trans(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 void
 zeros(ArmaMat<T>& X, const uint_t n, const uint_t k)
 {
@@ -545,6 +659,7 @@ zeros(ArmaMat<T>& X, const uint_t n, const uint_t k)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 void
 zeros(BlazeMat<Ta,Tb>& X, const uint_t n, const uint_t k)
 {
@@ -555,6 +670,7 @@ zeros(BlazeMat<Ta,Tb>& X, const uint_t n, const uint_t k)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 void
 zeros(EigMat<Ta,iTr,iTc>& X, const uint_t n, const uint_t k)
 {
@@ -568,6 +684,7 @@ zeros(EigMat<Ta,iTr,iTc>& X, const uint_t n, const uint_t k)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 T
 mean(const ArmaMat<T>& X)
 {
@@ -577,6 +694,7 @@ mean(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 mean(const BlazeMat<Ta,Tb>& X)
 {
@@ -586,6 +704,7 @@ mean(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta
 mean(const EigMat<Ta,iTr,iTc>& X)
 {
@@ -598,6 +717,7 @@ mean(const EigMat<Ta,iTr,iTc>& X)
 
 #ifdef STATS_USE_ARMA
 template<typename T>
+statslib_inline
 T
 var(const ArmaMat<T>& X)
 {
@@ -607,6 +727,7 @@ var(const ArmaMat<T>& X)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, bool Tb>
+statslib_inline
 Ta
 var(const BlazeMat<Ta,Tb>& X)
 {
@@ -618,6 +739,7 @@ var(const BlazeMat<Ta,Tb>& X)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, int iTr, int iTc>
+statslib_inline
 Ta
 var(const EigMat<Ta,iTr,iTc>& X)
 {

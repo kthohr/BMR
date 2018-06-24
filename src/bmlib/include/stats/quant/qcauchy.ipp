@@ -33,18 +33,19 @@ qcauchy_int(const T p, const T mu_par, const T sigma_par)
     return ( mu_par + sigma_par*stmath::tan(GCEM_PI*(p - T(0.5))) );
 }
 
-template<typename T>
+template<typename Ta, typename Tb>
 statslib_constexpr
-T
-qcauchy(const T p, const T mu_par, const T sigma_par)
+Ta
+qcauchy(const Ta p, const Tb mu_par, const Tb sigma_par)
 {
-    return ( qcauchy_int(p,mu_par,sigma_par) );
+    return qcauchy_int<Ta>(p,mu_par,sigma_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qcauchy_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, 
                   Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -60,6 +61,7 @@ qcauchy_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qcauchy(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 {
@@ -73,12 +75,13 @@ qcauchy(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qcauchy(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qcauchy_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.columns());
+    qcauchy_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -86,6 +89,7 @@ qcauchy(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qcauchy(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par)
 {

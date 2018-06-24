@@ -23,45 +23,75 @@
  */
 
 template<typename T>
+statslib_inline
 T
-rf_int(const T df1_par, const T df2_par)
+rf_int(const T df1_par, const T df2_par, rand_engine_t& engine)
 {
-    const T X = rchisq(df1_par);
-    const T Y = rchisq(df2_par);
-
-    //
+    const T X = rchisq(df1_par,engine);
+    const T Y = rchisq(df2_par,engine);
     
     return (df2_par / df1_par) * X / Y;
 }
 
 template<typename T>
+statslib_inline
 return_t<T>
-rf(const T df1_par, const T df2_par)
+rf(const T df1_par, const T df2_par, rand_engine_t& engine)
 {
-    return rf_int(return_t<T>(df1_par),return_t<T>(df2_par));
+    return rf_int<return_t<T>>(df1_par,df2_par,engine);
 }
 
 template<typename T>
+statslib_inline
+return_t<T>
+rf(const T df1_par, const T df2_par, uint_t seed_val)
+{
+    rand_engine_t engine(seed_val);
+    return rf_int<return_t<T>>(df1_par,df2_par,engine);
+}
+
+//
+
+template<typename T>
+statslib_inline
 void
 rf_int(const T df1_par, const T df2_par, T* vals_out, const uint_t num_elem)
 {
 #ifdef STATS_USE_OPENMP
+    uint_t n_threads = omp_get_max_threads();
+
+    std::vector<rand_engine_t> engines;
+
+    for (uint_t k=0; k < n_threads; k++)
+    {
+        engines.push_back(rand_engine_t(std::random_device{}()));
+    }
+
     #pragma omp parallel for
-#endif
     for (uint_t j=0U; j < num_elem; j++)
     {
-        vals_out[j] = rf(df1_par,df2_par);
+        uint_t thread_id = omp_get_thread_num();
+        vals_out[j] = rf(df1_par,df2_par,engines[thread_id]);
     }
+#else
+    rand_engine_t engine(std::random_device{}());
+
+    for (uint_t j=0U; j < num_elem; j++)
+    {
+        vals_out[j] = rf(df1_par,df2_par,engine);
+    }
+#endif
 }
 
 #ifdef STATS_WITH_MATRIX_LIB
 template<typename mT, typename eT>
+statslib_inline
 mT
 rf(const uint_t n, const uint_t k, const eT df1_par, const eT df2_par)
 {
     mT mat_out(n,k);
 
-    rf_int(df1_par,df2_par,mat_ops::get_mem_ptr(mat_out),n*k);
+    rf_int(df1_par,df2_par,mat_ops::get_mem_ptr(mat_out),n*mat_ops::spacing(mat_out));
 
     return mat_out;
 }

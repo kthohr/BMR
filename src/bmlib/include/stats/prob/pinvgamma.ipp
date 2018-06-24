@@ -30,22 +30,31 @@ statslib_constexpr
 T
 pinvgamma_int(const T x, const T shape_par, const T rate_par)
 {
-    return ( T(1.0) - gcem::incomplete_gamma(shape_par,rate_par/x) );
+    return ( T(1) - gcem::incomplete_gamma(shape_par,rate_par/x) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-pinvgamma(const T x, const T shape_par, const T rate_par, const bool log_form)
+pinvgamma_check(const T x, const T shape_par, const T rate_par, const bool log_form)
 {
     return ( log_form == true ? stmath::log(pinvgamma_int(x,shape_par,rate_par)) :
                                 pinvgamma_int(x,shape_par,rate_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+pinvgamma(const Ta x, const Tb shape_par, const Tb rate_par, const bool log_form)
+{
+    return pinvgamma_check<return_t<Ta>>(x,shape_par,rate_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 pinvgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb rate_par, const bool log_form, 
                     Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ pinvgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 pinvgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb rate_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ pinvgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb rate_par, const boo
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 pinvgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb rate_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    pinvgamma_int<Ta,Tb,Tc>(X.data(),shape_par,rate_par,log_form,mat_out.data(),X.rows()*X.columns());
+    pinvgamma_int<Ta,Tb,Tc>(X.data(),shape_par,rate_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ pinvgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb rate_par, const
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 pinvgamma(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb rate_par, const bool log_form)
 {

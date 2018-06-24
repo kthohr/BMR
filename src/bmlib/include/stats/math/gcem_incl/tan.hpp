@@ -25,15 +25,18 @@
 #ifndef _gcem_tan_HPP
 #define _gcem_tan_HPP
 
+namespace internal
+{
+
 template<typename T>
 constexpr
 T
 tan_cf_recur(const T xx, const int depth, const int max_depth)
 {
-    return ( depth < max_depth ? \
-             // if
+    return( depth < max_depth ? \
+            // if
                 T(2*depth - 1) - xx/tan_cf_recur(xx,depth+1,max_depth) :
-             // else
+            // else
                 T(2*depth - 1) );
 }
 
@@ -42,19 +45,22 @@ constexpr
 T
 tan_cf_main(const T x)
 {
-    return ( x > T(1.0) ? x/tan_cf_recur(x*x,1,35) :
-                          x/tan_cf_recur(x*x,1,25) );
+    return( x > T(1) ? \
+            // if
+                x/tan_cf_recur(x*x,1,35) :
+            // else
+                x/tan_cf_recur(x*x,1,25) );
 }
 
 template<typename T>
 constexpr
 T
-tan_int(const T x)
-{ // tan(x) = tan(x + pi)
-    return ( x > T(GCEM_PI) ? \
-             // if
-                tan_int( x - T(GCEM_PI) * int(x/T(GCEM_PI)) ) :
-             // else 
+tan_begin(const T x)
+{   // tan(x) = tan(x + pi)
+    return( x > T(GCEM_PI) ? \
+            // if
+                tan_begin( x - T(GCEM_PI) * int(x/T(GCEM_PI)) ) :
+            // else 
                 tan_cf_main(x) );
 }
 
@@ -63,17 +69,26 @@ constexpr
 T
 tan_check(const T x)
 {
-    return ( GCLIM<T>::epsilon() > abs(x) ? T(0.0) :
-             //
-             x < T(0.0) ? -tan_int(-x) : tan_int(x) );
+    return( // indistinguishable from zero 
+            GCLIM<T>::epsilon() > abs(x) ? \
+                T(0) :
+            // else
+                x < T(0) ? \
+                    - tan_begin(-x) : 
+                      tan_begin( x) );
 }
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 tan(const T x)
 {
-    return tan_check(return_t<T>(x));
+    return internal::tan_check<return_t<T>>(x);
 }
 
 #endif

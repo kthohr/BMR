@@ -30,23 +30,32 @@ statslib_constexpr
 T
 pexp_int(const T x, const T rate_par)
 {
-    return ( x < T(0.0) ? T(0.0) :
-                          T(1.0) - stmath::exp( - rate_par*x )  );
+    return ( x < T(0) ? T(0) :
+                        T(1) - stmath::exp( - rate_par*x )  );
 }
 
 template<typename T>
 statslib_constexpr
 T
-pexp(const T x, const T rate_par, const bool log_form)
+pexp_check(const T x, const T rate_par, const bool log_form)
 {
     return ( log_form == true ? stmath::log(pexp_int(x,rate_par)) : 
                                 pexp_int(x,rate_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+pexp(const Ta x, const Tb rate_par, const bool log_form)
+{
+    return pexp_check<return_t<Ta>>(x,rate_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 pexp_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const bool log_form, 
                Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -62,6 +71,7 @@ pexp_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 pexp(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 {
@@ -75,12 +85,13 @@ pexp(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 pexp(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    pexp_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.columns());
+    pexp_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -88,6 +99,7 @@ pexp(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 pexp(const EigMat<Ta,iTr,iTc>& X, const Tb rate_par, const bool log_form)
 {

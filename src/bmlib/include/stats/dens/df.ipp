@@ -30,7 +30,7 @@ statslib_constexpr
 T
 df_int_adj(const T x, const T ratio_abx)
 {
-    return ( ratio_abx * (T(1.0) - x*ratio_abx) );
+    return ( ratio_abx * (T(1) - x*ratio_abx) );
 }
 
 template<typename T>
@@ -38,22 +38,34 @@ statslib_constexpr
 T
 df_int(const T x, const T a_par, const T b_par, const T abx, const bool log_form)
 {
-    return ( log_form == true ? dbeta(abx/(T(1.0)+abx),a_par,b_par,true)  + stmath::log(df_int_adj(x,(a_par/b_par)/(T(1.0) + abx))) :
-                                dbeta(abx/(T(1.0)+abx),a_par,b_par,false) * df_int_adj(x,(a_par/b_par)/(T(1.0) + abx)) );
+    return ( log_form == true ? \
+             // if
+                dbeta(abx/(T(1)+abx),a_par,b_par,true)  + stmath::log(df_int_adj(x,(a_par/b_par)/(T(1) + abx))) :
+             // else
+                dbeta(abx/(T(1)+abx),a_par,b_par,false) * df_int_adj(x,(a_par/b_par)/(T(1) + abx)) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-df(const T x, const T df1_par, const T df2_par, const bool log_form)
+df_check(const T x, const T df1_par, const T df2_par, const bool log_form)
 {
-    return ( df_int(x,df1_par/T(2.0),df2_par/T(2.0),df1_par*x/df2_par,log_form) );
+    return df_int(x,df1_par/T(2),df2_par/T(2),df1_par*x/df2_par,log_form);
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+df(const Ta x, const Tb df1_par, const Tb df2_par, const bool log_form)
+{
+    return df_check<return_t<Ta>>(x,df1_par,df2_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 df_int(const Ta* __stats_pointer_settings__ vals_in, const Tb df1_par, const Tb df2_par, const bool log_form,
              Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -69,6 +81,7 @@ df_int(const Ta* __stats_pointer_settings__ vals_in, const Tb df1_par, const Tb 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 df(const ArmaMat<Ta>& X, const Tb df1_par, const Tb df2_par, const bool log_form)
 {
@@ -82,12 +95,13 @@ df(const ArmaMat<Ta>& X, const Tb df1_par, const Tb df2_par, const bool log_form
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 df(const BlazeMat<Ta,To>& X, const Tb df1_par, const Tb df2_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    df_int<Ta,Tb,Tc>(X.data(),df1_par,df2_par,log_form,mat_out.data(),X.rows()*X.columns());
+    df_int<Ta,Tb,Tc>(X.data(),df1_par,df2_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -95,6 +109,7 @@ df(const BlazeMat<Ta,To>& X, const Tb df1_par, const Tb df2_par, const bool log_
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 df(const EigMat<Ta,iTr,iTc>& X, const Tb df1_par, const Tb df2_par, const bool log_form)
 {

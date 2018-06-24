@@ -30,26 +30,33 @@ statslib_constexpr
 T
 punif_int(const T x, const T a_par, const T b_par)
 {
-    return ( x <= a_par ? T(0.0) : x >= b_par ? T(1.0) :
-             (x-a_par) / (b_par-a_par) );
+    return ( x <= a_par ? T(0) :
+             x >= b_par ? T(1) :
+                          (x-a_par) / (b_par-a_par) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-punif(const T x, const T a_par, const T b_par, const bool log_form)
+punif_check(const T x, const T a_par, const T b_par, const bool log_form)
 {
     return ( log_form == true ? stmath::log(punif_int(x,a_par,b_par)) :
                                 punif_int(x,a_par,b_par) );
 }
 
-//
-// matrix/vector input
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+punif(const Ta x, const Tb a_par, const Tb b_par, const bool log_form)
+{
+    return punif_check<return_t<Ta>>(x,a_par,b_par,log_form);
+}
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 punif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb b_par, const bool log_form, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -65,6 +72,7 @@ punif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 punif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
@@ -78,12 +86,13 @@ punif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 punif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    punif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.columns());
+    punif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -91,6 +100,7 @@ punif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_f
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 punif(const EigMat<Ta,iTr,iTc>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {

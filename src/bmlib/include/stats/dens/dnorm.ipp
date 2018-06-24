@@ -30,22 +30,31 @@ statslib_constexpr
 T
 dnorm_int(const T z, const T sigma_par)
 {
-    return ( - T(0.5)*GCEM_LOG_2PI - stmath::log(sigma_par) - z*z/T(2.0) );
+    return ( - T(0.5)*GCEM_LOG_2PI - stmath::log(sigma_par) - z*z/T(2) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-dnorm(const T x, const T mu_par, const T sigma_par, const bool log_form)
+dnorm_check(const T x, const T mu_par, const T sigma_par, const bool log_form)
 {
     return ( log_form == true ? dnorm_int((x-mu_par)/sigma_par,sigma_par) :
                                 stmath::exp(dnorm_int((x-mu_par)/sigma_par,sigma_par)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dnorm(const Ta x, const Tb mu_par, const Tb sigma_par, const bool log_form)
+{
+    return dnorm_check<return_t<Ta>>(x,mu_par,sigma_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, const bool log_form, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ dnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const T
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ dnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par, const bool log_
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ dnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par, const bool 
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dnorm(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par, const bool log_form)
 {

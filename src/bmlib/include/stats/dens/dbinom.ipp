@@ -34,7 +34,7 @@ dbinom_int(const uint_t x, const uint_t n_trials_par, const T prob_par)
             x == n_trials_par ? x * stmath::log(prob_par) :
             //
             stmath::log(gcem::binomial_coef(n_trials_par,x)) + x*stmath::log(prob_par) \
-                + (n_trials_par - x)*stmath::log(T(1.0) - prob_par) );
+                + (n_trials_par - x)*stmath::log(T(1) - prob_par) );
 }
 
 template<typename T>
@@ -42,7 +42,7 @@ statslib_constexpr
 T
 dbinom(const uint_t x, const uint_t n_trials_par, const T prob_par, const bool log_form)
 {
-    return ( x > n_trials_par ? T(0.0) :
+    return ( x > n_trials_par ? T(0) :
              //
              n_trials_par == 1 ? dbern(x,prob_par,log_form) :
              //
@@ -54,6 +54,7 @@ dbinom(const uint_t x, const uint_t n_trials_par, const T prob_par, const bool l
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dbinom_int(const Ta* __stats_pointer_settings__ vals_in, const uint_t n_trials_par, const Tb prob_par, const bool log_form, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -69,6 +70,7 @@ dbinom_int(const Ta* __stats_pointer_settings__ vals_in, const uint_t n_trials_p
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dbinom(const ArmaMat<Ta>& X, const uint_t n_trials_par, const Tb prob_par, const bool log_form)
 {
@@ -82,12 +84,13 @@ dbinom(const ArmaMat<Ta>& X, const uint_t n_trials_par, const Tb prob_par, const
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dbinom(const BlazeMat<Ta,To>& X, const uint_t n_trials_par, const Tb prob_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dbinom_int<Ta,Tb,Tc>(X.data(),n_trials_par,prob_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dbinom_int<Ta,Tb,Tc>(X.data(),n_trials_par,prob_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -95,6 +98,7 @@ dbinom(const BlazeMat<Ta,To>& X, const uint_t n_trials_par, const Tb prob_par, c
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dbinom(const EigMat<Ta,iTr,iTc>& X, const uint_t n_trials_par, const Tb prob_par, const bool log_form)
 {

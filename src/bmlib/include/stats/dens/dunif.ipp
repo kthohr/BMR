@@ -28,9 +28,17 @@
 template<typename T>
 statslib_constexpr
 T
-dunif(const T x, const T a_par, const T b_par, const bool log_form)
+dunif_int(const T x, const T a_par, const T b_par, const bool log_form)
 {
-    return ( log_form == true ? - stmath::log(b_par - a_par) : T(1.0) / (b_par - a_par) );
+    return ( log_form == true ? - stmath::log(b_par - a_par) : T(1) / (b_par - a_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dunif(const Ta x, const Tb a_par, const Tb b_par, const bool log_form)
+{
+    return dunif_int<return_t<Ta>>(x,a_par,b_par,log_form);
 }
 
 template<typename T>
@@ -38,13 +46,14 @@ statslib_constexpr
 T
 dunif(const T x)
 {
-    return dunif(x,T(0.0),T(1.0));
+    return dunif(x,T(0),T(1));
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dunif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb b_par, const bool log_form, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -60,6 +69,7 @@ dunif_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dunif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
@@ -73,12 +83,13 @@ dunif(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dunif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dunif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dunif_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -86,6 +97,7 @@ dunif(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_f
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dunif(const EigMat<Ta,iTr,iTc>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {

@@ -25,22 +25,32 @@
 #ifndef _gcem_sinh_HPP
 #define _gcem_sinh_HPP
 
+namespace internal
+{
+
 template<typename T>
 constexpr
 T
 sinh_check(const T x)
 {
-    return ( GCLIM<T>::epsilon() > abs(x) ? T(0.0) :
-             //
-             (exp(x) - exp(-x))/T(2.0) );
+    return( // indistinguishable from zero
+            GCLIM<T>::epsilon() > abs(x) ? \
+                T(0) :
+            // else
+                (exp(x) - exp(-x))/T(2) );
 }
+
+}
+
+//
+// main function
 
 template<typename T>
 constexpr
 return_t<T>
 sinh(const T x)
 {
-    return sinh_check(return_t<T>(x));
+    return internal::sinh_check<return_t<T>>(x);
 }
 
 #endif

@@ -30,25 +30,34 @@ statslib_constexpr
 T
 qweibull_int(const T p, const T shape_par, const T scale_par)
 {
-    return ( scale_par*stmath::pow(- stmath::log(T(1.0) - p), T(1.0)/shape_par) );
+    return ( scale_par*stmath::pow(- stmath::log(T(1) - p), T(1)/shape_par) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-qweibull(const T p, const T shape_par, const T scale_par)
+qweibull_check(const T p, const T shape_par, const T scale_par)
 {
     return ( ( (shape_par < STLIM<T>::epsilon()) || (scale_par < STLIM<T>::epsilon()) ) ? STLIM<T>::quiet_NaN() :
              //
-             p < STLIM<T>::epsilon() ? T(0.0) :
+             p < STLIM<T>::epsilon() ? T(0) :
              //
              qweibull_int(p,shape_par,scale_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+Ta
+qweibull(const Ta p, const Tb shape_par, const Tb scale_par)
+{
+    return qweibull_check<Ta>(p,shape_par,scale_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qweibull_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb scale_par, 
                    Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -64,6 +73,7 @@ qweibull_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, c
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qweibull(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par)
 {
@@ -77,12 +87,13 @@ qweibull(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qweibull(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qweibull_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,mat_out.data(),X.rows()*X.columns());
+    qweibull_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -90,6 +101,7 @@ qweibull(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qweibull(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb scale_par)
 {

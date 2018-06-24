@@ -30,22 +30,31 @@ statslib_constexpr
 T
 pchisq_int(const T x, const T dof_par)
 {
-    return gcem::incomplete_gamma(dof_par/T(2.0),x/T(2.0));
+    return gcem::incomplete_gamma(dof_par/T(2),x/T(2));
 }
 
 template<typename T>
 statslib_constexpr
 T
-pchisq(const T x, const T dof_par, const bool log_form)
+pchisq_check(const T x, const T dof_par, const bool log_form)
 {
     return ( log_form == true ? stmath::log(pchisq_int(x,dof_par)) :
                                 pchisq_int(x,dof_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+pchisq(const Ta x, const Tb dof_par, const bool log_form)
+{
+    return pchisq_check<return_t<Ta>>(x,dof_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 pchisq_int(const Ta* __stats_pointer_settings__ vals_in, const Tb dof_par, const bool log_form, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ pchisq_int(const Ta* __stats_pointer_settings__ vals_in, const Tb dof_par, const
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 pchisq(const ArmaMat<Ta>& X, const Tb dof_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ pchisq(const ArmaMat<Ta>& X, const Tb dof_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 pchisq(const BlazeMat<Ta,To>& X, const Tb dof_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    pchisq_int<Ta,Tb,Tc>(X.data(),dof_par,log_form,mat_out.data(),X.rows()*X.columns());
+    pchisq_int<Ta,Tb,Tc>(X.data(),dof_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ pchisq(const BlazeMat<Ta,To>& X, const Tb dof_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 pchisq(const EigMat<Ta,iTr,iTc>& X, const Tb dof_par, const bool log_form)
 {

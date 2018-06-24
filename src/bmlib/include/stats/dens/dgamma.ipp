@@ -36,16 +36,25 @@ dgamma_int(const T x, const T shape_par, const T scale_par)
 template<typename T>
 statslib_constexpr
 T
-dgamma(const T x, const T shape_par, const T scale_par, const bool log_form)
+dgamma_check(const T x, const T shape_par, const T scale_par, const bool log_form)
 {
     return ( log_form == true ? dgamma_int(x,shape_par,scale_par) : 
                                 stmath::exp(dgamma_int(x,shape_par,scale_par)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dgamma(const Ta x, const Tb shape_par, const Tb scale_par, const bool log_form)
+{
+    return dgamma_check<return_t<Ta>>(x,shape_par,scale_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb scale_par, const bool log_form, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ dgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, con
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ dgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par, const bool 
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dgamma_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dgamma_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ dgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par, const b
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dgamma(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb scale_par, const bool log_form)
 {

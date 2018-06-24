@@ -30,23 +30,32 @@ statslib_constexpr
 T
 qinvgamma_int(const T p, const T shape_par, const T rate_par)
 {
-    return ( rate_par / gcem::incomplete_gamma_inv(shape_par,T(1.0)-p) );
+    return ( rate_par / gcem::incomplete_gamma_inv(shape_par,T(1)-p) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-qinvgamma(const T p, const T shape_par, const T rate_par)
+qinvgamma_check(const T p, const T shape_par, const T rate_par)
 {
-    return ( STLIM<T>::epsilon() > p ? T(0.0) :
+    return ( STLIM<T>::epsilon() > p ? T(0) :
              //
              qinvgamma_int(p,shape_par,rate_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+Ta
+qinvgamma(const Ta p, const Tb shape_par, const Tb rate_par)
+{
+    return qinvgamma_check<Ta>(p,shape_par,rate_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qinvgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb rate_par, 
                     Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -62,6 +71,7 @@ qinvgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qinvgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb rate_par)
 {
@@ -75,12 +85,13 @@ qinvgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb rate_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qinvgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb rate_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qinvgamma_int<Ta,Tb,Tc>(X.data(),shape_par,rate_par,mat_out.data(),X.rows()*X.columns());
+    qinvgamma_int<Ta,Tb,Tc>(X.data(),shape_par,rate_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -88,6 +99,7 @@ qinvgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb rate_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qinvgamma(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb rate_par)
 {

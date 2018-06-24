@@ -36,16 +36,25 @@ dexp_int(const T x, const T rate_par)
 template<typename T>
 statslib_constexpr
 T
-dexp(const T x, const T rate_par, const bool log_form)
+dexp_check(const T x, const T rate_par, const bool log_form)
 {
-    return ( log_form == true ? ( x < T(0.0) ? - STLIM<T>::infinity() : dexp_int(x,rate_par) ) :
-                                ( x < T(0.0) ? 0.0 : stmath::exp(dexp_int(x,rate_par)) ) );
+    return ( log_form == true ? ( x < T(0) ? - STLIM<T>::infinity() : dexp_int(x,rate_par) ) :
+                                ( x < T(0) ? T(0) : stmath::exp(dexp_int(x,rate_par)) ) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dexp(const Ta x, const Tb rate_par, const bool log_form)
+{
+    return dexp_check<return_t<Ta>>(x,rate_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dexp_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const bool log_form, 
                Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +70,7 @@ dexp_int(const Ta* __stats_pointer_settings__ vals_in, const Tb rate_par, const 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dexp(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 {
@@ -74,12 +84,13 @@ dexp(const ArmaMat<Ta>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dexp(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dexp_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dexp_int<Ta,Tb,Tc>(X.data(),rate_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +98,7 @@ dexp(const BlazeMat<Ta,To>& X, const Tb rate_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dexp(const EigMat<Ta,iTr,iTc>& X, const Tb rate_par, const bool log_form)
 {

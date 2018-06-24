@@ -23,52 +23,84 @@
  */
 
 template<typename T>
+statslib_inline
 T
-runif(const T a_par, const T b_par)
+runif_int(const T a_par, const T b_par, rand_engine_t& engine)
 {
-    if (std::is_integral<T>::value)
-    {
-        return STLIM<T>::quiet_NaN();
-    }
-
-    //
-
-    std::mt19937_64 engine(std::random_device{}());
-
-    T a_par_adj = std::nextafter(a_par, b_par); // converts from [a,b) to (a,b)
-    std::uniform_real_distribution<T> unif_dist(a_par_adj,b_par);
+    // convert from [a,b) to (a,b)
+    T a_par_adj = std::nextafter(a_par, b_par);
+    std::uniform_real_distribution<T> unif_dist(a_par_adj, b_par);
 
     return unif_dist(engine);
 }
 
 template<typename T>
-T
-runif()
+statslib_inline
+return_t<T>
+runif(const T a_par, const T b_par, rand_engine_t& engine)
 {
-    return runif<T>(T(0.0),T(1.0));
+    return runif_int<return_t<T>>(a_par,b_par,engine);
 }
 
 template<typename T>
+statslib_inline
+return_t<T>
+runif(const T a_par, const T b_par, uint_t seed_val)
+{
+    rand_engine_t engine(seed_val);
+    return runif_int<return_t<T>>(a_par,b_par,engine);
+}
+
+template<typename T>
+statslib_inline
+T
+runif()
+{
+    return runif<T>(T(0),T(1));
+}
+
+//
+
+template<typename T>
+statslib_inline
 void
 runif_int(const T a_par, const T b_par, T* vals_out, const uint_t num_elem)
 {
 #ifdef STATS_USE_OPENMP
+    uint_t n_threads = omp_get_max_threads();
+
+    std::vector<rand_engine_t> engines;
+
+    for (uint_t k=0; k < n_threads; k++)
+    {
+        engines.push_back(rand_engine_t(std::random_device{}()));
+    }
+
     #pragma omp parallel for
-#endif
     for (uint_t j=0U; j < num_elem; j++)
     {
-        vals_out[j] = runif(a_par,b_par);
+        uint_t thread_id = omp_get_thread_num();
+        vals_out[j] = runif(a_par,b_par,engines[thread_id]);
     }
+#else
+    rand_engine_t engine(std::random_device{}());
+
+    for (uint_t j=0U; j < num_elem; j++)
+    {
+        vals_out[j] = runif(a_par,b_par,engine);
+    }
+#endif
 }
 
 #ifdef STATS_WITH_MATRIX_LIB
 template<typename mT, typename eT>
+statslib_inline
 mT
 runif(const uint_t n, const uint_t k, const eT a_par, const eT b_par)
 {
     mT mat_out(n,k);
 
-    runif_int(a_par,b_par,mat_ops::get_mem_ptr(mat_out),n*k);
+    runif_int(a_par,b_par,mat_ops::get_mem_ptr(mat_out),n*mat_ops::spacing(mat_out));
 
     return mat_out;
 }

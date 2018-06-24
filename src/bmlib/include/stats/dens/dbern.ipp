@@ -30,7 +30,7 @@ statslib_constexpr
 T
 dbern_int(const uint_t x, const T prob_par)
 {
-    return ( x == 1U ? prob_par : T(1.0) - prob_par );
+    return ( x == 1U ? prob_par : T(1) - prob_par );
 }
 
 template<typename T>
@@ -54,6 +54,7 @@ dbern(const int x)
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dbern_int(const Ta* __stats_pointer_settings__ vals_in, const Tb prob_par, const bool log_form,
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -69,6 +70,7 @@ dbern_int(const Ta* __stats_pointer_settings__ vals_in, const Tb prob_par, const
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dbern(const ArmaMat<Ta>& X, const Tb prob_par, const bool log_form)
 {
@@ -82,12 +84,13 @@ dbern(const ArmaMat<Ta>& X, const Tb prob_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dbern(const BlazeMat<Ta,To>& X, const Tb prob_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dbern_int<Ta,Tb,Tc>(X.data(),prob_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dbern_int<Ta,Tb,Tc>(X.data(),prob_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -95,6 +98,7 @@ dbern(const BlazeMat<Ta,To>& X, const Tb prob_par, const bool log_form)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dbern(const EigMat<Ta,iTr,iTc>& X, const Tb prob_par, const bool log_form)
 {

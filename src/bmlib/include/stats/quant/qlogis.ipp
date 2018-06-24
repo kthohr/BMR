@@ -30,21 +30,22 @@ statslib_constexpr
 T
 qlogis_int(const T p, const T mu_par, const T sigma_par)
 {
-    return ( mu_par + sigma_par*stmath::log(p/(T(1.0) - p)) );
+    return ( mu_par + sigma_par*stmath::log(p/(T(1) - p)) );
 }
 
-template<typename T>
+template<typename Ta, typename Tb>
 statslib_constexpr
-T
-qlogis(const T p, const T mu_par, const T sigma_par)
+Ta
+qlogis(const Ta p, const Tb mu_par, const Tb sigma_par)
 {
-    return ( qlogis_int(p,mu_par,sigma_par) );
+    return qlogis_int<Ta>(p,mu_par,sigma_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qlogis_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -60,6 +61,7 @@ qlogis_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qlogis(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 {
@@ -73,12 +75,13 @@ qlogis(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qlogis(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qlogis_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.columns());
+    qlogis_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -86,6 +89,7 @@ qlogis(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qlogis(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par)
 {

@@ -21,7 +21,7 @@
 // version
 
 #ifndef STATS_VERSION_MAJOR
-    #define STATS_VERSION_MAJOR 1
+    #define STATS_VERSION_MAJOR 2
 #endif
 
 #ifndef STATS_VERSION_MINOR
@@ -34,11 +34,16 @@
 
 // enable OpenMP
 
-#if defined(_OPENMP) && !defined(STATS_NO_OMP) && !defined(STATS_USE_OPENMP)
+#if defined(_OPENMP) && !defined(STATS_DONT_USE_OPENMP) && !defined(STATS_USE_OPENMP)
     #define STATS_USE_OPENMP
+    #include <omp.h>
 #endif
 
 // switch between inline mode vs constexpr
+
+#ifndef statslib_inline
+    #define statslib_inline inline
+#endif
 
 #ifndef STATS_GO_INLINE
     #define statslib_constexpr constexpr
@@ -55,11 +60,11 @@
 #include <random>
 
 namespace stats {
-    using uint_t = unsigned int;
-    // static const double inf = std::numeric_limits<double>::infinity();
-
     template<class T>
     using STLIM = std::numeric_limits<T>;
+
+    using uint_t = unsigned int;
+    using rand_engine_t = std::mt19937_64;
 
     template<typename T>
     using return_t = typename std::conditional<std::is_integral<T>::value,double,T>::type;
@@ -87,6 +92,14 @@ namespace stats {
     using ArmaMat = arma::Mat<T>;
 #endif
 
+#ifdef STATS_USE_ARMA
+    template<typename T>
+    using not_arma_mat = std::enable_if<!(std::is_same<T,arma::mat>::value)>;
+#else
+    template<typename T>
+    using not_arma_mat = std::enable_if<!(std::is_same<T,char>::value)>;
+#endif
+
 // Blaze options
 
 #ifdef STATS_USE_BLAZE
@@ -95,6 +108,9 @@ namespace stats {
 
     template<typename Ta, bool To = blaze::columnMajor>
     using BlazeMat = blaze::DynamicMatrix<Ta,To>;
+
+    template<typename Ta, bool To = blaze::rowMajor>
+    using BlazeRow = blaze::DynamicVector<Ta,To>;
 
 #endif
 

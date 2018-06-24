@@ -36,17 +36,26 @@ qgamma_int(const T p, const T shape_par, const T scale_par)
 template<typename T>
 statslib_constexpr
 T
-qgamma(const T p, const T shape_par, const T scale_par)
+qgamma_check(const T p, const T shape_par, const T scale_par)
 {
-    return ( STLIM<T>::epsilon() > p ? T(0.0) :
+    return ( STLIM<T>::epsilon() > p ? T(0) :
              //
              qgamma_int(p,shape_par,scale_par) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+Ta
+qgamma(const Ta p, const Tb shape_par, const Tb scale_par)
+{
+    return qgamma_check<Ta>(p,shape_par,scale_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, const Tb scale_par, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -62,6 +71,7 @@ qgamma_int(const Ta* __stats_pointer_settings__ vals_in, const Tb shape_par, con
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par)
 {
@@ -75,12 +85,13 @@ qgamma(const ArmaMat<Ta>& X, const Tb shape_par, const Tb scale_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qgamma_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,mat_out.data(),X.rows()*X.columns());
+    qgamma_int<Ta,Tb,Tc>(X.data(),shape_par,scale_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -88,6 +99,7 @@ qgamma(const BlazeMat<Ta,To>& X, const Tb shape_par, const Tb scale_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qgamma(const EigMat<Ta,iTr,iTc>& X, const Tb shape_par, const Tb scale_par)
 {

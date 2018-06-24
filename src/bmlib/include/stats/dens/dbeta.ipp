@@ -31,21 +31,31 @@ T
 dbeta_int(const T x, const T a_par, const T b_par)
 {
     return ( - (stmath::lgamma(a_par) + stmath::lgamma(b_par) - stmath::lgamma(a_par+b_par)) \
-             + (a_par - T(1.0))*stmath::log(x) + (b_par - T(1.0))*stmath::log(T(1.0) - x) );
+             + (a_par - T(1))*stmath::log(x) + (b_par - T(1))*stmath::log(T(1) - x) );
 }
 
 template<typename T>
 statslib_constexpr
 T
-dbeta(const T x, const T a_par, const T b_par, const bool log_form)
+dbeta_check(const T x, const T a_par, const T b_par, const bool log_form)
 {
-    return ( log_form == true ? dbeta_int(x,a_par,b_par) : stmath::exp(dbeta_int(x,a_par,b_par)) );
+    return ( log_form == true ? dbeta_int(x,a_par,b_par) : 
+                                stmath::exp(dbeta_int(x,a_par,b_par)) );
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+return_t<Ta>
+dbeta(const Ta x, const Tb a_par, const Tb b_par, const bool log_form)
+{
+    return dbeta_check<return_t<Ta>>(x,a_par,b_par,log_form);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 dbeta_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb b_par, const bool log_form, 
                 Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -61,6 +71,7 @@ dbeta_int(const Ta* __stats_pointer_settings__ vals_in, const Tb a_par, const Tb
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 dbeta(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
@@ -74,12 +85,13 @@ dbeta(const ArmaMat<Ta>& X, const Tb a_par, const Tb b_par, const bool log_form)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 dbeta(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    dbeta_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.columns());
+    dbeta_int<Ta,Tb,Tc>(X.data(),a_par,b_par,log_form,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -87,6 +99,7 @@ dbeta(const BlazeMat<Ta,To>& X, const Tb a_par, const Tb b_par, const bool log_f
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 dbeta(const EigMat<Ta,iTr,iTc>& X, const Tb a_par, const Tb b_par, const bool log_form)
 {

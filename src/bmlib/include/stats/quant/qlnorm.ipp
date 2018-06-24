@@ -28,15 +28,24 @@
 template<typename T>
 statslib_constexpr
 T
-qlnorm(const T p, const T mu_par, const T sigma_par)
+qlnorm_int(const T p, const T mu_par, const T sigma_par)
 {
     return stmath::exp(qnorm(p,mu_par,sigma_par));
+}
+
+template<typename Ta, typename Tb>
+statslib_constexpr
+Ta
+qlnorm(const Ta p, const Tb mu_par, const Tb sigma_par)
+{
+    return qlnorm_int<Ta>(p,mu_par,sigma_par);
 }
 
 //
 // matrix/vector input
 
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 void
 qlnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const Tb sigma_par, 
                  Tc* __stats_pointer_settings__ vals_out, const uint_t num_elem)
@@ -52,6 +61,7 @@ qlnorm_int(const Ta* __stats_pointer_settings__ vals_in, const Tb mu_par, const 
 
 #ifdef STATS_USE_ARMA
 template<typename Ta, typename Tb, typename Tc>
+statslib_inline
 ArmaMat<Tc>
 qlnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 {
@@ -65,12 +75,13 @@ qlnorm(const ArmaMat<Ta>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_BLAZE
 template<typename Ta, typename Tb, typename Tc, bool To>
+statslib_inline
 BlazeMat<Tc,To>
 qlnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 {
     BlazeMat<Tc,To> mat_out(X.rows(),X.columns());
 
-    qlnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.columns());
+    qlnorm_int<Ta,Tb,Tc>(X.data(),mu_par,sigma_par,mat_out.data(),X.rows()*X.spacing());
 
     return mat_out;
 }
@@ -78,6 +89,7 @@ qlnorm(const BlazeMat<Ta,To>& X, const Tb mu_par, const Tb sigma_par)
 
 #ifdef STATS_USE_EIGEN
 template<typename Ta, typename Tb, typename Tc, int iTr, int iTc>
+statslib_inline
 EigMat<Tc,iTr,iTc>
 qlnorm(const EigMat<Ta,iTr,iTc>& X, const Tb mu_par, const Tb sigma_par)
 {
