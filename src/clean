@@ -1,4 +1,0 @@
-#! /bin/sh
-## BMR src cleanup script
-
-rm -f ./*so ./modules/*.o ./bmlib/src/*/*.o ./bmlib/src/*/*/*.o

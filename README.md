@@ -1,7 +1,7 @@
 # BMR &nbsp; [![Build Status](https://travis-ci.org/kthohr/BMR.svg)](https://travis-ci.org/kthohr/BMR) [![Build status](https://ci.appveyor.com/api/projects/status/github/kthohr/BMR?branch=master)](https://ci.appveyor.com/project/kthohr/BMR/branch/master)
 
 
-Bayesian Macroeconometrics in R (BMR) is an R interface to BMLib, a templated C++ library for estimating Bayesian Vector Autoregression (BVAR) and Dynamic Stochastic General Equilibrium (DSGE) models.
+Bayesian Macroeconometrics in R (BMR) is an R interface to BM++, a templated C++ library for estimating Bayesian Vector Autoregression (BVAR) and Dynamic Stochastic General Equilibrium (DSGE) models.
 
 Features:
 
