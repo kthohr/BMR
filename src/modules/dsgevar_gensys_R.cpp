@@ -19,7 +19,7 @@
   ##
   ################################################################################*/
 
-#include "bmlib.hpp"
+#include "bmpp.hpp"
 #include "dsge_R.hpp"
 
 RCPP_EXPOSED_CLASS(gensys_R)
@@ -312,7 +312,7 @@ void
 dsgevar_gensys_R::estim_mcmc_R(const arma::vec& initial_vals, int n_pop, int n_gen, int n_burnin)
 {
     try {
-        mcmc::algo_settings settings;
+        mcmc::algo_settings_t settings;
 
         if (mcmc_initial_lb.n_elem > 0) {
             settings.de_initial_lb = mcmc_initial_lb;

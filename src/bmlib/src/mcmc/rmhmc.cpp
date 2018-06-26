@@ -4,15 +4,17 @@
   ##
   ##   This file is part of the MCMC C++ library.
   ##
-  ##   MCMC is free software: you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation, either version 2 of the License, or
-  ##   (at your option) any later version.
+  ##   Licensed under the Apache License, Version 2.0 (the "License");
+  ##   you may not use this file except in compliance with the License.
+  ##   You may obtain a copy of the License at
   ##
-  ##   MCMC is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
+  ##       http://www.apache.org/licenses/LICENSE-2.0
+  ##
+  ##   Unless required by applicable law or agreed to in writing, software
+  ##   distributed under the License is distributed on an "AS IS" BASIS,
+  ##   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ##   See the License for the specific language governing permissions and
+  ##   limitations under the License.
   ##
   ################################################################################*/
  
@@ -23,7 +25,7 @@
 #include "mcmc.hpp" 
 
 bool
-mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings* settings_inp)
+mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings_t* settings_inp)
 {
     bool success = false;
 
@@ -32,7 +34,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     //
     // settings
 
-    algo_settings settings;
+    algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;
@@ -263,7 +265,7 @@ mcmc::rmhmc_int(const arma::vec& initial_vals, arma::mat& draws_out, std::functi
     //
 
     if (vals_bound) {
-#ifdef MCMC_USE_OMP
+#ifdef MCMC_USE_OPENMP
         #pragma omp parallel for
 #endif
         for (size_t jj = 0; jj < n_draws_keep; jj++) {
@@ -289,7 +291,7 @@ mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<d
 }
 
 bool
-mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings& settings)
+mcmc::rmhmc(const arma::vec& initial_vals, arma::mat& draws_out, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* target_data)> target_log_kernel, void* target_data, std::function<arma::mat (const arma::vec& vals_inp, arma::cube* tensor_deriv_out, void* tensor_data)> tensor_fn, void* tensor_data, algo_settings_t& settings)
 {
     return rmhmc_int(initial_vals,draws_out,target_log_kernel,target_data,tensor_fn,tensor_data,&settings);
 }

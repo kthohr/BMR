@@ -2,20 +2,20 @@
   ##
   ##   Copyright (C) 2011-2018 Keith O'Hara
   ##
-  ##   This file is part of the BMLib C++ library.
+  ##   This file is part of the BM++ C++ library.
   ##
-  ##   BMLib is free software: you can redistribute it and/or modify
+  ##   BM++ is free software: you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by
   ##   the Free Software Foundation, either version 2 of the License, or
   ##   (at your option) any later version.
   ##
-  ##   BMLib is distributed in the hope that it will be useful,
+  ##   BM++ is distributed in the hope that it will be useful,
   ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
   ##   You should have received a copy of the GNU General Public License
-  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##   along with BM++. If not, see <http://www.gnu.org/licenses/>.
   ##
   ################################################################################*/
 
@@ -324,7 +324,7 @@ dsgevar<T>::mcmc_objfn(const arma::vec& pars_inp, void* mcmc_data)
 
 template<typename T>
 void
-dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings* settings_inp)
+dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings_t* settings_inp)
 {
 
     dsgevar_estim_data<T> mcmc_data;
@@ -333,7 +333,7 @@ dsgevar<T>::estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings* setti
     //
     // MCMC settings
 
-    mcmc::algo_settings settings;
+    mcmc::algo_settings_t settings;
 
     if (settings_inp) {
         settings = *settings_inp;

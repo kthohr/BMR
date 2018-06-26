@@ -19,7 +19,7 @@
   ##
   ################################################################################*/
 
-#include "bmlib.hpp"
+#include "bmpp.hpp"
 #include "dsge_R.hpp"
 
 RCPP_MODULE(uhlig_module)

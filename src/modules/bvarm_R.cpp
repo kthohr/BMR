@@ -19,7 +19,7 @@
   ##
   ################################################################################*/
 
-#include "bmlib.hpp"
+#include "bmpp.hpp"
 #include "vars_R.hpp"
 
 RCPP_MODULE(bvarm_module)

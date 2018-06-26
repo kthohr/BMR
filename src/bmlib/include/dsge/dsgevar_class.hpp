@@ -2,20 +2,20 @@
   ##
   ##   Copyright (C) 2011-2018 Keith O'Hara
   ##
-  ##   This file is part of the BMLib C++ library.
+  ##   This file is part of the BM++ C++ library.
   ##
-  ##   BMLib is free software: you can redistribute it and/or modify
+  ##   BM++ is free software: you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by
   ##   the Free Software Foundation, either version 2 of the License, or
   ##   (at your option) any later version.
   ##
-  ##   BMLib is distributed in the hope that it will be useful,
+  ##   BM++ is distributed in the hope that it will be useful,
   ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
   ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   ##   GNU General Public License for more details.
   ##
   ##   You should have received a copy of the GNU General Public License
-  ##   along with BMLib. If not, see <http://www.gnu.org/licenses/>.
+  ##   along with BM++. If not, see <http://www.gnu.org/licenses/>.
   ##
   ################################################################################*/
 
@@ -23,8 +23,8 @@
  * DSGE-VAR model class
  */
 
-#ifndef _bmlib_dsgevar_class_HPP
-#define _bmlib_dsgevar_class_HPP
+#ifndef _bmpp_dsgevar_class_HPP
+#define _bmpp_dsgevar_class_HPP
 
 template<class T>
 class dsgevar
@@ -90,7 +90,7 @@ class dsgevar
         arma::vec estim_mode(const arma::vec& initial_vals, arma::mat& vcov_mat);
         arma::vec estim_mode(const arma::vec& initial_vals, arma::mat* vcov_mat, optim::algo_settings* settings_inp);
 
-        void estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings* settings_inp);
+        void estim_mcmc(const arma::vec& initial_vals, mcmc::algo_settings_t* settings_inp);
 
         arma::cube IRF(const int n_irf_periods) const;
 
