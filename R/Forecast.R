@@ -16,54 +16,54 @@
 ##
 ################################################################################
 
-forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_bvarm <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_bvars <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvarcnw <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_bvarcnw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_bvarinw <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_bvarinw <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_cvar <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsge_gensys <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_dsge_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_dsge(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_dsge(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsge_uhlig <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_dsge_uhlig <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_dsge(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_dsge(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_dsgevar_gensys <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
-forecast.Rcpp_dsgevar_uhlig <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
+forecast.Rcpp_dsgevar_uhlig <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11,...)
 {
-    return=.forecast_var(obj,periods,shocks,var_names,percentiles,use_mean,back_data,save,height,width)
+    return=.forecast_var(obj,periods,shocks,plot,var_names,percentiles,use_mean,back_data,save,height,width)
 }
 
 #
 
-.forecast_var <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11)
+.forecast_var <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11)
 {    
     M <- obj$M
     n_draws <- dim(obj$beta_draws)[3]
@@ -113,61 +113,64 @@ forecast.Rcpp_dsgevar_uhlig <- function(obj,periods=20,shocks=TRUE,var_names=NUL
     }
     
     #
-    
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    
-    if (save==TRUE) {
-        if(class(dev.list()) != "NULL"){dev.off()}
-        cairo_ps(filename="Forecast.eps",height=height,width=width)
-    }
-    
-    #
-    
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(M,1)))
-    
-    if (class(var_names) != "character") {
-        var_names <- character(length=M)
-        for (i in 1:M) {  
-            var_names[i] <- paste("VAR",i,sep="")
+
+    if (plot)
+    {
+        vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+        
+        if (save==TRUE) {
+            if(class(dev.list()) != "NULL"){dev.off()}
+            cairo_ps(filename="Forecast.eps",height=height,width=width)
         }
-    }
-    
-    #
-    
-    if (back_data > 0) {
-        # Include a dashed line to mark where the forecast begins
-        for (i in 1:M) {
-            FCastName <- var_names[i]
-            FCDF <- plot_vals[,,i]
-            FCDF <- data.frame(FCDF)
-            colnames(FCDF) <- c("FCL","FCM","FCU","Time")
-            #
-            print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
-            #
-            Sys.sleep(0.6)
+        
+        #
+        
+        grid.newpage()
+        pushViewport(viewport(layout=grid.layout(M,1)))
+        
+        if (class(var_names) != "character") {
+            var_names <- character(length=M)
+            for (i in 1:M) {  
+                var_names[i] <- paste("VAR",i,sep="")
+            }
         }
-    } else {
-        for (i in 1:M) {
-            FCastName <- var_names[i]
-            FCDF <- plot_vals[,,i]
-            FCDF <- data.frame(FCDF)
-            colnames(FCDF) <- c("FCL","FCM","FCU","Time")
-            #
-            print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
-            #
-            Sys.sleep(0.6)
+        
+        #
+        
+        if (back_data > 0) {
+            # Include a dashed line to mark where the forecast begins
+            for (i in 1:M) {
+                FCastName <- var_names[i]
+                FCDF <- plot_vals[,,i]
+                FCDF <- data.frame(FCDF)
+                colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+                #
+                print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+                #
+                Sys.sleep(0.6)
+            }
+        } else {
+            for (i in 1:M) {
+                FCastName <- var_names[i]
+                FCDF <- plot_vals[,,i]
+                FCDF <- data.frame(FCDF)
+                colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+                #
+                print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+                #
+                Sys.sleep(0.6)
+            }
         }
+        
+        if(save==TRUE){dev.off()}
     }
-    
-    if(save==TRUE){dev.off()}
 
     #
 
     return=list(forecast_mean=forecast_mean,plot_vals=plot_vals)
 }
 
-.forecast_dsge <- function(obj,periods=20,shocks=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11)
+.forecast_dsge <- function(obj,periods=20,shocks=TRUE,plot=TRUE,var_names=NULL,percentiles=c(.05,.50,.95),use_mean=FALSE,back_data=0,save=FALSE,height=13,width=11)
 {
     forecast_cube = obj$forecast(periods,shocks)$forecast_vals
 
@@ -217,54 +220,57 @@ forecast.Rcpp_dsgevar_uhlig <- function(obj,periods=20,shocks=TRUE,var_names=NUL
     }
     
     #
-    
-    vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
-    
-    if (save==TRUE) {
-        if(class(dev.list()) != "NULL"){dev.off()}
-        cairo_ps(filename="Forecast.eps",height=height,width=width)
-    }
-    
-    #
-    
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(M,1)))
-    
-    if (class(var_names) != "character") {
-        var_names <- character(length=M)
-        for (i in 1:M) {  
-            var_names[i] <- paste("VAR",i,sep="")
-        }
-    }
-    
-    #
-    
-    if (back_data > 0) {
-        # Include a dashed line to mark where the forecast begins
-        for (i in 1:M) {
-            FCastName <- var_names[i]
-            FCDF <- plot_vals[,,i]
-            FCDF <- data.frame(FCDF)
-            colnames(FCDF) <- c("FCL","FCM","FCU","Time")
-            #
-            print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
-            #
-            Sys.sleep(0.6)
-        }
-    } else {
-        for (i in 1:M) {
-            FCastName <- var_names[i]
-            FCDF <- plot_vals[,,i]
-            FCDF <- data.frame(FCDF)
-            colnames(FCDF) <- c("FCL","FCM","FCU","Time")
-            #
-            print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
-            #
-            Sys.sleep(0.6)
-        }
-    }
 
-    if(save==TRUE){dev.off()}
+    if (plot)
+    {
+        vplayout <- function(x,y){viewport(layout.pos.row=x, layout.pos.col=y)}
+        
+        if (save==TRUE) {
+            if(class(dev.list()) != "NULL"){dev.off()}
+            cairo_ps(filename="Forecast.eps",height=height,width=width)
+        }
+        
+        #
+        
+        grid.newpage()
+        pushViewport(viewport(layout=grid.layout(M,1)))
+        
+        if (class(var_names) != "character") {
+            var_names <- character(length=M)
+            for (i in 1:M) {  
+                var_names[i] <- paste("VAR",i,sep="")
+            }
+        }
+        
+        #
+        
+        if (back_data > 0) {
+            # Include a dashed line to mark where the forecast begins
+            for (i in 1:M) {
+                FCastName <- var_names[i]
+                FCDF <- plot_vals[,,i]
+                FCDF <- data.frame(FCDF)
+                colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+                #
+                print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_vline(xintercept=as.numeric(nrow(Y)),linetype = "longdash") + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+                #
+                Sys.sleep(0.6)
+            }
+        } else {
+            for (i in 1:M) {
+                FCastName <- var_names[i]
+                FCDF <- plot_vals[,,i]
+                FCDF <- data.frame(FCDF)
+                colnames(FCDF) <- c("FCL","FCM","FCU","Time")
+                #
+                print(ggplot(data=FCDF,aes(x=Time)) + xlab("Time") + ylab(paste("Forecast of ",FCastName)) + geom_ribbon(aes(ymin=FCL,ymax=FCU),color="blue",lty=1,fill="blue",alpha=0.2,size=0.1) + geom_hline(yintercept=0,colour='grey30') + geom_line(aes(y=FCM),color="red",size=2) + theme(panel.background = element_rect(fill='white', colour='grey15')) + theme(panel.grid.major = element_line(colour = 'grey89')),vp = vplayout(i,1))
+                #
+                Sys.sleep(0.6)
+            }
+        }
+
+        if(save==TRUE){dev.off()}
+    }
     
     #
     
