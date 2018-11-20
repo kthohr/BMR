@@ -119,6 +119,7 @@ bm::bvartvp::prior(const int tau_inp, const double Xi_beta, const double Xi_Q_in
     }
 
     alpha_pr_mean = arma::solve(alpha_denom,alpha_numer);
+    alpha_hat = alpha_pr_mean;
 
     //
 
