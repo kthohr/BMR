@@ -16,6 +16,7 @@ Imports:
     methods,
     Rcpp,
     grid
+Biarch: true
 NeedsCompilation: yes
 RcppModules: bvarm_module, bvars_module,
              bvarcnw_module, bvarinw_module,
