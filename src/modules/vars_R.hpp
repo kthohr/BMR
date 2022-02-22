@@ -49,7 +49,7 @@ class bvars_R : public bm::bvars
         void reset_draws_R();
 
         void prior_R(const arma::vec& coef_prior, double HP_1, double HP_2, 
-                     const arma::mat& Psi_prior, double Xi_Psi, int gamma,
+                     const arma::mat& Psi_prior, const arma::mat& Psi_prior_var, int gamma,
                      bool full_cov_prior);
 
         void gibbs_R(int n_draws, int n_burnin);

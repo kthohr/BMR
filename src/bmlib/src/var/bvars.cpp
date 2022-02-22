@@ -151,7 +151,7 @@ bm::bvars::minn_pr_var()
 
 void
 bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP_2, 
-                 const arma::mat& Psi_prior, const double Xi_psi, const int gamma,
+                 const arma::mat& Psi_prior, const arma::mat& Psi_prior_var, const int gamma,
                  const bool full_cov_prior)
 {
     arma::mat Z = arma::join_rows(X,d);
@@ -175,7 +175,7 @@ bm::bvars::prior(const arma::vec& coef_prior, const double HP_1, const double HP
     //
 
     psi_pr_mean = arma::vectorise(Psi_prior.t());
-    psi_pr_var = Xi_psi*arma::eye(q*M,q*M);
+    psi_pr_var = Psi_prior_var;
 
     //
 
